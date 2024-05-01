@@ -1,0 +1,1 @@
+from .getSentiments import getSentiments
