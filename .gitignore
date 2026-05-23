@@ -42,6 +42,9 @@ lancedb/
 
 # javascript
 package-lock.json
+# Exception: the Docusaurus site under website/ requires a tracked lock
+# file so the GH Pages deploy workflow can do `npm ci` reproducibly.
+!website/package-lock.json
 
 staticfiles/*
 !staticfiles/.gitkeep
