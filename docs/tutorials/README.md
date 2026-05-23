@@ -26,7 +26,7 @@ Each tutorial has the same three sections:
 
 - Whistlerlib installed on the client (see [Install from PyPI](../installation/pip.md)).
 - A running Whistlerlib cluster on `localhost:8786` (see [Install with Docker](../installation/docker.md)).
-- For tutorial 07: the cluster must be running the `observatoriogeo/whistlerlib` image (R lives only there).
+- For tutorial 07: the cluster must be running the `albertogarob/whistlerlib` image (R lives only there).
 
 ## Related
 

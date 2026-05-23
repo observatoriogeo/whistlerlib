@@ -1,6 +1,6 @@
 # Install with Docker
 
-Whistlerlib ships **one custom Docker image**: `observatoriogeo/whistlerlib`, that runs both worker and scheduler roles in a Dask cluster. R and every R library the R-bridge calls (`tm`, `syuzhet`, `radvertools`, `RWeka`, …) are baked in, so your host never installs R.
+Whistlerlib ships **one custom Docker image**: `albertogarob/whistlerlib`, that runs both worker and scheduler roles in a Dask cluster. R and every R library the R-bridge calls (`tm`, `syuzhet`, `radvertools`, `RWeka`, …) are baked in, so your host never installs R.
 
 Two deployment shapes are supported out of the box:
 
@@ -15,8 +15,8 @@ The image is the same. The orchestration differs.
 
 | Role | Image | Notes |
 |---|---|---|
-| Scheduler ("master") | `observatoriogeo/whistlerlib:<version>` with the entrypoint overridden to `dask-scheduler` | The scheduler runs no whistlerlib algorithm code, but Dask requires consistent Python environments between client / scheduler / workers for task-graph serialization. We reuse the worker image rather than publish a second lean one. |
-| Worker | `observatoriogeo/whistlerlib:<version>` | Where every algorithm closure (alt-python and R-bridge) actually runs. |
+| Scheduler ("master") | `albertogarob/whistlerlib:<version>` with the entrypoint overridden to `dask-scheduler` | The scheduler runs no whistlerlib algorithm code, but Dask requires consistent Python environments between client / scheduler / workers for task-graph serialization. We reuse the worker image rather than publish a second lean one. |
+| Worker | `albertogarob/whistlerlib:<version>` | Where every algorithm closure (alt-python and R-bridge) actually runs. |
 | Client | Whatever Python env you have | `pip install whistlerlib` and connect via `Context(...)`. See [pip installation](pip.md). |
 
 See [Architecture](../concepts/architecture.md) for the why behind this split.
@@ -119,7 +119,7 @@ Swarm is the production target. The workflow has more moving parts than Compose,
   - **4789/udp**: overlay-network data plane.
   - **8786/tcp**: Dask scheduler (clients → manager).
   - **8787/tcp**: dashboard (optional; firewall this if exposed publicly).
-- A way for every node to **pull the `observatoriogeo/whistlerlib` image**: either Docker Hub (default for public images) or a private registry. See [Image distribution](#image-distribution).
+- A way for every node to **pull the `albertogarob/whistlerlib` image**: either Docker Hub (default for public images) or a private registry. See [Image distribution](#image-distribution).
 - A **shared filesystem** workers can read data from. See [Shared storage](#shared-storage).
 
 ### 1. Initialize the swarm
@@ -161,7 +161,7 @@ If you don't set `zone` labels, the `spread` directive is silently ignored, Swar
 
 Swarm pulls the image **on every node that runs a service replica**. You have three options:
 
-**Option A: Docker Hub (default, recommended once published).** Once `observatoriogeo/whistlerlib:<version>` is published to Docker Hub (Phase 7), every node just pulls it:
+**Option A: Docker Hub (default, recommended once published).** Once `albertogarob/whistlerlib:<version>` is published to Docker Hub (Phase 7), every node just pulls it:
 
 ```bash
 # Nothing to do, `docker stack deploy` triggers the pulls.
@@ -171,8 +171,8 @@ Swarm pulls the image **on every node that runs a service replica**. You have th
 
 ```bash
 # Tag the locally-built image for your registry:
-docker tag observatoriogeo/whistlerlib:dev myregistry.example.com/observatoriogeo/whistlerlib:0.2.0
-docker push myregistry.example.com/observatoriogeo/whistlerlib:0.2.0
+docker tag albertogarob/whistlerlib:dev myregistry.example.com/albertogarob/whistlerlib:0.2.0
+docker push myregistry.example.com/albertogarob/whistlerlib:0.2.0
 # Then in stack.yml change the `image:` to point at the registry, and
 # log every node into the registry: docker login myregistry.example.com
 ```
@@ -181,7 +181,7 @@ docker push myregistry.example.com/observatoriogeo/whistlerlib:0.2.0
 
 ```bash
 # On a build host:
-docker save observatoriogeo/whistlerlib:0.2.0 | gzip > whistlerlib-worker-0.2.0.tar.gz
+docker save albertogarob/whistlerlib:0.2.0 | gzip > whistlerlib-worker-0.2.0.tar.gz
 
 # Copy to every swarm node, then on each:
 zcat whistlerlib-worker-0.2.0.tar.gz | docker load
@@ -304,7 +304,7 @@ This removes services and the overlay network. The image stays on each node (`do
 ### Health-check tips
 
 - **Scheduler not reachable from a node**: ensure the overlay network port 4789/udp isn't blocked. Most firewall surprises are here.
-- **Workers connect, then drop**: usually a Python environment mismatch, verify all nodes are pulling the **same** `observatoriogeo/whistlerlib:<tag>`. The bare-`latest` tag floats; pin to `<x.y.z>` in production.
+- **Workers connect, then drop**: usually a Python environment mismatch, verify all nodes are pulling the **same** `albertogarob/whistlerlib:<tag>`. The bare-`latest` tag floats; pin to `<x.y.z>` in production.
 - **`docker service logs whistlerlib_worker` shows R errors**: see `docs/concepts/architecture.md` → R bridge section. The worker image bakes in R + libraries; if you've built a custom image and stripped something, the R bridge will fail.
 
 ---
@@ -314,7 +314,7 @@ This removes services and the overlay network. The image stays on each node (`do
 If you want to build the image yourself (you're hacking on `Dockerfile.worker`, you're doing offline distribution, or you don't trust the Docker Hub copy):
 
 ```bash
-docker build -f docker/Dockerfile.worker -t observatoriogeo/whistlerlib:dev .
+docker build -f docker/Dockerfile.worker -t albertogarob/whistlerlib:dev .
 ```
 
 The first build takes ~5–10 minutes (R + Posit binary R wheels + `radvertools` from GitHub + `uv sync`). Subsequent builds are cached layer-by-layer and finish in seconds unless you touched the R install or `uv.lock`.
@@ -324,7 +324,7 @@ For multi-arch builds (`linux/amd64` + `linux/arm64`):
 ```bash
 docker buildx build --platform linux/amd64,linux/arm64 \
     -f docker/Dockerfile.worker \
-    -t observatoriogeo/whistlerlib:dev .
+    -t albertogarob/whistlerlib:dev .
 ```
 
 ## Next

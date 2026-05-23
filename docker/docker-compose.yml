@@ -11,7 +11,7 @@ services:
     # client / scheduler / workers, not just workers running closures).
     # We reuse the worker image here; R goes unused on the scheduler but the
     # storage cost is small vs publishing a separate lean-master image.
-    image: observatoriogeo/whistlerlib:dev
+    image: albertogarob/whistlerlib:dev
     container_name: whistlerlib-master
     # Override the worker image's ENTRYPOINT=["dask-worker"]: this service is
     # the scheduler.
@@ -37,7 +37,7 @@ services:
     build:
       context: ..
       dockerfile: docker/Dockerfile.worker
-    image: observatoriogeo/whistlerlib:dev
+    image: albertogarob/whistlerlib:dev
     networks:
       - whistlerlib
     depends_on:

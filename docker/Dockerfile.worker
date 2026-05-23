@@ -14,7 +14,7 @@
 # See `.plans/REVIVAL-PLAN.md` Phase 5 + the Docker Swarm memory.
 #
 # Build (from repo root):
-#   docker build -f docker/Dockerfile.worker -t observatoriogeo/whistlerlib:dev .
+#   docker build -f docker/Dockerfile.worker -t albertogarob/whistlerlib:dev .
 
 # ------------------------------------------------------------------------- #
 # Stage 1, install Whistlerlib + Dask via uv (same as master).
@@ -128,6 +128,6 @@ USER whistler
 # network.
 
 # Default scheduler address, overridable via `CMD` at run time.
-#   docker run observatoriogeo/whistlerlib tcp://some-other-master:8786
+#   docker run albertogarob/whistlerlib tcp://some-other-master:8786
 ENTRYPOINT ["dask-worker"]
 CMD ["tcp://master:8786"]

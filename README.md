@@ -2,7 +2,7 @@
   Logo path is RELATIVE so it renders on GitHub's web UI (and locally)
   off the modernization branch. PyPI's long-description renderer does
   NOT follow relative paths; Phase 7 should rewrite to an absolute URL
-  (e.g. https://raw.githubusercontent.com/observatoriogeo/whistlerlib/
+  (e.g. https://raw.githubusercontent.com/albertogarob/whistlerlib/
   v0.2.0/docs/_assets/logo.png) before the first publish.
 -->
 <p align="center">
@@ -14,7 +14,7 @@
 </p>
 
 <p align="center">
-  Hashtag, mention, and n-gram histograms; sentiment ranges; emotion vectors; co-occurrence networks. Python or R implementations on Dask, in one <code>observatoriogeo/whistlerlib</code> Docker image.
+  Hashtag, mention, and n-gram histograms; sentiment ranges; emotion vectors; co-occurrence networks. Python or R implementations on Dask, in one <code>albertogarob/whistlerlib</code> Docker image.
 </p>
 
 <p align="center">
@@ -48,7 +48,7 @@ Current release: **`0.2.0`**. Runs on Python 3.11+, Dask 2026.3.x, pandas 2.x, i
 | Tests | 119 unit tests (97 % coverage) + 7 docker-backed integration tests, all green |
 | Docs | [`docs/`](https://github.com/observatoriogeo/whistlerlib/blob/main/docs/) tree (renderable on GitHub, portable to Docusaurus) |
 | Examples | 7 runnable end-to-end examples under [`examples/`](https://github.com/observatoriogeo/whistlerlib/blob/main/examples/) |
-| Docker image | `observatoriogeo/whistlerlib:<version>` (build locally from `docker/Dockerfile.worker`; Docker Hub publish planned) |
+| Docker image | `albertogarob/whistlerlib:<version>` (build locally from `docker/Dockerfile.worker`; Docker Hub publish planned) |
 | PyPI | GitHub release only; PyPI publish planned |
 
 Full release notes in [`CHANGELOG.md`](https://github.com/observatoriogeo/whistlerlib/blob/main/CHANGELOG.md); upgrade path from 0.1.0 in [`docs/migration/from-0.1.0.md`](https://github.com/observatoriogeo/whistlerlib/blob/main/docs/migration/from-0.1.0.md).
@@ -65,7 +65,7 @@ Full release notes in [`CHANGELOG.md`](https://github.com/observatoriogeo/whistl
 | Hashtag co-occurrence network | `hashtag_weighted_coonet` | (n/a) |
 | Mention co-occurrence network | `mention_weighted_coonet` | (n/a) |
 
-Pure-Python methods wrap `advertools`, `nltk`, `sklearn`, and `sentiment-analysis-spanish`. R-bridge methods shell out to `Rscript` (via the `tm`, `RWeka`, `syuzhet`, and `radvertools` R packages) running inside the published `observatoriogeo/whistlerlib` Docker image; the host never installs R.
+Pure-Python methods wrap `advertools`, `nltk`, `sklearn`, and `sentiment-analysis-spanish`. R-bridge methods shell out to `Rscript` (via the `tm`, `RWeka`, `syuzhet`, and `radvertools` R packages) running inside the published `albertogarob/whistlerlib` Docker image; the host never installs R.
 
 See [docs/concepts/algorithm-families.md](https://github.com/observatoriogeo/whistlerlib/blob/main/docs/concepts/algorithm-families.md) for the dispatch story.
 
@@ -130,7 +130,7 @@ Full Swarm setup (initialization, node labelling, image distribution, shared sto
 ```mermaid
 flowchart LR
     Client["Client (your Python)"] -->|cloudpickle| Scheduler
-    Scheduler -->|tasks| W1["Worker 1<br/>observatoriogeo/whistlerlib"]
+    Scheduler -->|tasks| W1["Worker 1<br/>albertogarob/whistlerlib"]
     Scheduler -->|tasks| W2["Worker 2"]
     Scheduler -->|tasks| WN["Worker N"]
     W1 -.->|subprocess| R1["Rscript"]
@@ -138,7 +138,7 @@ flowchart LR
     WN -.->|subprocess| RN["Rscript"]
 ```
 
-Both the scheduler ("master") and the workers run the same `observatoriogeo/whistlerlib` image; the scheduler service overrides the `ENTRYPOINT` to `dask-scheduler`. This keeps the Python environments consistent across client / scheduler / workers (a Dask requirement for task-graph serialization). R lives only inside the worker image.
+Both the scheduler ("master") and the workers run the same `albertogarob/whistlerlib` image; the scheduler service overrides the `ENTRYPOINT` to `dask-scheduler`. This keeps the Python environments consistent across client / scheduler / workers (a Dask requirement for task-graph serialization). R lives only inside the worker image.
 
 See [docs/concepts/architecture.md](https://github.com/observatoriogeo/whistlerlib/blob/main/docs/concepts/architecture.md) for the full picture.
 

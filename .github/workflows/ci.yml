@@ -100,7 +100,7 @@ jobs:
     # exercising one of the runnable `examples/<slug>/example.py` files
     # against a real local Docker cluster (compose-managed by
     # `tests/integration/conftest.py`). Heavy: needs the
-    # `observatoriogeo/whistlerlib:dev` image which takes ~5 to 10 min to build the
+    # `albertogarob/whistlerlib:dev` image which takes ~5 to 10 min to build the
     # first time.
     #
     # Triggers (see `if:` below):
@@ -127,11 +127,11 @@ jobs:
       - name: Sync deps (dev extras)
         run: uv sync --extra dev --python 3.11
 
-      - name: Build observatoriogeo/whistlerlib:dev
+      - name: Build albertogarob/whistlerlib:dev
         # Tag must match `WORKER_IMAGE` in tests/integration/conftest.py;
         # otherwise the conftest fixture detects "image missing" and
         # rebuilds it, doubling the CI cost.
-        run: env DOCKER_BUILDKIT=1 docker build -f docker/Dockerfile.worker -t observatoriogeo/whistlerlib:dev .
+        run: env DOCKER_BUILDKIT=1 docker build -f docker/Dockerfile.worker -t albertogarob/whistlerlib:dev .
 
       - name: Run docker-backed integration tests
         # `-m "docker and not slow"` runs 6 of the 7 integration tests

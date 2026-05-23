@@ -91,6 +91,6 @@ The `coonet_algs.to_graph(nodes, edges, weights)` helper turns the three lists i
 | You should pick | When |
 |---|---|
 | `*_alt_python` | You want zero R install. You're running on a host without the worker Docker image. The Python implementations cover hashtags, mentions, n-grams, and Spanish sentiment well. |
-| `*_r` | You want a specific behaviour from an R library you trust, `tm`-style hashtag tokenization, `syuzhet`-style emotion vectors, `RWeka` n-grams. R-bridge methods are only callable against a cluster running the `observatoriogeo/whistlerlib` image (R isn't available otherwise). |
+| `*_r` | You want a specific behaviour from an R library you trust, `tm`-style hashtag tokenization, `syuzhet`-style emotion vectors, `RWeka` n-grams. R-bridge methods are only callable against a cluster running the `albertogarob/whistlerlib` image (R isn't available otherwise). |
 
 The output schemas are matched between `*_alt_python` and `*_r` versions of the same analytic, so you can swap one for the other in a downstream pipeline without changing the consumer.

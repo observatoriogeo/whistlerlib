@@ -6,7 +6,7 @@ a module-level `EXAMPLE_SLUG` constant; the `example_module` fixture below
 loads the matching `examples/<slug>/example.py` at runtime.
 
 Brings up a local Docker cluster (master + workers, all using the same
-locally-built `observatoriogeo/whistlerlib:dev` image) and yields the scheduler
+locally-built `albertogarob/whistlerlib:dev` image) and yields the scheduler
 endpoint to each test. The cluster lifecycle is session-scoped: one
 bring-up per pytest run.
 
@@ -25,7 +25,7 @@ Run only the docker-backed integration tests:
 
     pytest -m docker tests/integration
 
-Pre-requisites: Docker daemon running, `observatoriogeo/whistlerlib:dev` image
+Pre-requisites: Docker daemon running, `albertogarob/whistlerlib:dev` image
 present locally (the fixture builds it on demand the first time;
 this costs 5 to 10 minutes for the R + radvertools install). NLTK corpora
 (`stopwords`, `punkt`, `punkt_tab`) are auto-downloaded to `~/nltk_data`
@@ -48,7 +48,7 @@ import pytest
 REPO_ROOT = Path(__file__).resolve().parent.parent.parent
 COMPOSE_FILE = REPO_ROOT / 'docker' / 'docker-compose.yml'
 EXAMPLES_DIR = REPO_ROOT / 'examples'
-WORKER_IMAGE = 'observatoriogeo/whistlerlib:dev'
+WORKER_IMAGE = 'albertogarob/whistlerlib:dev'
 PROJECT_NAME = 'whistlerlib-examples'
 SCHEDULER_HOST = 'localhost'
 SCHEDULER_PORT = 8786

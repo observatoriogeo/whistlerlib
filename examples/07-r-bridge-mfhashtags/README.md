@@ -27,7 +27,7 @@ The result has the same shape as example 01, same `[tag, freq]` columns. The num
 
 ## Why this needs the Docker cluster
 
-The R-bridge code spawns `/usr/bin/Rscript <whistlerlib R script>`. `Rscript` and the R packages it loads (`tm`, `slam`, `snowballc`, `rweka`, …) live **only** inside the `observatoriogeo/whistlerlib:dev` Docker image. The test is therefore gated on the `docker` marker, `pytest` on a clean dev box without Docker simply skips it (via the session fixture's `_docker_available` guard).
+The R-bridge code spawns `/usr/bin/Rscript <whistlerlib R script>`. `Rscript` and the R packages it loads (`tm`, `slam`, `snowballc`, `rweka`, …) live **only** inside the `albertogarob/whistlerlib:dev` Docker image. The test is therefore gated on the `docker` marker, `pytest` on a clean dev box without Docker simply skips it (via the session fixture's `_docker_available` guard).
 
 ## Run it
 

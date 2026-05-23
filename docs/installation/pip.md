@@ -40,15 +40,15 @@ Plus the core types: `Context`, `TweetDataset`.
 
 The **R-bridge** methods, `hashtag_histogram_r`, `mention_histogram_r`, `ngram_histogram_r`, `sentiment_histogram_and_sum_r`, are **not available from a pip install alone**. They shell out to `Rscript` on the worker, which needs R + a curated set of R libraries (`tm`, `syuzhet`, `RWeka`, `radvertools`, …). Installing all of that on a researcher's laptop is exactly what we don't want you to do.
 
-Instead, the R libraries live **inside the published `observatoriogeo/whistlerlib` Docker image** ([Docker installation](docker.md)). The pattern is:
+Instead, the R libraries live **inside the published `albertogarob/whistlerlib` Docker image** ([Docker installation](docker.md)). The pattern is:
 
 - **Client**: `pip install whistlerlib` on your laptop. Use the alt-python methods locally, or submit work to a remote cluster.
-- **Cluster workers**: run the `observatoriogeo/whistlerlib` image. R + libraries baked in. R-bridge methods just work when called against this cluster.
+- **Cluster workers**: run the `albertogarob/whistlerlib` image. R + libraries baked in. R-bridge methods just work when called against this cluster.
 
 So:
 
 - ✅ `pip install whistlerlib` → client-side, alt-python methods, no R required.
-- ✅ `pip install whistlerlib` + connect to a Dask cluster running `observatoriogeo/whistlerlib` → full surface including R-bridge.
+- ✅ `pip install whistlerlib` + connect to a Dask cluster running `albertogarob/whistlerlib` → full surface including R-bridge.
 - ❌ `pip install whistlerlib` + R installed manually on the host → not a supported configuration. We don't test it; don't go there.
 
 ## Next

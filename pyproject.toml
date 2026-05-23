@@ -100,7 +100,7 @@ timeout_method = "thread"
 # Default runs exclude `slow` tests (sentiment-analysis-spanish model load,
 # anything else needing >5s of real work) AND `docker` tests (Phase 4
 # example tests requiring a running Docker daemon + the
-# `observatoriogeo/whistlerlib:test` image, many minutes for a full bring-up).
+# `albertogarob/whistlerlib:test` image, many minutes for a full bring-up).
 # Opt in with `-m slow`, `-m docker`, or `-m 'slow or docker'`.
 addopts = "-m 'not slow and not docker' --import-mode=importlib"
 markers = [
