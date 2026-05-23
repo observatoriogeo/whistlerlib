@@ -61,7 +61,14 @@ const config: Config = {
         docs: {
           sidebarPath: './sidebars.ts',
           editUrl: 'https://github.com/observatoriogeo/whistlerlib/tree/main/website/',
-          // TODO (deployment): enable versioning when 0.3.x is cut, see Weaverlet's config for the pattern.
+          // Single labelled version. `current` is Docusaurus' magic key
+          // for the live docs/ tree (no snapshot needed). When 0.3.0 is
+          // cut, snapshot 0.2.0 via `npm run docusaurus docs:version 0.2.0`
+          // and add it to the versions map.
+          lastVersion: 'current',
+          versions: {
+            current: {label: 'v0.2.0'},
+          },
         },
         blog: false,
         theme: {
@@ -107,6 +114,7 @@ const config: Config = {
           label: 'About',
           position: 'left',
         },
+        {type: 'docsVersionDropdown', position: 'right'},
         {
           href: 'https://doi.org/10.1007/s11042-024-19827-z',
           label: 'Paper',
