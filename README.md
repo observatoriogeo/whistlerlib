@@ -1,12 +1,11 @@
 <!--
-  Logo path is RELATIVE so it renders on GitHub's web UI (and locally)
-  off the modernization branch. PyPI's long-description renderer does
-  NOT follow relative paths; Phase 7 should rewrite to an absolute URL
-  (e.g. https://raw.githubusercontent.com/albertogarob/whistlerlib/
-  v0.2.0/docs/_assets/logo.png) before the first publish.
+  Logo path is RELATIVE so it renders on GitHub's web UI (and locally).
+  PyPI's long-description renderer does NOT follow relative paths;
+  before the first PyPI publish rewrite to an absolute URL like
+  https://raw.githubusercontent.com/observatoriogeo/whistlerlib/v0.2.0/website/static/img/whistlerlib-logo.png
 -->
 <p align="center">
-  <img src="docs/_assets/logo.png" width="240" height="269" alt="Whistlerlib" title="Whistlerlib">
+  <img src="website/static/img/whistlerlib-logo.png" width="240" height="269" alt="Whistlerlib" title="Whistlerlib">
 </p>
 
 <p align="center">
@@ -18,14 +17,14 @@
 </p>
 
 <p align="center">
-  <a href="docs/"><img src="https://img.shields.io/badge/docs-in--repo-blue.svg" alt="Documentation"></a>
+  <a href="https://whistlerlib.observatoriogeo.mx"><img src="https://img.shields.io/badge/docs-online-blue.svg" alt="Documentation"></a>
   <a href="https://pypi.org/project/whistlerlib/"><img src="https://img.shields.io/badge/pypi-pending-yellow.svg" alt="PyPI"></a>
   <a href="https://pypi.org/project/whistlerlib/"><img src="https://img.shields.io/badge/python-3.11+-blue.svg" alt="Python 3.11+"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-GPL--3.0--or--later-green.svg" alt="License: GPL-3.0-or-later"></a>
 </p>
 
 <p align="center">
-  📖 <b>Documentation:</b> <a href="docs/">in-repo <code>docs/</code></a> (Docusaurus site planned)
+  📖 <b>Documentation:</b> <a href="https://whistlerlib.observatoriogeo.mx">whistlerlib.observatoriogeo.mx</a>
 </p>
 
 ---
@@ -46,12 +45,12 @@ Current release: **`0.2.0`**. Runs on Python 3.11+, Dask 2026.3.x, pandas 2.x, i
 |---|---|
 | Source layout | `src/whistlerlib/` (PEP 621, hatchling, [`uv.lock`](https://github.com/observatoriogeo/whistlerlib/blob/main/uv.lock) committed) |
 | Tests | 119 unit tests (97 % coverage) + 7 docker-backed integration tests, all green |
-| Docs | [`docs/`](https://github.com/observatoriogeo/whistlerlib/blob/main/docs/) tree (renderable on GitHub, portable to Docusaurus) |
+| Docs | Live at [whistlerlib.observatoriogeo.mx](https://whistlerlib.observatoriogeo.mx) (Docusaurus 3.10, source under [`website/`](https://github.com/observatoriogeo/whistlerlib/tree/main/website)) |
 | Examples | 7 runnable end-to-end examples under [`examples/`](https://github.com/observatoriogeo/whistlerlib/blob/main/examples/) |
 | Docker image | [`albertogarob/whistlerlib`](https://hub.docker.com/r/albertogarob/whistlerlib) on Docker Hub: `0.2.0`, `0.2`, `latest` (multi-arch: `linux/amd64` + `linux/arm64`) |
 | PyPI | GitHub release only; PyPI publish planned |
 
-Full release notes in [`CHANGELOG.md`](https://github.com/observatoriogeo/whistlerlib/blob/main/CHANGELOG.md); upgrade path from 0.1.0 in [`docs/migration/from-0.1.0.md`](https://github.com/observatoriogeo/whistlerlib/blob/main/docs/migration/from-0.1.0.md).
+Full release notes in [`CHANGELOG.md`](https://github.com/observatoriogeo/whistlerlib/blob/main/CHANGELOG.md); upgrade path from 0.1.0 in the [migration guide](https://whistlerlib.observatoriogeo.mx/docs/migration/from-0.1.0).
 
 ## What it does
 
@@ -67,7 +66,7 @@ Full release notes in [`CHANGELOG.md`](https://github.com/observatoriogeo/whistl
 
 Pure-Python methods wrap `advertools`, `nltk`, `sklearn`, and `sentiment-analysis-spanish`. R-bridge methods shell out to `Rscript` (via the `tm`, `RWeka`, `syuzhet`, and `radvertools` R packages) running inside the published `albertogarob/whistlerlib` Docker image; the host never installs R.
 
-See [docs/concepts/algorithm-families.md](https://github.com/observatoriogeo/whistlerlib/blob/main/docs/concepts/algorithm-families.md) for the dispatch story.
+See [Algorithm families](https://whistlerlib.observatoriogeo.mx/docs/concepts/algorithm-families) for the dispatch story.
 
 ## Quickstart
 
@@ -91,7 +90,7 @@ print(f'Loaded {ds.tweet_count()} posts.')
 print(ds.hashtag_histogram_alt_python(k=5))
 ```
 
-Full walkthrough including how to bring up the cluster: [Tutorial 01](https://github.com/observatoriogeo/whistlerlib/blob/main/docs/tutorials/01-quickstart-hashtag-histogram.md).
+Full walkthrough including how to bring up the cluster: [Tutorial 01](https://whistlerlib.observatoriogeo.mx/docs/tutorials/01-quickstart-hashtag-histogram).
 
 ## Install
 
@@ -123,7 +122,7 @@ Multi-node production cluster on Docker Swarm:
 VERSION=0.2.0 docker stack deploy -c docker/stack.yml whistlerlib
 ```
 
-Full Swarm setup (initialization, node labelling, image distribution, shared storage, scaling): [docs/installation/docker.md](https://github.com/observatoriogeo/whistlerlib/blob/main/docs/installation/docker.md).
+Full Swarm setup (initialization, node labelling, image distribution, shared storage, scaling): [Install with Docker](https://whistlerlib.observatoriogeo.mx/docs/installation/docker).
 
 ## Architecture
 
@@ -140,20 +139,24 @@ flowchart LR
 
 Both the scheduler ("master") and the workers run the same `albertogarob/whistlerlib` image; the scheduler service overrides the `ENTRYPOINT` to `dask-scheduler`. This keeps the Python environments consistent across client / scheduler / workers (a Dask requirement for task-graph serialization). R lives only inside the worker image.
 
-See [docs/concepts/architecture.md](https://github.com/observatoriogeo/whistlerlib/blob/main/docs/concepts/architecture.md) for the full picture.
+See [Architecture](https://whistlerlib.observatoriogeo.mx/docs/concepts/architecture) for the full picture.
 
 ## Documentation
 
+All documentation lives at **[whistlerlib.observatoriogeo.mx](https://whistlerlib.observatoriogeo.mx)**. Highlights:
+
 | Section | Pointer |
 |---|---|
-| Introduction | [docs/intro.md](https://github.com/observatoriogeo/whistlerlib/blob/main/docs/intro.md) |
-| Install (pip) | [docs/installation/pip.md](https://github.com/observatoriogeo/whistlerlib/blob/main/docs/installation/pip.md) |
-| Install (Docker / Swarm) | [docs/installation/docker.md](https://github.com/observatoriogeo/whistlerlib/blob/main/docs/installation/docker.md) |
-| Architecture | [docs/concepts/architecture.md](https://github.com/observatoriogeo/whistlerlib/blob/main/docs/concepts/architecture.md) |
-| `Context` & datasets | [docs/concepts/context-and-datasets.md](https://github.com/observatoriogeo/whistlerlib/blob/main/docs/concepts/context-and-datasets.md) |
-| Algorithm families | [docs/concepts/algorithm-families.md](https://github.com/observatoriogeo/whistlerlib/blob/main/docs/concepts/algorithm-families.md) |
-| Tutorials (7 examples) | [docs/tutorials/](https://github.com/observatoriogeo/whistlerlib/blob/main/docs/tutorials/) |
-| Migration from 0.1.0 | [docs/migration/from-0.1.0.md](https://github.com/observatoriogeo/whistlerlib/blob/main/docs/migration/from-0.1.0.md) |
+| Introduction | [/docs/intro](https://whistlerlib.observatoriogeo.mx/docs/intro) |
+| Install (pip) | [/docs/installation/pip](https://whistlerlib.observatoriogeo.mx/docs/installation/pip) |
+| Install (Docker / Swarm) | [/docs/installation/docker](https://whistlerlib.observatoriogeo.mx/docs/installation/docker) |
+| Architecture | [/docs/concepts/architecture](https://whistlerlib.observatoriogeo.mx/docs/concepts/architecture) |
+| `Context` & datasets | [/docs/concepts/context-and-datasets](https://whistlerlib.observatoriogeo.mx/docs/concepts/context-and-datasets) |
+| Algorithm families | [/docs/concepts/algorithm-families](https://whistlerlib.observatoriogeo.mx/docs/concepts/algorithm-families) |
+| Tutorials (7 examples) | [/docs/tutorials/](https://whistlerlib.observatoriogeo.mx/docs/tutorials/) |
+| API reference | [/docs/api/](https://whistlerlib.observatoriogeo.mx/docs/api/) |
+| Migration from 0.1.0 | [/docs/migration/from-0.1.0](https://whistlerlib.observatoriogeo.mx/docs/migration/from-0.1.0) |
+| Citation | [/docs/citation](https://whistlerlib.observatoriogeo.mx/docs/citation) |
 
 ## Development
 

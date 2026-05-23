@@ -4,7 +4,7 @@
 
 ## Why an R version?
 
-Two reasons, neither involving local R installs (R lives only in the **worker image**; see [`docs/concepts/architecture.md`](../../docs/concepts/architecture.md) for the R-bridge architecture):
+Two reasons, neither involving local R installs (R lives only in the **worker image**; see the [Architecture](https://whistlerlib.observatoriogeo.mx/docs/concepts/architecture) page for the R-bridge architecture):
 
 1. **Comparison baseline.** The Whistlerlib paper benchmarked the alt-python implementation against the original R implementation. Both are kept in the codebase so users can reproduce that comparison.
 2. **R-only libraries.** Some downstream features (notably `syuzhet`-based sentiment, used in `sentiment_histogram_and_sum_r`) only have a high-quality R implementation. The same R-bridge plumbing handles all of them.

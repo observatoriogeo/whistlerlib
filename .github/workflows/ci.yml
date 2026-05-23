@@ -13,12 +13,13 @@ concurrency:
 
 jobs:
   docs:
-    # Fast docs sanity check: tutorials in docs/tutorials/ are auto-generated
-    # from examples/<slug>/README.md (see scripts/sync_tutorials.py); fail if
-    # they're out of sync. Also verify every relative link in docs/ resolves
-    # to a real file on disk. Both checks need only stdlib Python so we skip
-    # the dep sync.
-    name: docs (tutorial sync + link check)
+    # Fast docs sanity check: tutorials in website/docs/tutorials/ are
+    # auto-generated from examples/<slug>/README.md (see
+    # scripts/sync_tutorials.py); fail if they're out of sync. Link rot
+    # is caught at build time by the Docusaurus website itself via
+    # `onBrokenLinks: 'throw'` (see .github/workflows/docs-deploy.yml).
+    # Both checks need only stdlib Python so we skip the dep sync.
+    name: docs (tutorial sync + style)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -27,8 +28,6 @@ jobs:
           python-version: "3.11"
       - name: Tutorial drift check
         run: python scripts/sync_tutorials.py --check
-      - name: Doc link check
-        run: python scripts/check_doc_links.py
       - name: No em-dashes
         # Em-dashes (U+2014) are prohibited in tracked prose; use comma,
         # colon, semicolon, or period instead. Plain hyphens are fine.

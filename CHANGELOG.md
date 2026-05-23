@@ -11,7 +11,7 @@ First public release of Whistlerlib as a packaged Python library. Brings the
 codebase to current Python (3.11+), Dask (2026.3.x), and pandas (2.x); adds a
 comprehensive test suite, runnable examples, a portable docs tree, and the
 `albertogarob/whistlerlib` Docker image. Upgrade notes from 0.1.0:
-[`docs/migration/from-0.1.0.md`](docs/migration/from-0.1.0.md).
+[migration guide](https://whistlerlib.observatoriogeo.mx/docs/migration/from-0.1.0).
 
 Available on:
 - **GitHub**: [`v0.2.0`](https://github.com/observatoriogeo/whistlerlib/releases/tag/v0.2.0)
@@ -58,7 +58,7 @@ Available on:
 
 ### Removed
 - Pinned `requirements*.txt` files (replaced by `pyproject.toml` dependencies + extras).
-- **`dask_sql` dependency** and the SQL surface it backed (`TweetDataset.run_query()`, `Context.dask_sql_context`, `TweetDataset.dask_sql_context`/`dask_sql_tablename`/`query_result`/`query`). `dask_sql==2024.5.0` is incompatible with `dask>=2025` because Dask folded `dask_expr` into the main namespace, and upstream `dask_sql` is unmaintained. See [`docs/migration/from-0.1.0.md`](docs/migration/from-0.1.0.md) for the workaround.
+- **`dask_sql` dependency** and the SQL surface it backed (`TweetDataset.run_query()`, `Context.dask_sql_context`, `TweetDataset.dask_sql_context`/`dask_sql_tablename`/`query_result`/`query`). `dask_sql==2024.5.0` is incompatible with `dask>=2025` because Dask folded `dask_expr` into the main namespace, and upstream `dask_sql` is unmaintained. See the [migration guide](https://whistlerlib.observatoriogeo.mx/docs/migration/from-0.1.0) for the workaround.
 
 ## [0.1.0] - 2024-05-01
 

@@ -12,7 +12,8 @@
 # The scheduler runs no whistlerlib algorithm code, but it must be able
 # to deserialize the cloudpickle bytes the client submits, which means
 # whistlerlib has to be importable in the scheduler's env. See the
-# `docs/installation/docker.md` page for the architectural details.
+# Install with Docker page on the docs site for the architectural details:
+# https://whistlerlib.observatoriogeo.mx/docs/installation/docker
 #
 # `VERSION` env var picks the worker image tag (matches Docker Hub
 # releases). Defaults to `latest`; pin in production:
@@ -55,7 +56,8 @@ services:
     # /tmp is bind-mounted RO inside the worker so R can write its own
     # R_TempDir; see `docker-compose.yml` for the why. In Swarm you
     # typically want a SHARED filesystem (NFS, gluster, s3fs) instead.
-    # See `docs/installation/docker.md` → "Shared storage".
+    # See the "Shared storage" section of the Install with Docker page:
+    # https://whistlerlib.observatoriogeo.mx/docs/installation/docker
     environment:
       TMPDIR: /var/tmp
     deploy:

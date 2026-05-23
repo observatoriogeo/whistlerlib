@@ -39,29 +39,25 @@ git push main
 
 Total time end-to-end is around one minute (typical: ~55 s build, ~8 s deploy). The two jobs run sequentially; the deploy job depends on the build artifact. No SSH layer, no proxy chain, no manual steps after push.
 
-## The content-sync chain (subtle, read carefully)
+## The content-sync chain
 
-Most-confusing failure mode. The website does NOT read from `docs/`; it reads from `website/docs/`. The chain is:
+Tutorials are derived, not hand-edited. The chain is two steps:
 
 1. **Canonical tutorial source:** `examples/<slug>/README.md` (the runnable example's own README).
-2. **`scripts/sync_tutorials.py`** regenerates `docs/tutorials/<slug>.md` from each example README (writes HTML banner comments `<!-- ... -->`).
-3. **The website docs tree at `website/docs/tutorials/<slug>.md`** is a manual mirror of the sync script's output, with the HTML banner comment swapped to MDX form `{/* ... */}` (MDX 3 in strict mode chokes on HTML comments in `.md` files).
+2. **`scripts/sync_tutorials.py`** regenerates `website/docs/tutorials/<slug>.md` directly, wrapping the source in Docusaurus frontmatter (`id`, `title`, `sidebar_position`) and an MDX banner (`{/* ... */}`). No intermediate `docs/tutorials/` tree exists; the script writes straight into the Docusaurus content directory.
 
 The deploy's path filter is `website/**`. Concrete consequences:
 
-- Editing only `examples/<slug>/README.md`: no deploy.
-- Editing only `docs/tutorials/<slug>.md`: no deploy.
-- Running `python scripts/sync_tutorials.py` without also mirroring into `website/docs/tutorials/`: no deploy.
-- Editing `website/docs/tutorials/<slug>.md` directly: triggers a deploy but creates drift with the canonical source; the next sync-script run will overwrite the drift.
+- Editing only `examples/<slug>/README.md`: no deploy until the regen lands in `website/`.
+- Editing `website/docs/tutorials/<slug>.md` directly: triggers a deploy but creates drift with the canonical source; the next sync-script run will overwrite the drift, and CI's `sync_tutorials.py --check` will fail in the meantime.
 
 Correct workflow for tutorial edits:
 
 1. Edit `examples/<slug>/README.md`.
-2. `python scripts/sync_tutorials.py`, this regenerates `docs/tutorials/<slug>.md`.
-3. Mirror into `website/docs/tutorials/<slug>.md`, swapping `<!-- -->` to `{/* */}`.
-4. Commit all three paths together, push.
+2. Run `python scripts/sync_tutorials.py`. The website tutorial under `website/docs/tutorials/<slug>.md` is regenerated.
+3. Commit both paths together, push.
 
-If step 3 is skipped, the live site stays stale even though `git status` looks clean for the rest of the tree.
+Non-tutorial doc pages under `website/docs/` (intro, installation, concepts, api, citation, changelog, migration) are NOT regenerated; they are hand-maintained directly in `website/docs/`. Only `tutorials/<slug>.md` files are derived from `examples/`.
 
 ## Phases (the deploy loop)
 
@@ -78,7 +74,7 @@ cd website && npm run build
 Common build-breakers:
 
 - Em-dashes (U+2014) anywhere in `.md` / `.mdx` / `.ts` / `.tsx` / `.css` / `.json` content under `website/`: the project's separate `docs` CI job will fail even if Docusaurus accepts the build. Pre-push scan: `grep -rP "\x{2014}" website/ examples/`.
-- HTML comments `<!-- -->` in `.md` files under `website/docs/`: MDX 3 strict parsing fails. Swap to `{/* ... */}`.
+- HTML comments `<!-- -->` in hand-written `.md` files under `website/docs/`: MDX 3 strict parsing fails. Use `{/* ... */}` instead. The tutorial pages get this right automatically (the sync script writes MDX banners); risk applies only to hand-written non-tutorial docs.
 - Trailing-slash drift on directory-index doc links (e.g. `/docs/api/` vs `/docs/api`). See `LINK_CONVENTIONS.md` at the repo root for the rule.
 
 ### 2. Commit and push
@@ -92,7 +88,7 @@ git push origin main
 
 Before committing, sanity-check the content-sync chain (see above) and that `website/package-lock.json` is in the diff if `package.json` changed. Pushing is visible to others and triggers the live deploy, so confirm with the user unless they have already said "deploy".
 
-If the changes touch only `examples/`, `docs/`, or `scripts/`, the push will NOT trigger a deploy. Either also mirror to `website/`, or trigger a manual run with `gh workflow run docs-deploy.yml --ref main`.
+If the changes touch only paths outside `website/**` (for example `src/`, `tests/`, `examples/` without a sync regen, or `scripts/`), the push will NOT trigger a deploy. Either also regenerate `website/docs/tutorials/` via `python scripts/sync_tutorials.py`, or trigger a manual run with `gh workflow run docs-deploy.yml --ref main`.
 
 ### 3. Watch the workflow
 
@@ -205,17 +201,17 @@ gh api -X PUT repos/observatoriogeo/whistlerlib/pages \
 **Fix:** scan and substitute before push.
 
 ```bash
-grep -rnP "\x{2014}" website/ examples/ docs/   # should be empty
+grep -rnP "\x{2014}" website/ examples/   # should be empty
 # If hits found, replace each with comma, colon, period, or parens.
 ```
 
-### 4. HTML comments in website MDX tutorials
+### 4. HTML comments in hand-written website docs
 
-**Symptom:** local `npm run build` fails with an MDX acorn parse error around a `<!--` token in `website/docs/tutorials/<slug>.md`.
+**Symptom:** local `npm run build` fails with an MDX acorn parse error around a `<!--` token in a `.md` file under `website/docs/`.
 
-**Cause:** `scripts/sync_tutorials.py` writes HTML banner comments (`<!-- ... -->`); the website's strict-mode MDX 3 parser refuses them in `.md` files.
+**Cause:** the website's strict-mode MDX 3 parser refuses HTML comments in `.md` files. Tutorial pages get this right automatically (the sync script writes `{/* ... */}` banners), so the risk applies only to hand-written non-tutorial docs (intro, concepts, installation, api, citation, etc.).
 
-**Fix:** swap to `{/* ... */}` when mirroring from `docs/tutorials/` into `website/docs/tutorials/`. This is the canonical website mirror, not a workaround.
+**Fix:** swap any `<!-- ... -->` to `{/* ... */}` in the offending hand-written doc. If the offending file is a tutorial under `website/docs/tutorials/`, re-run `python scripts/sync_tutorials.py` instead; the script writes MDX banners and is the canonical source.
 
 ### 5. Trailing-slash convention drift
 
@@ -229,9 +225,9 @@ grep -rnP "\x{2014}" website/ examples/ docs/   # should be empty
 
 **Symptom:** `gh run list --workflow=docs-deploy.yml --limit 1` shows no new run after a push to `main`.
 
-**Cause:** the push touched only files outside `website/**` and outside `.github/workflows/docs-deploy.yml`. The path filter intentionally excludes pure-Python and top-level docs edits.
+**Cause:** the push touched only files outside `website/**` and outside `.github/workflows/docs-deploy.yml`. The path filter intentionally excludes pure-Python edits and changes to canonical-source-only locations like `examples/<slug>/README.md` (without a sync regen).
 
-**Fix:** if the change is content-relevant, also mirror into `website/`. If it is a one-off cosmetic redeploy, trigger manually:
+**Fix:** if a tutorial source changed, run `python scripts/sync_tutorials.py` to regenerate `website/docs/tutorials/` and commit the result. For a one-off cosmetic redeploy with no content change, trigger manually:
 
 ```bash
 gh workflow run docs-deploy.yml --ref main
@@ -303,6 +299,6 @@ Stop and report at the first mismatch; do not redeploy blindly.
 - **Initial GH Pages enablement.** One-time setup, already done. If somehow disabled, restore via repo Settings → Pages → Source: GitHub Actions.
 - **DNS record provisioning.** Already done at the `observatoriogeo.mx` domain registrar; not changeable from this repo.
 - **Cert revocation / renewal.** GitHub auto-manages Let's Encrypt for the custom domain; no manual cert work is needed.
-- **Snapshotting a new versioned docs release** (e.g., freezing `docs/` as `versioned_docs/version-0.2.0/` before starting 0.3.0 work). Distinct workflow; deserves its own skill (TBD).
+- **Snapshotting a new versioned docs release** (e.g., freezing `website/docs/` as `website/versioned_docs/version-0.2.0/` before starting 0.3.0 work). Distinct workflow; deserves its own skill (TBD).
 - **Migrating from Albatross.** Whistlerlib was Pages from day 1; no migration story exists.
 - **PyPI / Docker Hub publishes.** Covered by separate skills (e.g. `publish-docker`); this skill is docs-only.

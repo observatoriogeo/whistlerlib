@@ -155,6 +155,5 @@ include = [
     "README.md",
     "LICENSE",
     "CHANGELOG.md",
-    "docs/migration/",
     "pyproject.toml",
 ]
