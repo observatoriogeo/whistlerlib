@@ -30,6 +30,13 @@ venv
 # uv.lock IS committed (it's the reproducibility anchor)
 .uv-cache/
 
+# local workspace items not part of the published repo
+# (originally lived at the wrapper level above the git repo; preserved
+# as local-only after the repo was flattened up to the workspace root)
+CLAUDE.md
+.plans/
+lancedb/
+
 # other
 .DS_Store
 
