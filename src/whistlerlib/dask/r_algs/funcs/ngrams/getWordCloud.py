@@ -1,6 +1,7 @@
-from ..r_script_process import RScriptArgs, RScriptProcess
 from .....logger import logger
- 
+from ..r_script_process import RScriptArgs, RScriptProcess
+
+
 def getWordCloud(df_in, html_folder, html_filen):
     '''
     Python wrapper for the getWordCloud R function.

@@ -1,7 +1,8 @@
 # TODO: check graph weights?
 
 import pytest
-from .conftest import P, combs_p_r, validate_hashtag, validate_graph
+
+from .conftest import P, combs_p_r, validate_graph, validate_hashtag
 
 
 @pytest.mark.parametrize('p', P)

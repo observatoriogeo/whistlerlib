@@ -7,16 +7,16 @@ def cleanText(x, stopwords):
 
     """
 
-    import string
     import re
-    # import nltk
-    import emoji
+    import string
     from unicodedata import normalize
+
+    import emoji
 
     # Change to lower
     x = x.lower()
-    # Remove emojis
-    x = re.sub(emoji.get_emoji_regexp(), r"", x)
+    # Remove emojis (emoji >= 2.0 API)
+    x = emoji.replace_emoji(x, replace='')
     # Extra u
     x = re.sub(r"([^n\u0300-\u036f]|n(?!\u0303(?![\u0300-\u036f])))[\u0300-\u036f]+",
                r"\1", normalize("NFD", x), 0, re.I)

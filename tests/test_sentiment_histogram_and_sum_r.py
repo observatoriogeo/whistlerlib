@@ -1,5 +1,8 @@
 import pytest
-from .conftest import combs_sentiment_r, combs_sentiment_r_rep
+
+from .conftest import combs_sentiment_r, combs_sentiment_r_rep, r_required
+
+pytestmark = r_required
 
 
 @pytest.mark.parametrize('language,method,p', combs_sentiment_r)

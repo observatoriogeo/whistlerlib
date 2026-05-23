@@ -1,9 +1,10 @@
 # pyright: reportMissingImports=false, reportMissingModuleSource=false
 
-import pandas as pd
-import tempfile
 import subprocess
+import tempfile
 from enum import Enum
+
+import pandas as pd
 
 
 class RScriptArgs(Enum):

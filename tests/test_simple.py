@@ -1,5 +1,7 @@
 import pytest
 
+from .conftest import r_required
+
 ##############################
 # alt python methods
 ##############################
@@ -29,6 +31,7 @@ def test_ngram_histogram_alt_python(tweet_dataset):
     assert len(histogram.index) == 10
 
 
+@pytest.mark.slow
 @pytest.mark.usefixtures('tweet_dataset')
 def test_sentiment_range_spanish_alt_python(tweet_dataset):
     df = tweet_dataset.sentiment_range_spanish_alt_python(left_end=0.9,
@@ -41,6 +44,7 @@ def test_sentiment_range_spanish_alt_python(tweet_dataset):
 ##############################
 
 
+@r_required
 @pytest.mark.usefixtures('tweet_dataset')
 def test_hashtag_histogram_r(tweet_dataset):
     histogram = tweet_dataset.hashtag_histogram_r(k=10)
@@ -48,6 +52,7 @@ def test_hashtag_histogram_r(tweet_dataset):
     assert len(histogram.index) == 10
 
 
+@r_required
 @pytest.mark.usefixtures('tweet_dataset')
 def test_mention_histogram_r(tweet_dataset):
     histogram = tweet_dataset.mention_histogram_r(k=10)
@@ -55,6 +60,7 @@ def test_mention_histogram_r(tweet_dataset):
     assert len(histogram.index) == 10
 
 
+@r_required
 @pytest.mark.usefixtures('tweet_dataset')
 def test_ngram_histogram_r(tweet_dataset):
     histogram = tweet_dataset.ngram_histogram_r(k=10, n=2)
@@ -62,6 +68,7 @@ def test_ngram_histogram_r(tweet_dataset):
     assert len(histogram.index) == 10
 
 
+@r_required
 @pytest.mark.usefixtures('tweet_dataset')
 def test_sentiment_histogram_and_sum_r(tweet_dataset):
     histogram = tweet_dataset.sentiment_histogram_and_sum_r(language='spanish',

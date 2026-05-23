@@ -1,6 +1,17 @@
-import pytest
 import pandas as pd
-from .conftest import combs_k_n_p_ds, combs_n_p_ds, combs_k0_n_p, combs_k0_n_p_r_ds, combs_k0_n_p_ds, validate_ngram
+import pytest
+
+from .conftest import (
+    combs_k0_n_p,
+    combs_k0_n_p_ds,
+    combs_k0_n_p_r_ds,
+    combs_k_n_p_ds,
+    combs_n_p_ds,
+    r_required,
+    validate_ngram,
+)
+
+pytestmark = r_required
 
 
 @pytest.mark.parametrize('k,n,p,ds', combs_k_n_p_ds)

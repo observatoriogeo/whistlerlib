@@ -49,12 +49,14 @@ dependencies = [
     "igraph>=0.11",
     "advertools>=0.16",
     "sentiment-analysis-spanish>=0.0.25",
+    "emoji>=2",
 ]
 
 [project.optional-dependencies]
 tests = [
     "pytest>=8",
     "pytest-cov>=5",
+    "pytest-timeout>=2.3",
     "hypothesis>=6.100",
 ]
 examples = [
@@ -79,6 +81,35 @@ Homepage = "https://github.com/CentroGeo/whistlerlib"
 Repository = "https://github.com/CentroGeo/whistlerlib"
 Issues = "https://github.com/CentroGeo/whistlerlib/issues"
 Changelog = "https://github.com/CentroGeo/whistlerlib/blob/main/CHANGELOG.md"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+# Hard fail any single test that takes more than 30s — for verification
+# (not profiling), no individual test should be long-running.
+timeout = 30
+timeout_method = "thread"
+# Default runs exclude `slow` tests (sentiment-analysis-spanish model load,
+# anything else needing >5s of real work). Opt in with `-m slow` to run them.
+addopts = "-m 'not slow'"
+markers = [
+    "slow: tests that take >5s — sentiment model load, heavy compute. Excluded by default.",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+extend-exclude = [".venv", "build", "dist", "tests/fixtures"]
+
+[tool.ruff.lint]
+# Start permissive on this legacy codebase — pyflakes (real bugs) +
+# isort (import hygiene) only. Style rules (E/W) can be enabled in
+# follow-up PRs as legacy code gets touched.
+select = ["F", "I"]
+
+[tool.ruff.lint.per-file-ignores]
+# __init__.py files re-export symbols by importing them. F401 (imported but
+# unused) is the wrong rule there — the import IS the re-export.
+"**/__init__.py" = ["F401"]
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/whistlerlib"]

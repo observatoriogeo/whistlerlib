@@ -100,16 +100,15 @@ pip install -e ".[dev]"
 pytest
 ```
 
-### R bridge (optional)
+### R bridge
 
-The R-backed algorithms in `whistlerlib.dask.r_algs` require a system R install and two environment variables:
+The R-backed algorithms in `whistlerlib.dask.r_algs` (R-implemented hashtag / mention / n-gram / sentiment) **only run inside the Whistlerlib worker Docker image**, not on your dev machine. R + the R libraries are bundled in that image so users don't have to install anything R-related locally.
 
-```bash
-export WHISTLERLIB_R_PATH=/usr/bin
-export WHISTLERLIB_R_SCRIPTS_PATH="$(python -c 'import whistlerlib, os; print(os.path.join(os.path.dirname(whistlerlib.__file__), "dask", "r_algs", "funcs"))')"
-```
+- **Local dev:** R-bridge tests skip automatically. There is nothing to install.
+- **Production / experiments:** run the published `whistlerlib/worker` image on a Docker Swarm cluster (master + N workers). The worker image sets `WHISTLERLIB_R_PATH` and `WHISTLERLIB_R_SCRIPTS_PATH` internally.
+- **Running R tests in CI:** a dedicated GitHub Actions job uses the worker image as the runner; the default matrix runs Python-only tests on `ubuntu-latest`.
 
-Importing Whistlerlib does **not** require these env vars — they're only consumed when an R-backed algorithm is invoked.
+If you absolutely need to run R-bridge tests outside Docker (rare — only for debugging the bridge itself), set both env vars to point at your local R install and the bundled R scripts. This is not a supported workflow.
 
 
 ## License

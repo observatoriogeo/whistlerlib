@@ -1,5 +1,13 @@
 import pytest
-from .conftest import combs_k0_ngram_alt_python, combs_k0_ngram_alt_python_rep, combs_no_k_ngram_alt_python, combs_klt0_ngram_alt_python, combs_k0_ngram_alt_python_no_ds, validate_ngram
+
+from .conftest import (
+    combs_k0_ngram_alt_python,
+    combs_k0_ngram_alt_python_no_ds,
+    combs_k0_ngram_alt_python_rep,
+    combs_klt0_ngram_alt_python,
+    combs_no_k_ngram_alt_python,
+    validate_ngram,
+)
 
 
 @pytest.mark.parametrize('k,n,lan,w,p,ds', combs_klt0_ngram_alt_python)

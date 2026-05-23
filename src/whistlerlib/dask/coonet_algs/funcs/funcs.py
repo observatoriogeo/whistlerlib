@@ -1,8 +1,10 @@
 # pyright: reportMissingModuleSource=false
 
-import logging
 import itertools
+import logging
+
 import pandas as pd
+
 from ...alt_python_algs.funcs.getHashtags import getHashtags
 from ...alt_python_algs.funcs.getMentions import getMentions
 
@@ -13,7 +15,7 @@ def get_mention_coonet_edges(df, text_column):
 
     if df.empty:
         logger.info(
-            f'[whistler_dask.coonet.dask_methods.get_mention_coonet_edges] got an empty DataFrame! Returning empty response DataFrame')
+            '[whistler_dask.coonet.dask_methods.get_mention_coonet_edges] got an empty DataFrame! Returning empty response DataFrame')
         return pd.DataFrame(columns=['source', 'target', 'weight'])
     else:
         logger.info(
@@ -21,7 +23,7 @@ def get_mention_coonet_edges(df, text_column):
 
     edges = []
     logger.info(
-        f'[whistler_dask.coonet.dask_methods.get_mention_coonet_edges] computing edges ...')
+        '[whistler_dask.coonet.dask_methods.get_mention_coonet_edges] computing edges ...')
     for _, row in df.iterrows():
         row_text = row[text_column]
 
@@ -38,7 +40,7 @@ def get_mention_coonet_edges(df, text_column):
 
     if len(edges) == 0:
         logger.info(
-            f'[whistler_dask.coonet.dask_methods.get_mention_coonet_edges] no edges were found! Returning empty response DataFrame')
+            '[whistler_dask.coonet.dask_methods.get_mention_coonet_edges] no edges were found! Returning empty response DataFrame')
         return pd.DataFrame(columns=['source', 'target', 'weight'])
     else:
         # build edges dataset
@@ -52,14 +54,14 @@ def get_hashtag_coonet_edges(df, text_column):
 
     if df.empty:
         logger.info(
-            f'[whistler_dask.coonet.dask_methods.get_hashtag_coonet_edges] got an empty DataFrame! Returning empty response DataFrame')
+            '[whistler_dask.coonet.dask_methods.get_hashtag_coonet_edges] got an empty DataFrame! Returning empty response DataFrame')
         return pd.DataFrame(columns=['source', 'target', 'weight'])
     else:
         logger.info(
             f'[whistler_dask.coonet.dask_methods.get_hashtag_coonet_edges] got:\n{df}')
 
     logger.info(
-        f'[whistler_dask.coonet.dask_methods.get_hashtag_coonet_edges] computing edges ...')
+        '[whistler_dask.coonet.dask_methods.get_hashtag_coonet_edges] computing edges ...')
     edges = []
 
     for _, row in df.iterrows():
@@ -79,7 +81,7 @@ def get_hashtag_coonet_edges(df, text_column):
 
     if len(edges) == 0:
         logger.info(
-            f'[whistler_dask.coonet.dask_methods.get_hashtag_coonet_edges] no edges were found! Returning empty response DataFrame')
+            '[whistler_dask.coonet.dask_methods.get_hashtag_coonet_edges] no edges were found! Returning empty response DataFrame')
         return pd.DataFrame(columns=['source', 'target', 'weight'])
     else:
         # build edges dataset

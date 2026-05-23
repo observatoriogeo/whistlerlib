@@ -1,6 +1,8 @@
 import logging
+
+from .....config.config import R_PATH, R_SCRIPTS_PATH
 from ..r_script_process import RScriptArgs, RScriptProcess
-from .....config.config import R_SCRIPTS_PATH, R_PATH
+
 logger = logging.getLogger('distributed.worker')
 
 

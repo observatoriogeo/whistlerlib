@@ -1,5 +1,10 @@
 import pytest
-from .conftest import combs_sentiment_spanish_alt_python, combs_sentiment_spanish_alt_python_rep, P
+
+from .conftest import P, combs_sentiment_spanish_alt_python, combs_sentiment_spanish_alt_python_rep
+
+# Whole module is slow: each test loads the sentiment-analysis-spanish TF model.
+# Excluded from default runs; opt in with `pytest -m slow`.
+pytestmark = pytest.mark.slow
 
 
 def check_monotonicity(a_list):

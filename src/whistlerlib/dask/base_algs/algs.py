@@ -1,7 +1,8 @@
-import pandas as pd
 import dask.dataframe as dd
-from ...time_profile import TimeProfile
+import pandas as pd
+
 from ...logger import logger
+from ...time_profile import TimeProfile
 
 
 def compute_matrix_nz_histogram_and_sum(df, text_column, func, meta, col_names, num_partitions, **kwargs):
@@ -153,7 +154,7 @@ def compute_weighted_coonet(df, text_column, source_col, target_col, weight_col,
     df: A Dask DataFrame that has been already partitioned.
     '''
 
-    time_profile = TimeProfile(name=f'compute_weighted_coonet')
+    time_profile = TimeProfile(name='compute_weighted_coonet')
 
     # edges computation
 

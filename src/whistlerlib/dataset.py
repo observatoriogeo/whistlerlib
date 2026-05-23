@@ -1,37 +1,18 @@
-import hashlib
-from .dask import r_algs
-from .dask import alt_python_algs
-from .dask import coonet_algs
+from .dask import alt_python_algs, coonet_algs, r_algs
 from .time_profile import TimeProfile
 
 
 class TweetDataset:
 
-    def __init__(self, ds_metadata, dask_df, dask_sql_context, num_partitions, ranged=False, range_start_date='', range_end_date='', query_result=False, query=''):
+    def __init__(self, ds_metadata, dask_df, num_partitions, ranged=False, range_start_date='', range_end_date=''):
         self.ds_metadata = ds_metadata
-        self.query_result = query_result
-        self.query = query
         self.dask_df = dask_df
-        self.dask_sql_context = dask_sql_context
         self.text_column = self.ds_metadata['column_mapping']['text_column']
         self.date_column = self.ds_metadata['column_mapping']['date_column']
         self.num_partitions = num_partitions
         self.ranged = ranged
         self.range_start_date = range_start_date
         self.range_end_date = range_end_date
-
-        # get a dataset table name for Dask SQL
-        tablename = "dataset"
-        if self.query_result:
-            tablename += self.query
-        if self.ranged:
-            tablename += str(self.range_start_date) + str(self.range_end_date)
-        # the leading 't' is for making sure the table name will be a valid one not starting with a number
-        self.dask_sql_tablename = 't' + \
-            hashlib.md5(tablename.encode('utf-8')).hexdigest()
-
-        self.dask_sql_context.create_table(
-            self.dask_sql_tablename, self.dask_df)
 
     def hashtag_histogram_r(self, k, distributed_sorting=False, return_time_profile=False):
         '''
@@ -169,29 +150,6 @@ class TweetDataset:
         else:
             return df_out, graph
 
-    def run_query(self, query):
-        '''
-        Returns the result of a query as a new TweetDataset
-        '''
-        query = query.replace('{dataset}', self.dask_sql_tablename)
-        query_df = self.dask_sql_context.sql(
-            query
-        )
-
-        query_df = query_df.repartition(npartitions=self.num_partitions)
-        query_df = query_df.persist()
-
-        query_dataset = TweetDataset(ds_metadata=self.ds_metadata,
-                                     dask_df=query_df,
-                                     dask_sql_context=self.dask_sql_context,
-                                     num_partitions=self.num_partitions,
-                                     ranged=self.ranged,
-                                     range_start_date=self.range_start_date,
-                                     range_end_date=self.range_end_date,
-                                     query_result=True,
-                                     query=query)
-        return query_dataset
-
     def group_by_date(self):
         '''
         Assumes that self.dask_df has been already partitioned.
@@ -219,13 +177,10 @@ class TweetDataset:
 
         ranged_dataset = TweetDataset(ds_metadata=self.ds_metadata,
                                       dask_df=ddf_ranged,
-                                      dask_sql_context=self.dask_sql_context,
                                       num_partitions=self.num_partitions,
                                       ranged=True,
                                       range_start_date=start_date,
-                                      range_end_date=end_date,
-                                      query=self.query,
-                                      query_result=self.query_result)
+                                      range_end_date=end_date)
         return ranged_dataset
 
     def tweet_count(self, return_time_profile=False):
@@ -261,8 +216,8 @@ class TweetDataset:
 
         # create integer index column by considering the current partitioning
         chunks = tuple(self.dask_df.map_partitions(len).compute())
-        from dask.array import from_array
         import numpy as np
+        from dask.array import from_array
         self.dask_df['_index'] = from_array(
             np.arange(dataset_len), chunks=chunks)
         self.dask_df = self.dask_df.set_index('_index')  # index

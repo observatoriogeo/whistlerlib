@@ -1,5 +1,6 @@
-from .cleanText import cleanText
 import pandas as pd
+
+from .cleanText import cleanText
 
 
 def getNgrams(x, n, w, stopwords):
@@ -24,8 +25,9 @@ def getNgrams(x, n, w, stopwords):
     # Get the frequencies
     frequencies = sum(sparse_matrix).toarray()[0]
     # Set the ngrams and its frequencies in a dataframe
+    # (sklearn >= 1.0 renamed get_feature_names → get_feature_names_out)
     ngramsF = pd.DataFrame(frequencies,
-                           index=word_vectorizer.get_feature_names(),
+                           index=word_vectorizer.get_feature_names_out(),
                            columns=['Frequency'])
     return ngramsF
 

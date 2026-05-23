@@ -1,5 +1,14 @@
 import pytest
-from .conftest import combs_k_p_ds, combs_p_ds, combs_k0_p, combs_k0_p_r_ds, combs_k0_p_ds, validate_mention
+
+from .conftest import (
+    combs_k0_p,
+    combs_k0_p_ds,
+    combs_k0_p_r_ds,
+    combs_k_p_ds,
+    combs_p_ds,
+    r_required,
+    validate_mention,
+)
 
 
 @pytest.mark.parametrize('k,p,ds', combs_k_p_ds)
@@ -100,6 +109,7 @@ def test_reps(k, p, r, ds, tweet_dataset):
 #TODO: disabled
 
 
+@r_required
 @pytest.mark.parametrize('k,p,r,ds', combs_k0_p_r_ds)
 @pytest.mark.usefixtures('tweet_dataset')
 def test_python_vs_r(k, p, r, ds, tweet_dataset):

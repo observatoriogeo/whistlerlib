@@ -1,1 +1,6 @@
-from .algs import compute_matrix_nz_histogram_and_sum, compute_vector_histogram, compute_vector_range, compute_weighted_coonet
+from .algs import (
+    compute_matrix_nz_histogram_and_sum,
+    compute_vector_histogram,
+    compute_vector_range,
+    compute_weighted_coonet,
+)

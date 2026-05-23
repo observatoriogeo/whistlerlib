@@ -1,12 +1,13 @@
 # pyright: reportMissingImports=false
 
 import dask
+
+from ...logger import logger
+from ..base_algs import compute_vector_histogram, compute_vector_range
 from .funcs.getHashtags import get_hashtags_wrapper
+from .funcs.getMentions import get_mentions_wrapper
 from .funcs.getNgrams import get_ngrams_wrapper
 from .funcs.getSentimentScore import get_sentiment_score_wrapper
-from .funcs.getMentions import get_mentions_wrapper
-from ..base_algs import compute_vector_histogram, compute_vector_range
-from ...logger import logger
 
 
 def compute_hashtag_histogram(df, k, text_column, distributed_sorting, num_partitions):
@@ -27,11 +28,13 @@ def compute_hashtag_histogram(df, k, text_column, distributed_sorting, num_parti
 
 def compute_ngram_histogram(df, n, k, lan, w, text_column, distributed_sorting, num_partitions):
 
-    # locally download stopwords
-    logger.debug(
-        f"[whistler_dask.ngrams.alt_python.get_ngrams] downloading NLTK stop words ...")
+    # locally fetch stopwords — only hit the network if not already cached
     import nltk
-    nltk.download('stopwords')
+    try:
+        nltk.data.find('corpora/stopwords')
+    except LookupError:
+        logger.debug("[compute_ngram_histogram] downloading NLTK stopwords ...")
+        nltk.download('stopwords', quiet=True)
     stopwords = nltk.corpus.stopwords.words(lan)
 
     return compute_vector_histogram(df=df,
@@ -55,11 +58,13 @@ def compute_sentiment_range_spanish(df, left_end, right_end, text_column, num_pa
     df: A Dask DataFrame that has been already partitioned.
     '''
 
-    # locally download stopwords
-    logger.debug(
-        f"[compute_sentiment_range_spanish] downloading NLTK stop words ...")
+    # locally fetch stopwords — only hit the network if not already cached
     import nltk
-    nltk.download('stopwords')
+    try:
+        nltk.data.find('corpora/stopwords')
+    except LookupError:
+        logger.debug("[compute_sentiment_range_spanish] downloading NLTK stopwords ...")
+        nltk.download('stopwords', quiet=True)
     stopwords = nltk.corpus.stopwords.words('spanish')
 
     # locally load sentiment analysis model

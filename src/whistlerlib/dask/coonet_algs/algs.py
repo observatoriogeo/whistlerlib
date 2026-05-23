@@ -1,6 +1,7 @@
 from igraph import Graph
-from .funcs import get_mention_coonet_edges, get_hashtag_coonet_edges
+
 from ..base_algs import compute_weighted_coonet
+from .funcs import get_hashtag_coonet_edges, get_mention_coonet_edges
 
 
 def to_graph(nodes, edges, weights):

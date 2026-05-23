@@ -1,6 +1,16 @@
 import pytest
-import advertools as adv
-from .conftest import combs_k_p_ds, combs_p_ds, combs_k0_p, combs_k0_p_r_ds, combs_k0_p_ds, validate_mention
+
+from .conftest import (
+    combs_k0_p,
+    combs_k0_p_ds,
+    combs_k0_p_r_ds,
+    combs_k_p_ds,
+    combs_p_ds,
+    r_required,
+    validate_mention,
+)
+
+pytestmark = r_required
 
 
 @pytest.mark.parametrize('k,p,ds', combs_k_p_ds)

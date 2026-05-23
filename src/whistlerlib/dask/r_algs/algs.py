@@ -1,9 +1,8 @@
+from ..base_algs import compute_matrix_nz_histogram_and_sum, compute_vector_histogram
+from .funcs.getmentions import getMentions
 from .funcs.mfhashtags import getMFHashtags
 from .funcs.ngrams import getNgrams
 from .funcs.sentiments import getSentiments
-from .funcs.getmentions import getMentions
-from ..base_algs import compute_vector_histogram, compute_matrix_nz_histogram_and_sum
-
 
 SENTIMENT_META = {
     'text': 'object',

@@ -19,30 +19,55 @@ land.
 
 ### Dependencies removed
 
-_To be finalized during Phase 2._ Expected removals:
-- `dask_sql` — decision deferred to Phase 2 (replace with `duckdb`, vendor a maintained fork, or drop the SQL surface entirely). Tracked in plan §4.
+- **`dask_sql`** — removed entirely. The package is unmaintained upstream and its `2024.5.0` release is broken against `dask>=2025` (Dask folded `dask_expr` into its main namespace; `dask_sql.context.create_table` still tries `from dask_expr.io.parquet import ReadParquet` and crashes). Since the SQL surface was used by **zero tests** and not advertised in the README example, it was dropped rather than replaced. See "API breaking changes" below for the workaround.
 
 ### Dependencies renamed / replaced
 
 | Old | New | Notes |
 |---|---|---|
 | `python-igraph` | `igraph` | PyPI rename; same library. |
+| `dask_sql==2024.5.0` | _(removed)_ | See above. |
+
+### Dependencies added
+
+| Package | Why |
+|---|---|
+| `emoji>=2` | Was a transitive (untracked) need of `cleanText`. Now declared explicitly. |
 
 ### API breaking changes
 
-_None catalogued yet — Phase 2 will populate this section as the test suite
-gets back to green and breaking changes become visible._
+- **`whistlerlib.Context(...)` no longer exposes `dask_sql_context`.** The argument was internal but accessible. If you were reaching into it, switch to:
+  - **Filtering:** use `ctx.load_csv(...).dask_df[predicate]` (a Dask DataFrame) and `.compute()`.
+  - **Ad-hoc SQL on small results:** `compute()` to pandas, then run `duckdb.sql(...)` directly. Whistlerlib no longer ships SQL as a built-in surface.
+
+- **`whistlerlib.TweetDataset.__init__` signature change.** The following parameters were removed:
+  - `dask_sql_context`
+  - `query_result`
+  - `query`
+
+  Code that constructed `TweetDataset` instances directly will need to drop these kwargs. Code that goes through `Context.load_csv()` is unaffected.
+
+- **`whistlerlib.TweetDataset.run_query(query)` removed.** No tests, examples, or docs used it. Replacement: use Dask DataFrame filtering directly on `ds.dask_df` (`ds.dask_df[ds.dask_df['score'] > 0.9].compute()`), or `compute()` and apply duckdb to the resulting pandas DataFrame.
+
+- **`whistlerlib.TweetDataset.range_by_dates(...)` returns a `TweetDataset`** without the historical `query_result` / `query` attributes (they were removed alongside the SQL surface).
 
 ### Behavioural changes
 
-- **`whistlerlib.config.config` no longer asserts R-bridge env vars at import.**
-  Previously, `import whistlerlib` would fail with `AssertionError` unless both
-  `WHISTLERLIB_R_SCRIPTS_PATH` and `WHISTLERLIB_R_PATH` were set, regardless of
-  whether the caller used the R bridge. Now those variables default to `None`
-  when unset, and validation is the responsibility of the R-bridge code paths
-  that actually need them. **Impact:** non-R workflows can now `import
-  whistlerlib` without setting any env vars; R-bridge workflows behave
-  identically as long as the env vars are set before the R call sites run.
+- **`whistlerlib.config.config` no longer asserts R-bridge env vars at import.** Previously, `import whistlerlib` would fail with `AssertionError` unless both `WHISTLERLIB_R_SCRIPTS_PATH` and `WHISTLERLIB_R_PATH` were set, regardless of whether the caller used the R bridge. Now those variables default to `None` when unset, and validation is the responsibility of the R-bridge code paths that actually need them. **Impact:** non-R workflows can now `import whistlerlib` without setting any env vars; R-bridge workflows behave identically as long as the env vars are set before the R call sites run.
+
+- **NLTK stopwords are no longer downloaded unconditionally.** The algorithm code now does `try: nltk.data.find('corpora/stopwords') except LookupError: nltk.download(...)`. Behaviour is identical on fresh machines; the change makes the code **work offline** when the corpus is already cached (e.g. baked into a worker Docker image) without re-hitting the NLTK download server, which is sometimes slow or unreachable.
+
+- **`getHashtags`/`getNgrams` adapted to modern pandas + sklearn.** No user-visible behavioural change; the resulting DataFrames have the same `tag`/`freq` and `N_Tokens`/`Freq` columns as before. The internal pipeline now uses `value_counts().rename_axis(...).reset_index(name=...)` (pandas-version-agnostic) and `CountVectorizer.get_feature_names_out()` (sklearn 1.0+ API).
+
+### Test-infrastructure changes
+
+These don't affect callers but are worth knowing if you run / extend the suite:
+
+- **Tests no longer need an external Dask scheduler.** A session-scoped `LocalCluster` is started in `tests/conftest.py`.
+- **Tests no longer need a real X-platform CSV.** A synthetic 10-row hand-crafted Spanish/English CSV is generated per session (see §2 of `.plans/REVIVAL-PLAN.md`).
+- **R-bridge tests skip by default.** They opt in via `WHISTLERLIB_R_PATH` and `WHISTLERLIB_R_SCRIPTS_PATH` env vars; the Whistlerlib worker Docker image (Phase 5) sets them. Local dev never needs R installed.
+- **`sentiment_range_spanish_alt_python` tests are marked `slow`** and excluded from default runs (each loads a TensorFlow model). Opt in with `pytest -m slow`.
+- **Per-test timeout: 30s.** Configured in `[tool.pytest.ini_options]` so a hang in any single test fails loudly instead of stalling the suite.
 
 ---
 

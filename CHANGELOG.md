@@ -18,9 +18,23 @@ pre-revival snapshot.
 - `CHANGELOG.md` and `MIGRATION.md`.
 - Ported `getWordCloud.py` and `getWordCloud.R` from the unreleased working copy.
 - Test suite (12 files) ported into `tests/`.
+- `pytest-timeout` (30s per-test cap) and `pytest-cov` to the `tests` extra.
+- `emoji>=2` to runtime dependencies.
+- Session-scoped `LocalCluster` test fixture and synthetic 10-row Spanish/English tweet CSV — tests no longer need an external Dask scheduler or proprietary CSVs.
+- Bundled NLTK stopwords corpus under `tests/fixtures/nltk_data/` so the suite runs offline.
+- `r_required` skip marker and `slow` marker so contributors without R (or who don't want the 30s+ sentiment model load) get a clean green default run.
+- `ruff` (lint) configured in `pyproject.toml` and wired into CI.
+- GitHub Actions workflow (`.github/workflows/ci.yml`) running `uv lock --locked` + `uv sync` + `ruff` + `pytest` on Python 3.11 and 3.12.
 
 ### Changed
 - Package source relocated from `whistlerlib/` to `src/whistlerlib/` (via `git mv` to preserve history).
+- Dependency floors raised to a Dask 2026.x-compatible set: `dask>=2024.1`, `pandas>=2.2`, `numpy>=1.26,<3`, `scikit-learn>=1.4`.
+- `whistlerlib/config/config.py`: removed module-level `assert` on `WHISTLERLIB_R_*` env vars (broke `import whistlerlib` for non-R workflows). Validation moved to call-time at the R-bridge sites.
+- `whistlerlib/dask/alt_python_algs/algs.py`: `nltk.download('stopwords')` now skipped when the corpus is already cached (`nltk.data.find` check first). Important for offline / pre-baked Docker workers.
+- `whistlerlib/dask/alt_python_algs/funcs/cleanText.py`: migrated to `emoji.replace_emoji()` (emoji 2.0+ API; `get_emoji_regexp()` was removed upstream).
+- `whistlerlib/dask/alt_python_algs/funcs/getNgrams.py`: migrated to `CountVectorizer.get_feature_names_out()` (sklearn 1.0+ rename).
+- `whistlerlib/dask/alt_python_algs/funcs/getHashtags.py`: rewritten with `rename_axis('tag').reset_index(name='freq')` so the result is robust across pandas versions (modern `value_counts()` returns a `'count'`-named Series).
 
 ### Removed
 - Pinned `requirements*.txt` files (replaced by `pyproject.toml` dependencies + extras).
+- **`dask_sql` dependency** and the SQL surface it backed (`TweetDataset.run_query()`, `Context.dask_sql_context`, `TweetDataset.dask_sql_context`/`dask_sql_tablename`/`query_result`/`query`). `dask_sql==2024.5.0` is incompatible with `dask>=2025` because Dask folded `dask_expr` into the main namespace, and upstream `dask_sql` is unmaintained. See `MIGRATION.md` for the workaround.

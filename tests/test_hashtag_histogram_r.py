@@ -1,5 +1,16 @@
 import pytest
-from .conftest import combs_k_p_ds, combs_p_ds, combs_k0_p, combs_k0_p_r_ds, combs_k0_p_ds, validate_hashtag
+
+from .conftest import (
+    combs_k0_p,
+    combs_k0_p_ds,
+    combs_k0_p_r_ds,
+    combs_k_p_ds,
+    combs_p_ds,
+    r_required,
+    validate_hashtag,
+)
+
+pytestmark = r_required
 
 
 @pytest.mark.parametrize('k,p,ds', combs_k_p_ds)
