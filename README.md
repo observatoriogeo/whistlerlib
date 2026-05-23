@@ -122,16 +122,15 @@ Full Swarm setup (initialization, node labelling, image distribution, shared sto
 
 ## Architecture
 
-```mermaid
-flowchart LR
-    Client["Client (your Python)"] -->|cloudpickle| Scheduler
-    Scheduler -->|tasks| W1["Worker 1<br/>albertogarob/whistlerlib"]
-    Scheduler -->|tasks| W2["Worker 2"]
-    Scheduler -->|tasks| WN["Worker N"]
-    W1 -.->|subprocess| R1["Rscript"]
-    W2 -.->|subprocess| R2["Rscript"]
-    WN -.->|subprocess| RN["Rscript"]
-```
+<!--
+  The architecture diagram is pre-rendered to SVG so it shows on PyPI
+  too (PyPI's README renderer does not understand the `mermaid` code
+  fence). Regenerate with:
+    npx @mermaid-js/mermaid-cli -i source.mmd -o website/static/img/architecture.svg -b transparent
+-->
+<p align="center">
+  <img src="https://whistlerlib.observatoriogeo.mx/img/architecture.svg" width="800" alt="Whistlerlib distributed architecture: client serializes work with cloudpickle to the Dask scheduler, which fans tasks out to N albertogarob/whistlerlib worker containers; each worker may spawn an Rscript subprocess for R-bridge analytics.">
+</p>
 
 Both the scheduler ("master") and the workers run the same `albertogarob/whistlerlib` image; the scheduler service overrides the `ENTRYPOINT` to `dask-scheduler`. This keeps the Python environments consistent across client / scheduler / workers (a Dask requirement for task-graph serialization). R lives only inside the worker image.
 
