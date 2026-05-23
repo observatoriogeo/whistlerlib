@@ -185,6 +185,26 @@ uv run pytest -m docker tests/integration
 
 The `docker` marker is **deselected by default** so a plain `pytest` stays fast and doesn't require Docker. CI runs the docker job on every push to `main` and on manual `workflow_dispatch`.
 
+## Citation
+
+If you use Whistlerlib in your research, please cite:
+
+> Garcia-Robledo, A., Espejel-Trujillo, A. Whistlerlib: a distributed computing library for exploratory data analysis on large social network datasets. *Multimedia Tools and Applications* **83**, 87071–87104 (2024). [https://doi.org/10.1007/s11042-024-19827-z](https://doi.org/10.1007/s11042-024-19827-z)
+
+BibTeX:
+
+```bibtex
+@article{garcia2024whistlerlib,
+  author  = {Garcia-Robledo, A. and Espejel-Trujillo, A.},
+  title   = {Whistlerlib: a distributed computing library for exploratory data analysis on large social network datasets},
+  journal = {Multimedia Tools and Applications},
+  volume  = {83},
+  pages   = {87071--87104},
+  year    = {2024},
+  doi     = {10.1007/s11042-024-19827-z},
+}
+```
+
 ## License
 
 Whistlerlib is distributed under **GPL-3.0-or-later**. See [LICENSE](https://github.com/observatoriogeo/whistlerlib/blob/main/LICENSE).
