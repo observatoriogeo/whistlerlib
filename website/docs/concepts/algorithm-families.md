@@ -6,6 +6,22 @@ sidebar_position: 3
 
 # Algorithm families
 
+## At a glance: what each method does
+
+Plain-English summary of every analytic on `TweetDataset`. Methods with matched `*_alt_python` and `*_r` variants compute the same result, just via different per-partition extractors; the choice is which underlying library you trust for your domain. For full signatures, parameters, and return shapes see the [API reference](/docs/api/); for the per-primitive internals see [The four base primitives](#the-four-base-primitives) further down this page.
+
+| Method | What it does |
+|---|---|
+| `hashtag_histogram_alt_python` / `hashtag_histogram_r` | Top-`k` most-used hashtags in the dataset, with their counts. |
+| `mention_histogram_alt_python` / `mention_histogram_r` | Top-`k` most-mentioned `@user` handles, with their counts. |
+| `ngram_histogram_alt_python` / `ngram_histogram_r` | Top-`k` most-frequent word n-grams (bigrams, trigrams, etc.) after stopword removal in the chosen language. |
+| `sentiment_range_spanish_alt_python` | Rows whose Spanish-text sentiment score falls in a chosen `[left_end, right_end]` interval, e.g. only highly positive posts. This is a row filter, not a histogram. |
+| `sentiment_histogram_and_sum_r` | Per-emotion analysis using the NRC lexicon: counts and score sums for each emotion across the dataset (joy, fear, anger, anticipation, etc.). |
+| `hashtag_weighted_coonet` | Weighted co-occurrence network of hashtags: nodes are hashtags, edges link tags that appeared in the same tweet, weights count how often. |
+| `mention_weighted_coonet` | Weighted co-occurrence network of mentioned accounts: edges link accounts mentioned in the same tweet. |
+
+## The four sub-packages
+
 Whistlerlib's analytical surface is organized into four families. Each family is a Python sub-package under `whistlerlib.dask`:
 
 | Family | Sub-package | Role |
