@@ -1,5 +1,12 @@
+<!--
+  Logo path is RELATIVE so it renders on GitHub's web UI (and locally)
+  off the modernization branch. PyPI's long-description renderer does
+  NOT follow relative paths; Phase 7 should rewrite to an absolute URL
+  (e.g. https://raw.githubusercontent.com/observatoriogeo/whistlerlib/
+  v0.2.0/docs/_assets/logo.png) before the first publish.
+-->
 <p align="center">
-  <img src="https://github.com/observatoriogeo/whistlerlib/raw/main/docs/_assets/logo.png" alt="Whistlerlib" width="320">
+  <img src="docs/_assets/logo.png" alt="Whistlerlib" width="320">
 </p>
 
 # Whistlerlib
