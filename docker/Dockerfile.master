@@ -1,0 +1,98 @@
+# syntax=docker/dockerfile:1.7
+#
+# Whistlerlib MASTER image (Dask scheduler + whistlerlib + R).
+#
+# R + the R libraries needed by `whistlerlib.dask.r_algs` are baked in here
+# AS WELL AS the worker image. The rule is: the **Docker host machine** never
+# needs to install R (Docker is what shields it from that pain); both images
+# inside the stack carry R so any code path — scheduler-side or worker-side —
+# can dispatch to R without configuration drift.
+#
+# Image-internal R env vars (`WHISTLERLIB_R_PATH`, `WHISTLERLIB_R_SCRIPTS_PATH`)
+# are set below. They are NOT something a `pip install whistlerlib` user on a
+# bare host has to set — those users get the alt-python algorithms only, which
+# work without any R configuration.
+#
+# Build (from repo root):
+#   docker build -f docker/Dockerfile.master -t whistlerlib/master:dev .
+
+# ------------------------------------------------------------------------- #
+# Stage 1 — install Whistlerlib + Dask via uv into an isolated venv.
+# ------------------------------------------------------------------------- #
+FROM ghcr.io/astral-sh/uv:python3.11-bookworm-slim AS builder
+
+ENV UV_LINK_MODE=copy \
+    UV_COMPILE_BYTECODE=1 \
+    UV_PYTHON_DOWNLOADS=never
+
+WORKDIR /app
+
+# Lockfile-only step first so deps cache independently of the source tree.
+COPY pyproject.toml uv.lock README.md ./
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv sync --frozen --no-dev --no-install-project
+
+# Now copy source and install the project itself.
+COPY src ./src
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv sync --frozen --no-dev
+
+
+# ------------------------------------------------------------------------- #
+# Stage 2 — runtime: python + R + the R libraries the bridge scripts call.
+# Mirrors `Dockerfile.worker`'s R layer exactly (kept in sync intentionally).
+# ------------------------------------------------------------------------- #
+FROM python:3.11-slim-bookworm
+
+# R install via Debian's r-cran-* binary packages (pre-built, faster than
+# install.packages from source). The exact list mirrors what the .R scripts
+# under `src/whistlerlib/dask/r_algs/funcs/*` call via `library(...)`.
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+        r-base \
+        r-cran-tm \
+        r-cran-slam \
+        r-cran-snowballc \
+        r-cran-rweka \
+        r-cran-reshape2 \
+        r-cran-dplyr \
+        r-cran-tidyr \
+        r-cran-nlp \
+        r-cran-syuzhet \
+        r-cran-stringr \
+        r-cran-remotes \
+        r-cran-arrow \
+        r-cran-vctrs \
+        && rm -rf /var/lib/apt/lists/*
+
+# `advertools` Python lib uses an R companion fork (`radvertools`). The legacy
+# image installed from a personal GitHub fork without a SHA pin.
+# TODO(Phase 7): pin `ref=<sha>` for reproducible image builds.
+RUN R -e "remotes::install_github('eliasdabbas/radvertools', upgrade='never')"
+
+# Non-root user (created AFTER R install since R writes to /usr/lib/R as root).
+RUN groupadd --system whistler && \
+    useradd --system --gid whistler --create-home --home-dir /home/whistler whistler
+
+WORKDIR /app
+
+COPY --from=builder --chown=whistler:whistler /app/.venv /app/.venv
+# Smoke test script for post-deploy validation:
+#   docker compose run --rm master python /app/smoke.py master 8786
+COPY --chown=whistler:whistler docker/smoke.py /app/smoke.py
+
+# R-bridge env vars — set inside the image, NEVER expected on the host.
+# Path matches the uv-installed package layout inside the venv.
+ENV PATH="/app/.venv/bin:${PATH}" \
+    PYTHONUNBUFFERED=1 \
+    WHISTLERLIB_R_PATH=/usr/bin \
+    WHISTLERLIB_R_SCRIPTS_PATH=/app/.venv/lib/python3.11/site-packages/whistlerlib/dask/r_algs/funcs
+
+USER whistler
+
+# Scheduler port + dashboard port (legacy `docker/linode` convention).
+EXPOSE 8786 8787
+
+# ENTRYPOINT + CMD split so users can pass extra flags (e.g. --no-dashboard).
+ENTRYPOINT ["dask-scheduler"]
+CMD ["--dashboard-prefix", "/dask"]

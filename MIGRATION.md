@@ -59,6 +59,32 @@ land.
 
 - **`getHashtags`/`getNgrams` adapted to modern pandas + sklearn.** No user-visible behavioural change; the resulting DataFrames have the same `tag`/`freq` and `N_Tokens`/`Freq` columns as before. The internal pipeline now uses `value_counts().rename_axis(...).reset_index(name=...)` (pandas-version-agnostic) and `CountVectorizer.get_feature_names_out()` (sklearn 1.0+ API).
 
+### Deployment changes — Docker images (Phase 5)
+
+The README's long-standing promise of Docker support is now delivered. Two images, both built from `python:3.11-slim-bookworm` via a multi-stage `uv` install, both carrying the same R layer:
+
+- **`whistlerlib/master`** — Dask scheduler + whistlerlib + R + the R library set.
+- **`whistlerlib/worker`** — Dask worker + whistlerlib + R + the R library set.
+
+Replaces the legacy `daskdev/dask` + `conda env update` + `libffi6`-hack stack from `../whistlerlib/docker/linode/`. Modern Dask 2026, Python 3.11, `uv` for ~10× faster builds, multi-arch (`linux/amd64` + `linux/arm64`) via GitHub Actions buildx.
+
+**Host-machine impact:**
+
+- A host running `pip install whistlerlib` **does not need** R, R packages, or any `WHISTLERLIB_R_*` env vars. The alt-python algorithm surface works out of the box. R-bridge methods are unavailable on a bare host by design.
+- A host running the Docker images **does not need** R either — that's the entire point. `docker compose up` or `docker stack deploy` and you're done.
+
+**Deployment commands:**
+
+```bash
+# Single host (development):
+docker compose -f docker/docker-compose.yml up -d
+
+# Multi-node production (Docker Swarm):
+docker stack deploy -c docker/stack.yml whistlerlib
+```
+
+The Swarm stack file matches the legacy Linode + Ansible layout (manager-node scheduler, worker-node workers, overlay network).
+
 ### Test-infrastructure changes
 
 These don't affect callers but are worth knowing if you run / extend the suite:

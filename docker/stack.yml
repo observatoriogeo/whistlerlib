@@ -1,0 +1,50 @@
+# Docker Swarm production stack — the long-promised deployment story.
+#
+#   docker stack deploy -c docker/stack.yml whistlerlib
+#
+# Versions are pulled from environment: `VERSION=1.0.0 docker stack deploy ...`.
+# Image tags must already exist on Docker Hub (built + pushed by the
+# `.github/workflows/docker-publish.yml` workflow, gated on git tag).
+
+version: "3.9"
+
+networks:
+  whistlerlib:
+    driver: overlay
+    attachable: true
+
+services:
+  master:
+    image: whistlerlib/master:${VERSION:-latest}
+    networks:
+      - whistlerlib
+    ports:
+      - "8786:8786"   # Dask scheduler
+      - "8787:8787"   # Dashboard
+    deploy:
+      replicas: 1
+      placement:
+        constraints:
+          - "node.role==manager"
+      restart_policy:
+        condition: any
+        delay: 10s
+        max_attempts: 5
+
+  worker:
+    image: whistlerlib/worker:${VERSION:-latest}
+    networks:
+      - whistlerlib
+    command: ["tcp://master:8786"]
+    deploy:
+      replicas: 4
+      placement:
+        constraints:
+          - "node.role==worker"
+        preferences:
+          # Spread workers across worker nodes.
+          - spread: node.labels.zone
+      restart_policy:
+        condition: any
+        delay: 10s
+        max_attempts: 5

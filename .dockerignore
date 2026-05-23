@@ -1,0 +1,32 @@
+# Keep build contexts small.
+.git
+.github
+.venv
+venv
+env
+__pycache__
+*.pyc
+*.pyo
+.pytest_cache
+.coverage
+htmlcov
+coverage.xml
+.ruff_cache
+*.log
+*.tar.gz
+dist
+build
+*.egg-info
+
+# Test infrastructure not needed at runtime.
+tests
+docs
+examples
+
+# Plans (untracked anyway, but defensive).
+.plans
+
+# Editor / OS noise.
+.vscode
+.idea
+.DS_Store

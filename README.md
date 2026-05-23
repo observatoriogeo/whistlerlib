@@ -66,9 +66,42 @@ Upon completion, Whistlerlib will be available as a PyPi package, allowing for e
 
 ### Docker Support
 
-For enhanced usability and deployment, Docker images will be provided for both the Dask scheduler and Dask workers. These images will come pre-configured with all necessary dependencies, ensuring a seamless setup for distributed computing environments.
+Whistlerlib publishes two Docker images, designed to be run together as a Dask cluster on Docker Compose (single host) or Docker Swarm (production multi-node):
 
-Stay tuned for updates on release dates and additional features!
+- **`whistlerlib/master`** — Dask scheduler + whistlerlib + R + the full R library set. Listens on `8786` (scheduler) and `8787` (dashboard).
+- **`whistlerlib/worker`** — Dask worker + whistlerlib + R + the full R library set. Connects out to the scheduler.
+
+Both images bake in Python 3.11, Dask 2026.x, R, and every R package the `whistlerlib.dask.r_algs` bridge calls (`tm`, `slam`, `snowballc`, `rweka`, `syuzhet`, `dplyr`, `tidyr`, `stringr`, `nlp`, `arrow`, `radvertools`, …). **Your host machine never needs to install R, R packages, or set any `WHISTLERLIB_R_*` env vars** — those are image-internal details.
+
+#### Quick start — single host with Docker Compose
+
+```bash
+docker compose -f docker/docker-compose.yml up -d
+# Dashboard: http://localhost:8787
+# Scheduler: tcp://localhost:8786
+
+# Smoke-test the running cluster:
+docker compose -f docker/docker-compose.yml \
+    run --rm worker python /app/smoke.py master 8786
+```
+
+#### Production — Docker Swarm
+
+```bash
+docker stack deploy -c docker/stack.yml whistlerlib
+# Manager node hosts the master; worker nodes run N×whistlerlib/worker.
+```
+
+The Swarm stack file places the master on a `manager` node and spreads workers across `worker` nodes — matching the legacy Linode + Ansible production layout the library was designed for.
+
+#### Image tags
+
+| Tag | When | What |
+|---|---|---|
+| `latest` | each tagged release | most recent published version |
+| `<major>.<minor>` | each tagged release | floating tag for that minor line |
+| `<major>.<minor>.<patch>` | each tagged release | pinned version |
+| `dev-<sha>` | manual `workflow_dispatch` runs | development builds (no `latest` retag) |
 
 
 ## Development
@@ -102,13 +135,11 @@ pytest
 
 ### R bridge
 
-The R-backed algorithms in `whistlerlib.dask.r_algs` (R-implemented hashtag / mention / n-gram / sentiment) **only run inside the Whistlerlib worker Docker image**, not on your dev machine. R + the R libraries are bundled in that image so users don't have to install anything R-related locally.
+The R-backed algorithms in `whistlerlib.dask.r_algs` (R-implemented hashtag / mention / n-gram / sentiment) run inside the published Whistlerlib Docker images (**both master and worker** ship with R + the R libraries baked in). **You do not need to install R, or any R packages, or set any `WHISTLERLIB_R_*` env vars** to use whistlerlib — that's the whole point of the Docker images.
 
-- **Local dev:** R-bridge tests skip automatically. There is nothing to install.
-- **Production / experiments:** run the published `whistlerlib/worker` image on a Docker Swarm cluster (master + N workers). The worker image sets `WHISTLERLIB_R_PATH` and `WHISTLERLIB_R_SCRIPTS_PATH` internally.
-- **Running R tests in CI:** a dedicated GitHub Actions job uses the worker image as the runner; the default matrix runs Python-only tests on `ubuntu-latest`.
-
-If you absolutely need to run R-bridge tests outside Docker (rare — only for debugging the bridge itself), set both env vars to point at your local R install and the bundled R scripts. This is not a supported workflow.
+- **`pip install whistlerlib` on a bare machine** gives you the alt-python algorithm surface (hashtag / mention / n-gram histograms, sentiment-spanish, weighted co-occurrence networks). R-bridge methods aren't available in this mode; that's by design, not a missing dependency.
+- **For the R-bridge methods**, deploy via the published `whistlerlib/master` and `whistlerlib/worker` Docker images — either with `docker compose` (single-host) or `docker stack deploy` on a Docker Swarm. The images set `WHISTLERLIB_R_PATH` and `WHISTLERLIB_R_SCRIPTS_PATH` internally; you never set them yourself.
+- **R-bridge tests skip locally.** The `r_required` pytest marker gates them on the two env vars — absent on a dev box, so they skip cleanly. They run inside the Docker images.
 
 
 ## License

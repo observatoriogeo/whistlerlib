@@ -1,0 +1,45 @@
+# Local single-host stack for development / smoke testing.
+#
+#   docker compose -f docker/docker-compose.yml up --build
+#
+# For a multi-host production deploy, use `docker/stack.yml` (Swarm) instead.
+
+services:
+  master:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.master
+    image: whistlerlib/master:dev
+    container_name: whistlerlib-master
+    networks:
+      - whistlerlib
+    # Scheduler + dashboard, bound to localhost only.
+    ports:
+      - "127.0.0.1:8786:8786"
+      - "127.0.0.1:8787:8787"
+    healthcheck:
+      test: ["CMD-SHELL", "python -c 'from dask.distributed import Client; Client(\"tcp://127.0.0.1:8786\", timeout=5).close()'"]
+      interval: 5s
+      timeout: 5s
+      retries: 6
+      start_period: 5s
+
+  worker:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.worker
+    image: whistlerlib/worker:dev
+    networks:
+      - whistlerlib
+    depends_on:
+      master:
+        condition: service_healthy
+    # Two workers locally — matches the test fixture's LocalCluster size.
+    deploy:
+      replicas: 2
+    # Pass the scheduler address via CMD override (matches the master service name).
+    command: ["tcp://master:8786"]
+
+networks:
+  whistlerlib:
+    driver: bridge

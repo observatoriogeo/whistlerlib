@@ -12,6 +12,11 @@ This entry tracks work toward the upcoming `0.2.0` revival release. See also
 pre-revival snapshot.
 
 ### Added
+- **`whistlerlib/master` and `whistlerlib/worker` Docker images** — both built with `uv` in a multi-stage `python:3.11-slim-bookworm` base, both shipping R + the full R library set (`r-cran-tm`, `r-cran-slam`, `r-cran-snowballc`, `r-cran-rweka`, `r-cran-syuzhet`, `r-cran-dplyr`, `r-cran-tidyr`, `r-cran-stringr`, `r-cran-nlp`, `r-cran-arrow`, `r-cran-vctrs`, `r-cran-remotes`, `r-cran-reshape2`) + `radvertools` from upstream.
+- `docker/Dockerfile.master`, `docker/Dockerfile.worker`, `docker/docker-compose.yml` (single-host), `docker/stack.yml` (Swarm production).
+- `docker/smoke.py` — runs hashtag/mention/coonet + (when R env vars are set) R-bridge calls against a running scheduler. Baked into both images at `/app/smoke.py`.
+- `.github/workflows/docker-publish.yml` — multi-arch (`linux/amd64`, `linux/arm64`) buildx workflow. Publishes on `v*` git tags; `workflow_dispatch` allows manual build-only runs (opt-in `push` input).
+- `.dockerignore` for lean build contexts.
 - **Comprehensive unit test suite** under `tests/unit/` — 91 fast, isolated tests covering the pure-Python `funcs/` (cleanText, getHashtags, getMentions, getNgrams, getSentimentScore) and the orchestration layer (Context, TweetDataset, config, DatasetRepositoryClient). No Dask cluster, no real models, no network — full run in ~13s.
 - Unit-test coverage gate: **fail_under=80%** in `[tool.coverage.report]`. Current measured coverage **86.97%** (`funcs/` modules at 100%, orchestration at 89–100%; deferred dask alg modules omitted per the plan).
 - CI now runs `pytest tests/unit/ --cov ... --cov-report=html` and uploads the HTML report as a build artifact.

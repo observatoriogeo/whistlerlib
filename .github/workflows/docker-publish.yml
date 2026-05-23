@@ -1,0 +1,96 @@
+name: Docker images
+
+# Triggers:
+#   * Pushing a `v*` tag → builds and pushes both images to Docker Hub with the
+#     version + `latest` tags. ONLY happens on tag push; pushing to a branch
+#     does not publish.
+#   * Manual `workflow_dispatch` → builds without pushing by default. Operator
+#     can opt in to push with the `push` input set to `true`.
+#
+# Both modes require the `DOCKERHUB_USERNAME` and `DOCKERHUB_TOKEN` repository
+# secrets to be configured before any push will succeed.
+
+on:
+  workflow_dispatch:
+    inputs:
+      push:
+        description: 'Push to Docker Hub (otherwise build-only)'
+        type: boolean
+        default: false
+        required: false
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: build ${{ matrix.image }} (multi-arch)
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        image: [master, worker]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      # Decide whether this run pushes (tag push → yes; manual → use input).
+      - name: Compute push flag
+        id: push_flag
+        run: |
+          if [ "${{ github.event_name }}" = "push" ]; then
+            echo "value=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "value=${{ inputs.push }}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Log in to Docker Hub
+        if: steps.push_flag.outputs.value == 'true'
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Compute image tags
+        id: tags
+        run: |
+          if [ "${{ github.event_name }}" = "push" ]; then
+            # Strip refs/tags/v from GITHUB_REF → e.g. "1.0.0"
+            VERSION="${GITHUB_REF#refs/tags/v}"
+            MAJORMINOR="${VERSION%.*}"
+            {
+              echo "tags<<EOF"
+              echo "whistlerlib/${{ matrix.image }}:${VERSION}"
+              echo "whistlerlib/${{ matrix.image }}:${MAJORMINOR}"
+              echo "whistlerlib/${{ matrix.image }}:latest"
+              echo "EOF"
+            } >> "$GITHUB_OUTPUT"
+          else
+            # Manual run: tag with short SHA for traceability.
+            SHA="${GITHUB_SHA:0:7}"
+            echo "tags=whistlerlib/${{ matrix.image }}:dev-${SHA}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Build and (optionally) push
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: docker/Dockerfile.${{ matrix.image }}
+          platforms: linux/amd64,linux/arm64
+          push: ${{ steps.push_flag.outputs.value == 'true' }}
+          tags: ${{ steps.tags.outputs.tags }}
+          cache-from: type=gha,scope=${{ matrix.image }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.image }}
+          provenance: false  # smaller manifests for Docker Hub
