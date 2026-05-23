@@ -1,0 +1,29 @@
+# 02 — Top mentions
+
+`mention_histogram_alt_python` — the mirror of example 01, but for `@user` mentions instead of `#hashtag`s. Internally it uses `advertools.extract_mentions` partitioned across workers; advertools normalizes mentions to lowercase, so `@Alice` and `@ALICE` collapse onto the same `@alice` bucket.
+
+## What you'll see
+
+```
+Loaded 10 tweets.
+Top 5 mentions:
+   Mentions  Frequency
+     @unam          3
+   @senado          2
+      @gob          2
+     @scjn          1
+   @profeco         1
+```
+
+## Differences from example 01
+
+- The result columns are `['Mentions', 'Frequency']` (capital-M, capital-F) rather than `['tag', 'freq']`. This mirrors the underlying `advertools` field names. Phase 2 standardized the alt-python hashtag path to use `['tag', 'freq']` for consistency with the R-bridge; the mention path kept the advertools names because they're already used widely.
+- Mentions are returned in lowercase regardless of original casing.
+
+## Run it
+
+```bash
+docker compose -f ../../docker/docker-compose.yml up -d
+python example.py
+uv run pytest -m docker .
+```

@@ -12,6 +12,10 @@ This entry tracks work toward the upcoming `0.2.0` revival release. See also
 pre-revival snapshot.
 
 ### Added
+- **Seven runnable examples under `examples/`** (`01-quickstart-hashtag-histogram`, `02-mention-histogram`, `03-ngram-histogram-bilingual`, `04-sentiment-spanish` [`slow`], `05-hashtag-coonet`, `06-mention-coonet`, `07-r-bridge-mfhashtags`). Each is `example.py` + `test_example.py` + `README.md` — triple-duty as integration tests, learning material, and source for the separate Docusaurus docs project.
+- **`examples/conftest.py`** with a session-scoped `whistlerlib_swarm` fixture that brings up a real local Docker cluster (upstream `daskdev/dask` master + locally-built `whistlerlib/worker:test`) via Compose, waits for scheduler readiness, yields `(host, port)`, and tears down on session exit. Auto-skips when Docker is unavailable.
+- New pytest marker `docker` — deselected from default `pytest` run; opt in with `-m docker`.
+- CI `docker-examples` job (workflow_dispatch-gated) builds the worker image and runs the example suite end-to-end.
 - **`whistlerlib/worker` Docker image** — built with `uv` in a multi-stage `python:3.11-slim-bookworm` base, shipping the whistlerlib package + R + the full R library set (`r-cran-tm`, `r-cran-slam`, `r-cran-snowballc`, `r-cran-rweka`, `r-cran-syuzhet`, `r-cran-dplyr`, `r-cran-tidyr`, `r-cran-stringr`, `r-cran-nlp`, `r-cran-arrow`, `r-cran-vctrs`, `r-cran-remotes`, `r-cran-reshape2`) + `radvertools` from upstream. This is the **only** custom image whistlerlib publishes — the scheduler uses the upstream `daskdev/dask:<version>-py3.11` image directly.
 - `docker/Dockerfile.worker`, `docker/docker-compose.yml` (single-host), `docker/stack.yml` (Swarm production). Both compose files use `daskdev/dask:2026.3.0-py3.11` for the scheduler (pinned to match the worker's Dask version in `uv.lock`).
 - `docker/smoke.py` — runs hashtag/mention/coonet + (when R env vars are set) R-bridge calls against a running scheduler. Baked into the worker image at `/app/smoke.py`.

@@ -1,0 +1,35 @@
+# 04 — Spanish sentiment (positive range)
+
+`sentiment_range_spanish_alt_python(left_end=0.9, right_end=1.0)` — selects rows whose Spanish text scores ≥0.9 from the [`sentiment-analysis-spanish`](https://pypi.org/project/sentiment-analysis-spanish/) TensorFlow/Keras model. The model is small but loading and running it is several seconds, so this example is marked `slow` in addition to `docker`.
+
+## What you'll see
+
+```
+Loaded 10 tweets.
+
+Rows scoring in [0.9, 1.0]:
+                              text   score
+   excelente maravilloso fantástico  0.987
+       muy bueno me encanta totalmente  0.974
+   magnífico extraordinario lo mejor  0.962
+```
+
+(Exact scores will vary slightly between runs — the model isn't deterministic across TF versions.)
+
+## How it works
+
+1. Each partition's text column is run through `cleanText` (URL/mention/hashtag/punctuation/stopword removal).
+2. The cleaned text is fed to `SentimentAnalysisSpanish().sentiment(...)` which returns a float in `[0, 1]`.
+3. The Dask DataFrame is filtered by `left_end ≤ score ≤ right_end` and `.compute()`'d back to a pandas DataFrame.
+
+## Markers
+
+```python
+pytestmark = [pytest.mark.docker, pytest.mark.slow]
+```
+
+To run it, opt in to both markers:
+
+```bash
+uv run pytest -m "docker and slow" examples/04-sentiment-spanish/
+```

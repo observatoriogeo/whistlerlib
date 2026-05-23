@@ -1,0 +1,38 @@
+# 07 — R bridge: top hashtags via the R implementation
+
+`hashtag_histogram_r` — the same top-k hashtag computation as example 01, but implemented in R. Whistlerlib's `r_algs` module ships small R scripts under `src/whistlerlib/dask/r_algs/funcs/`; each worker spawns an `Rscript` subprocess per partition, reads back the result via Arrow files, and merges them in pandas.
+
+## Why an R version?
+
+Two reasons, neither involving local R installs (R lives only in the **worker image**, see [`.plans/REVIVAL-PLAN.md`](../../.plans/REVIVAL-PLAN.md) Phase 5):
+
+1. **Comparison baseline.** The Whistlerlib paper benchmarked the alt-python implementation against the original R implementation. Both are kept in the codebase so users can reproduce that comparison.
+2. **R-only libraries.** Some downstream features (notably `syuzhet`-based sentiment, used in `sentiment_histogram_and_sum_r`) only have a high-quality R implementation. The same R-bridge plumbing handles all of them.
+
+## What you'll see
+
+```
+Loaded 10 tweets.
+
+Top 5 hashtags (R implementation):
+        tag  freq
+   #política     2
+        #cdmx  2
+    #ciencia    1
+    #datos     1
+   #cultura    1
+```
+
+The result has the same shape as example 01 — same `[tag, freq]` columns. The numbers may differ very slightly because the R tokenization rules (from the `tm` and `tidytext`-adjacent packages) aren't byte-for-byte identical to advertools.
+
+## Why this needs the Docker cluster
+
+The R-bridge code spawns `/usr/bin/Rscript <whistlerlib R script>`. `Rscript` and the R packages it loads (`tm`, `slam`, `snowballc`, `rweka`, …) live **only** inside the `whistlerlib/worker:test` Docker image. The test is therefore gated on the `docker` marker — `pytest` on a clean dev box without Docker simply skips it (via the session fixture's `_docker_available` guard).
+
+## Run it
+
+```bash
+docker compose -f ../../docker/docker-compose.yml up -d
+python example.py
+uv run pytest -m docker .
+```

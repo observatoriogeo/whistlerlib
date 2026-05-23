@@ -38,8 +38,11 @@ RUN --mount=type=cache,target=/root/.cache/uv \
 
 # ------------------------------------------------------------------------- #
 # Stage 2 — runtime: python + R + the R libraries the bridge scripts call.
+# Non-slim Debian Bookworm base: has the debian-archive-keyring pre-installed
+# (the slim variant strips it, which makes apt-get fail on older Docker
+# daemons that can't verify Bookworm's signing keys out-of-band).
 # ------------------------------------------------------------------------- #
-FROM python:3.11-slim-bookworm
+FROM python:3.11-bookworm
 
 # R install via Debian's r-cran-* binary packages (pre-built, faster than
 # install.packages from source). The exact list mirrors what the .R scripts

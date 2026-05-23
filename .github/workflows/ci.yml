@@ -54,10 +54,43 @@ jobs:
           retention-days: 14
 
       - name: Run integration tests
-        # Full default suite (excluding `slow` and R-skipped via env-var gating).
-        # `-m 'not slow'` is already the default via [tool.pytest.ini_options].
-        # R-bridge tests skip automatically — WHISTLERLIB_R_* env vars are not
-        # set in CI (R lives only in the worker Docker image, see Phase 5).
-        # No --cov here: coverage is enforced on the unit suite only;
-        # integration coverage is informational for Phase 4.
+        # Phase 2's integration suite (LocalCluster-backed, not Docker).
+        # Excluded from default `pytest` via `testpaths` in pyproject.toml so
+        # local dev iteration stays fast; we run it explicitly here.
+        # `-m 'not slow'` is the default via [tool.pytest.ini_options];
+        # R-bridge tests skip automatically (WHISTLERLIB_R_* env vars not
+        # set in CI — R lives only in the worker Docker image, Phase 5).
+        # No --cov here: coverage is enforced on the unit suite only.
         run: uv run pytest tests/ --ignore=tests/unit --tb=short
+
+  docker-examples:
+    # Phase 4 example tests, each against a real local Docker cluster
+    # (compose-managed by examples/conftest.py). Heavy: needs the
+    # `whistlerlib/worker:test` image which takes ~5–10 min to build.
+    # Triggered only via `workflow_dispatch` so PR / push runs stay fast.
+    name: docker-backed example tests
+    if: github.event_name == 'workflow_dispatch'
+    needs: lint-and-test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+
+      - name: Set up Python 3.11
+        run: uv python install 3.11
+
+      - name: Sync deps (dev extras)
+        run: uv sync --extra dev --python 3.11
+
+      - name: Build whistlerlib/worker:test
+        run: env DOCKER_BUILDKIT=1 docker build -f docker/Dockerfile.worker -t whistlerlib/worker:test .
+
+      - name: Run docker-backed example tests
+        # `-m "docker and not slow"` runs 6 of the 7 examples (everything
+        # except the sentiment one, which is also marked `slow` because of
+        # the TensorFlow model load — opt in separately if needed).
+        run: uv run pytest examples/ -m "docker and not slow" --tb=short

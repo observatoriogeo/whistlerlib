@@ -59,6 +59,12 @@ land.
 
 - **`getHashtags`/`getNgrams` adapted to modern pandas + sklearn.** No user-visible behavioural change; the resulting DataFrames have the same `tag`/`freq` and `N_Tokens`/`Freq` columns as before. The internal pipeline now uses `value_counts().rename_axis(...).reset_index(name=...)` (pandas-version-agnostic) and `CountVectorizer.get_feature_names_out()` (sklearn 1.0+ API).
 
+### Examples + docker-backed tests (Phase 4)
+
+Seven examples in `examples/<slug>/` that triple as integration tests, learning material, and docs source. Each runnable as `python example.py [host [port]]` against a running Whistlerlib cluster, and tested via `pytest -m docker examples/` against a session-managed local cluster (upstream `daskdev/dask` master + `whistlerlib/worker:test`). The R-bridge example (`07-r-bridge-mfhashtags`) runs in the worker container where R lives, so a clean dev host needs zero R install to verify R-path behaviour.
+
+`pytest` (no flags) stays fast — `testpaths` is restricted to `tests/unit` + `examples/`, the docker-marked examples are deselected, and the legacy LocalCluster integration suite under `tests/test_*.py` is now opt-in via `pytest tests/ --ignore=tests/unit`. CI runs all three layers (unit, integration, docker examples) in separate steps.
+
 ### Deployment changes — Docker images (Phase 5)
 
 The README's long-standing promise of Docker support is now delivered, but the architecture is simpler than the legacy `../whistlerlib/docker/linode/` two-image setup suggested:

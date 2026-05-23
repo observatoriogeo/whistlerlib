@@ -83,16 +83,29 @@ Issues = "https://github.com/CentroGeo/whistlerlib/issues"
 Changelog = "https://github.com/CentroGeo/whistlerlib/blob/main/CHANGELOG.md"
 
 [tool.pytest.ini_options]
-testpaths = ["tests"]
+# The DEFAULT `pytest` run executes the unit suite and discovers (but
+# deselects) the docker-backed example tests — total ~10s, suitable for
+# every-commit / every-edit feedback.
+#
+# Phase 2's full integration suite under `tests/test_*.py` runs against a
+# session-scoped LocalCluster and takes 3–5 min; opt in explicitly:
+#   uv run pytest tests/ --ignore=tests/unit
+# The CI workflow runs unit + integration + (gated) example tests in
+# separate steps.
+testpaths = ["tests/unit", "examples"]
 # Hard fail any single test that takes more than 30s — for verification
 # (not profiling), no individual test should be long-running.
 timeout = 30
 timeout_method = "thread"
 # Default runs exclude `slow` tests (sentiment-analysis-spanish model load,
-# anything else needing >5s of real work). Opt in with `-m slow` to run them.
-addopts = "-m 'not slow'"
+# anything else needing >5s of real work) AND `docker` tests (Phase 4
+# example tests requiring a running Docker daemon + the
+# `whistlerlib/worker:test` image — many minutes for a full bring-up).
+# Opt in with `-m slow`, `-m docker`, or `-m 'slow or docker'`.
+addopts = "-m 'not slow and not docker' --import-mode=importlib"
 markers = [
     "slow: tests that take >5s — sentiment model load, heavy compute. Excluded by default.",
+    "docker: example tests that require a running local Docker cluster (Compose). Excluded by default; opt in with `-m docker`.",
 ]
 
 [tool.coverage.run]
