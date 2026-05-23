@@ -14,7 +14,7 @@
 </p>
 
 <p align="center">
-  Hashtag, mention, and n-gram histograms; Spanish sentiment ranges; multilingual emotion vectors; weighted co-occurrence networks. Pure-Python and R-bridged implementations sharing the same Dask task-graph primitives, with a single <code>whistlerlib/worker</code> Docker image that powers both single-host Compose and multi-node Swarm clusters.
+  Hashtag, mention, and n-gram histograms; sentiment ranges; emotion vectors; co-occurrence networks. Python or R implementations on Dask, in one <code>whistlerlib/worker</code> Docker image.
 </p>
 
 <p align="center">
