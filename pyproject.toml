@@ -76,11 +76,12 @@ dev = [
 ]
 
 [project.urls]
-# TODO(Phase 7): replace placeholders once the public repo URL is finalized.
-Homepage = "https://github.com/CentroGeo/whistlerlib"
-Repository = "https://github.com/CentroGeo/whistlerlib"
-Issues = "https://github.com/CentroGeo/whistlerlib/issues"
-Changelog = "https://github.com/CentroGeo/whistlerlib/blob/main/CHANGELOG.md"
+Homepage = "https://whistlerlib.observatoriogeo.mx"
+Documentation = "https://whistlerlib.observatoriogeo.mx"
+Repository = "https://github.com/observatoriogeo/whistlerlib"
+Issues = "https://github.com/observatoriogeo/whistlerlib/issues"
+Changelog = "https://github.com/observatoriogeo/whistlerlib/blob/main/CHANGELOG.md"
+Paper = "https://doi.org/10.1007/s11042-024-19827-z"
 
 [tool.pytest.ini_options]
 # The DEFAULT `pytest` run executes the unit suite and discovers (but
