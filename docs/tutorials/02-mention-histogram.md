@@ -31,5 +31,5 @@ Top 5 mentions:
 ```bash
 docker compose -f ../../docker/docker-compose.yml up -d
 python example.py
-uv run pytest -m docker .
+uv run pytest -m docker tests/integration/test_02_mention_histogram.py
 ```

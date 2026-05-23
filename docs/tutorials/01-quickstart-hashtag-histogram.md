@@ -38,5 +38,5 @@ docker compose -f ../../docker/docker-compose.yml down
 Or via pytest:
 
 ```bash
-uv run pytest -m docker .
+uv run pytest -m docker tests/integration/test_01_quickstart_hashtag_histogram.py
 ```

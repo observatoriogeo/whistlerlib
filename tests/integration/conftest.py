@@ -1,4 +1,9 @@
-"""Pytest fixtures for the Phase 4 example tests.
+"""Pytest fixtures for the docker-backed integration tests.
+
+One integration test per example in `examples/<slug>/`. Each test file is
+named `test_<slug-underscored>.py` and declares the example it covers via
+a module-level `EXAMPLE_SLUG` constant; the `example_module` fixture below
+loads the matching `examples/<slug>/example.py` at runtime.
 
 Brings up a local Docker cluster (master + workers, all using the same
 locally-built `whistlerlib/worker:dev` image) and yields the scheduler
@@ -8,7 +13,7 @@ bring-up per pytest run.
 Deployment choice for this fixture: **Docker Compose**, not Docker Swarm.
 The production deployment story is Swarm (see `docker/stack.yml`), but
 single-node Swarm is fiddly with the `node.role==worker` placement
-constraint, so for local example tests we use `docker/docker-compose.yml`
+constraint, so for local integration tests we use `docker/docker-compose.yml`
 which validates exactly the same image and network story. CI runs these
 tests too.
 
@@ -16,13 +21,13 @@ Tests opt in via `@pytest.mark.docker` (or `pytestmark = pytest.mark.docker`)
 and are deselected from the default `pytest` run via
 `addopts = "-m 'not slow and not docker'"` in `pyproject.toml`.
 
-Run only the docker-backed examples:
+Run only the docker-backed integration tests:
 
-    pytest -m docker examples/
+    pytest -m docker tests/integration
 
 Pre-requisites: Docker daemon running, `whistlerlib/worker:dev` image
 present locally (the fixture builds it on demand the first time;
-this costs 5–10 minutes for the R + radvertools install). NLTK corpora
+this costs 5 to 10 minutes for the R + radvertools install). NLTK corpora
 (`stopwords`, `punkt`, `punkt_tab`) are auto-downloaded to `~/nltk_data`
 on first run because examples 03 (n-grams) and 04 (sentiment) call
 `nltk.corpus.stopwords` on the client side.
@@ -39,8 +44,10 @@ from pathlib import Path
 
 import pytest
 
-REPO_ROOT = Path(__file__).resolve().parent.parent
+# tests/integration/conftest.py: parent.parent.parent is the repo root.
+REPO_ROOT = Path(__file__).resolve().parent.parent.parent
 COMPOSE_FILE = REPO_ROOT / 'docker' / 'docker-compose.yml'
+EXAMPLES_DIR = REPO_ROOT / 'examples'
 WORKER_IMAGE = 'whistlerlib/worker:dev'
 PROJECT_NAME = 'whistlerlib-examples'
 SCHEDULER_HOST = 'localhost'
@@ -94,8 +101,8 @@ def _worker_image_present() -> bool:
 def _build_worker_image() -> None:
     env = os.environ.copy()
     env['DOCKER_BUILDKIT'] = '1'
-    print(f'\n[examples-fixture] Building {WORKER_IMAGE} '
-          '(one-time; ~5–10 min for R + radvertools)...')
+    print(f'\n[integration-fixture] Building {WORKER_IMAGE} '
+          '(one-time; ~5 to 10 min for R + radvertools)...')
     subprocess.run(
         ['docker', 'build',
          '-f', str(REPO_ROOT / 'docker' / 'Dockerfile.worker'),
@@ -129,7 +136,7 @@ def _ensure_nltk_corpora() -> None:
     socket.getaddrinfo = _ipv4_only
     try:
         for name in missing:
-            print(f'[examples-fixture] downloading NLTK corpus: {name}')
+            print(f'[integration-fixture] downloading NLTK corpus: {name}')
             if not nltk.download(name, quiet=True):
                 raise RuntimeError(
                     f'failed to download NLTK corpus {name!r}; '
@@ -177,7 +184,7 @@ def whistlerlib_swarm():
     """
     if not _docker_available():
         pytest.skip('Docker not available, install Docker daemon to run '
-                    'example tests')
+                    'integration tests')
 
     compose = _compose_cmd()
 
@@ -197,19 +204,19 @@ def whistlerlib_swarm():
     # other Dask clusters, etc.).
     env = os.environ.copy()
     env.setdefault('DASK_DASHBOARD_HOST_PORT', '18787')
-    print(f'\n[examples-fixture] Bringing up cluster ({" ".join(up)})...')
+    print(f'\n[integration-fixture] Bringing up cluster ({" ".join(up)})...')
     subprocess.run(up, check=True, env=env)
 
     try:
         _wait_for_scheduler()
-        print(f'[examples-fixture] Scheduler ready at '
+        print(f'[integration-fixture] Scheduler ready at '
               f'{SCHEDULER_HOST}:{SCHEDULER_PORT}')
         yield (SCHEDULER_HOST, SCHEDULER_PORT)
     finally:
         down = compose + ['-f', str(COMPOSE_FILE),
                           '-p', PROJECT_NAME,
                           'down', '-v', '--remove-orphans']
-        print('\n[examples-fixture] Tearing down cluster...')
+        print('\n[integration-fixture] Tearing down cluster...')
         subprocess.run(down, capture_output=True)
 
 
@@ -225,8 +232,8 @@ def pytest_collection_modifyitems(config, items):
     """Bump the per-test timeout for `docker`-marked tests.
 
     The repo-wide pytest-timeout is 30s (good default for fast unit tests),
-    but docker-backed example tests legitimately need more, first-run
-    `docker compose up` can take 30-60s on its own pulling daskdev/dask,
+    but docker-backed integration tests legitimately need more, first-run
+    `docker compose up` can take 30-60s on its own pulling the worker image,
     and an end-to-end run inside the cluster adds another 10-60s. Without
     this hook, every docker test would fail in the fixture setup phase.
     """
@@ -237,17 +244,33 @@ def pytest_collection_modifyitems(config, items):
 
 @pytest.fixture
 def example_module(request):
-    """Load the sibling `example.py` of the requesting test by file path.
+    """Load the `example.py` of the example named in the test module's
+    `EXAMPLE_SLUG` constant.
 
-    Avoids the Python-module-name collision that would happen if we let each
-    `test_example.py` do `from example import run`, there are 7 `example.py`
-    files in 7 sibling directories whose names (`01-quickstart-...`) aren't
-    valid Python identifiers, so the standard package-style imports don't
-    work. `importlib.util.spec_from_file_location` loads each one by path.
+    Each integration test in `tests/integration/` declares
+    `EXAMPLE_SLUG = '<slug>'` to point at `examples/<slug>/example.py`.
+    We load that file by path via `importlib.util.spec_from_file_location`
+    because the example directory names (`01-quickstart-...`) aren't valid
+    Python identifiers, so the standard package-style imports don't work.
     """
     import importlib.util
-    example_path = request.path.parent / 'example.py'
-    spec = importlib.util.spec_from_file_location('example', example_path)
+
+    slug = getattr(request.module, 'EXAMPLE_SLUG', None)
+    if slug is None:
+        raise RuntimeError(
+            f'{request.module.__name__} requests `example_module` but '
+            "doesn't define `EXAMPLE_SLUG`. Add EXAMPLE_SLUG = '<slug>' at "
+            'the top of the test file (e.g. EXAMPLE_SLUG = '
+            "'01-quickstart-hashtag-histogram')."
+        )
+    example_path = EXAMPLES_DIR / slug / 'example.py'
+    if not example_path.exists():
+        raise RuntimeError(
+            f'{request.module.__name__} has EXAMPLE_SLUG={slug!r} but '
+            f'{example_path} does not exist.'
+        )
+    spec = importlib.util.spec_from_file_location(f'example_{slug}',
+                                                  example_path)
     mod = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(mod)
     return mod

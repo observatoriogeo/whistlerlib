@@ -2,6 +2,8 @@
 
 import pytest
 
+EXAMPLE_SLUG = '05-hashtag-coonet'
+
 pytestmark = pytest.mark.docker
 
 

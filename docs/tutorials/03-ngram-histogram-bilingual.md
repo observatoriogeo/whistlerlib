@@ -37,5 +37,5 @@ social policy      2
 ```bash
 docker compose -f ../../docker/docker-compose.yml up -d
 python example.py
-uv run pytest -m docker .
+uv run pytest -m docker tests/integration/test_03_ngram_histogram_bilingual.py
 ```

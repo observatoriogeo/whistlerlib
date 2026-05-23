@@ -8,6 +8,8 @@ which has all of them. On a clean dev box without Docker, the conftest's
 
 import pytest
 
+EXAMPLE_SLUG = '07-r-bridge-mfhashtags'
+
 pytestmark = pytest.mark.docker
 
 

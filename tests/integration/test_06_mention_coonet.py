@@ -2,6 +2,8 @@
 
 import pytest
 
+EXAMPLE_SLUG = '06-mention-coonet'
+
 pytestmark = pytest.mark.docker
 
 

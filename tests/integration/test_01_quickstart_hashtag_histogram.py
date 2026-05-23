@@ -1,11 +1,13 @@
 """Integration test for example 01.
 
 Runs against the session-scoped local Docker cluster (Compose-managed by
-`examples/conftest.py`). Gated on `@pytest.mark.docker`, deselected from
-the default `pytest` run.
+`tests/integration/conftest.py`). Gated on `@pytest.mark.docker`,
+deselected from the default `pytest` run.
 """
 
 import pytest
+
+EXAMPLE_SLUG = '01-quickstart-hashtag-histogram'
 
 pytestmark = pytest.mark.docker
 

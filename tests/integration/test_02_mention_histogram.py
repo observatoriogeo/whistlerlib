@@ -2,6 +2,8 @@
 
 import pytest
 
+EXAMPLE_SLUG = '02-mention-histogram'
+
 pytestmark = pytest.mark.docker
 
 

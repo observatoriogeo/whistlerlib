@@ -92,7 +92,7 @@ Changelog = "https://github.com/CentroGeo/whistlerlib/blob/main/CHANGELOG.md"
 #   uv run pytest tests/ --ignore=tests/unit
 # The CI workflow runs unit + integration + (gated) example tests in
 # separate steps.
-testpaths = ["tests/unit", "examples"]
+testpaths = ["tests/unit", "tests/integration"]
 # Hard fail any single test that takes more than 30s, for verification
 # (not profiling), no individual test should be long-running.
 timeout = 30

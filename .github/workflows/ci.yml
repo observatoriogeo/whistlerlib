@@ -96,9 +96,11 @@ jobs:
         run: uv run pytest tests/ --ignore=tests/unit --tb=short
 
   docker-examples:
-    # Phase 4 example tests, each against a real local Docker cluster
-    # (compose-managed by examples/conftest.py). Heavy: needs the
-    # `whistlerlib/worker:dev` image which takes ~5–10 min to build the
+    # Phase 4 docker integration tests under `tests/integration/`, each
+    # exercising one of the runnable `examples/<slug>/example.py` files
+    # against a real local Docker cluster (compose-managed by
+    # `tests/integration/conftest.py`). Heavy: needs the
+    # `whistlerlib/worker:dev` image which takes ~5 to 10 min to build the
     # first time.
     #
     # Triggers (see `if:` below):
@@ -126,13 +128,14 @@ jobs:
         run: uv sync --extra dev --python 3.11
 
       - name: Build whistlerlib/worker:dev
-        # Tag must match `WORKER_IMAGE` in examples/conftest.py; otherwise
-        # the conftest fixture detects "image missing" and rebuilds it,
-        # doubling the CI cost.
+        # Tag must match `WORKER_IMAGE` in tests/integration/conftest.py;
+        # otherwise the conftest fixture detects "image missing" and
+        # rebuilds it, doubling the CI cost.
         run: env DOCKER_BUILDKIT=1 docker build -f docker/Dockerfile.worker -t whistlerlib/worker:dev .
 
-      - name: Run docker-backed example tests
-        # `-m "docker and not slow"` runs 6 of the 7 examples (everything
-        # except the sentiment one, which is also marked `slow` because of
-        # the TensorFlow model load, opt in separately if needed).
-        run: uv run pytest examples/ -m "docker and not slow" --tb=short
+      - name: Run docker-backed integration tests
+        # `-m "docker and not slow"` runs 6 of the 7 integration tests
+        # (everything except the sentiment one, which is also marked
+        # `slow` because of the TensorFlow model load, opt in separately
+        # if needed).
+        run: uv run pytest tests/integration -m "docker and not slow" --tb=short

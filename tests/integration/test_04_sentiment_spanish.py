@@ -6,6 +6,8 @@ Slow: loads the TensorFlow sentiment model. Gated on BOTH `docker` and
 
 import pytest
 
+EXAMPLE_SLUG = '04-sentiment-spanish'
+
 pytestmark = [pytest.mark.docker, pytest.mark.slow]
 
 

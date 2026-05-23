@@ -61,9 +61,9 @@ land.
 
 ### Examples + docker-backed tests (Phase 4)
 
-Seven examples in `examples/<slug>/` that triple as integration tests, learning material, and docs source. Each runnable as `python example.py [host [port]]` against a running Whistlerlib cluster, and tested via `pytest -m docker examples/` against a session-managed local cluster (upstream `daskdev/dask` master + `whistlerlib/worker:test`). The R-bridge example (`07-r-bridge-mfhashtags`) runs in the worker container where R lives, so a clean dev host needs zero R install to verify R-path behaviour.
+Seven examples in `examples/<slug>/` that double as learning material and docs source. Each runnable as `python example.py [host [port]]` against a running Whistlerlib cluster. The matching pytest integration test for each example lives under `tests/integration/test_<slug>.py` and runs against a session-managed local cluster (locally-built `whistlerlib/worker:dev`) via `pytest -m docker tests/integration`. The R-bridge test runs in the worker container where R lives, so a clean dev host needs zero R install to verify R-path behaviour.
 
-`pytest` (no flags) stays fast, `testpaths` is restricted to `tests/unit` + `examples/`, the docker-marked examples are deselected, and the legacy LocalCluster integration suite under `tests/test_*.py` is now opt-in via `pytest tests/ --ignore=tests/unit`. CI runs all three layers (unit, integration, docker examples) in separate steps.
+`pytest` (no flags) stays fast: `testpaths` is restricted to `tests/unit` + `tests/integration`, the docker-marked integration tests are deselected, and the legacy LocalCluster integration suite under `tests/test_*.py` is opt-in via `pytest tests/ --ignore=tests/unit`. CI runs all three layers (unit, legacy integration, docker integration) in separate steps.
 
 ### Deployment changes, Docker images (Phase 5)
 

@@ -20,5 +20,5 @@ Edges (source, target, weight):
 ```bash
 docker compose -f ../../docker/docker-compose.yml up -d
 python example.py
-uv run pytest -m docker .
+uv run pytest -m docker tests/integration/test_06_mention_coonet.py
 ```

@@ -1,10 +1,11 @@
 # Whistlerlib examples
 
-Seven runnable examples that **triple as integration tests, learning material, and docs source**. Each example lives in `examples/<slug>/` and contains:
+Seven runnable examples that double as **learning material and docs source**. Each example lives in `examples/<slug>/` and contains:
 
 - `README.md`, narrative, copy-paste-ready for the separate Docusaurus docs project.
 - `example.py`, a standalone script you can `python example.py` against a running cluster.
-- `test_example.py`, a pytest wrapper that runs `example.py` against the fixture-managed Docker cluster.
+
+The matching pytest integration test for each example lives in [`tests/integration/`](../tests/integration/) (one file per example, e.g. `tests/integration/test_01_quickstart_hashtag_histogram.py`). Those tests share a session-scoped Docker-cluster fixture in `tests/integration/conftest.py` and resolve their `example.py` via an `EXAMPLE_SLUG = '<slug>'` module-level constant.
 
 | # | Example | Demonstrates | Notes |
 |---|---|---|---|
@@ -41,19 +42,21 @@ docker compose -f docker/docker-compose.yml down
 
 ### Via pytest (with fixture-managed cluster)
 
-```bash
-# Run all docker-backed example tests (the fixture handles bring-up + tear-down)
-uv run pytest -m docker examples/
+The integration tests live under [`tests/integration/`](../tests/integration/), not next to the examples:
 
-# Just one example
-uv run pytest -m docker examples/01-quickstart-hashtag-histogram/
+```bash
+# Run all docker-backed integration tests (the fixture handles bring-up + tear-down)
+uv run pytest -m docker tests/integration
+
+# Just one example's test
+uv run pytest -m docker tests/integration/test_01_quickstart_hashtag_histogram.py
 ```
 
 The `docker` marker is **deselected by default** so a plain `pytest` run stays fast and doesn't require Docker. CI runs them in a separate gated job.
 
 ## Deployment-target note
 
-The session fixture in `examples/conftest.py` uses **Docker Compose** (not Swarm) to bring up the local cluster. The reason is purely practical: single-node Docker Swarm doesn't schedule services with `node.role==worker` placement constraints on a manager-only node, which makes the `docker/stack.yml` production stack file fiddly for local testing.
+The session fixture in `tests/integration/conftest.py` uses **Docker Compose** (not Swarm) to bring up the local cluster. The reason is purely practical: single-node Docker Swarm doesn't schedule services with `node.role==worker` placement constraints on a manager-only node, which makes the `docker/stack.yml` production stack file fiddly for local testing.
 
 The Compose stack validates exactly the same image and network story that production Swarm uses, same `daskdev/dask` scheduler image, same `whistlerlib/worker` image, same TCP wire protocol. **Production deployment is Swarm via `docker/stack.yml`**; that path is the one operators use with `docker stack deploy` on a real multi-node cluster.
 

@@ -37,5 +37,5 @@ pytestmark = [pytest.mark.docker, pytest.mark.slow]
 To run it, opt in to both markers:
 
 ```bash
-uv run pytest -m "docker and slow" examples/04-sentiment-spanish/
+uv run pytest -m "docker and slow" tests/integration/test_04_sentiment_spanish.py
 ```

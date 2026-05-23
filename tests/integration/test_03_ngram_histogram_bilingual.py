@@ -2,6 +2,8 @@
 
 import pytest
 
+EXAMPLE_SLUG = '03-ngram-histogram-bilingual'
+
 pytestmark = pytest.mark.docker
 
 
