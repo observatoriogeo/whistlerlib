@@ -13,6 +13,9 @@ __pycache__/
 htmlcov/
 coverage.xml
 
+# ruff cache
+.ruff_cache/
+
 # database & logs
 *.db
 *.sqlite3
