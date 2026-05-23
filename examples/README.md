@@ -21,7 +21,8 @@ Seven runnable examples that **triple as integration tests, learning material, a
 ### Prerequisites
 
 - Docker daemon running.
-- `whistlerlib/worker:test` image present locally (the test fixture builds it on first run; ~5–10 min the first time).
+- `whistlerlib/worker:dev` image present locally (the test fixture builds it on first run; ~5–10 min the first time for R + radvertools).
+- NLTK corpora `stopwords`, `punkt`, `punkt_tab` in `~/nltk_data`. The fixture downloads them automatically on first run; examples 03 and 04 call `nltk.corpus.stopwords` on the **client** side, so they live on the host, not in the image. The auto-downloader forces IPv4 to avoid the multi-minute `SYN-SENT` hang seen on hosts with broken IPv6 routing.
 
 ### As a script (interactive)
 

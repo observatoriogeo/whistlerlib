@@ -1,9 +1,9 @@
 """Pytest fixtures for the Phase 4 example tests.
 
-Brings up a local Docker cluster (upstream `daskdev/dask` for the scheduler,
-locally-built `whistlerlib/worker:test` for workers) and yields the
-scheduler endpoint to each test. The cluster lifecycle is session-scoped:
-one bring-up per pytest run.
+Brings up a local Docker cluster (master + workers, all using the same
+locally-built `whistlerlib/worker:dev` image) and yields the scheduler
+endpoint to each test. The cluster lifecycle is session-scoped: one
+bring-up per pytest run.
 
 Deployment choice for this fixture: **Docker Compose**, not Docker Swarm.
 The production deployment story is Swarm (see `docker/stack.yml`), but
@@ -20,15 +20,19 @@ Run only the docker-backed examples:
 
     pytest -m docker examples/
 
-Pre-requisites: Docker daemon running, `whistlerlib/worker:test` image
+Pre-requisites: Docker daemon running, `whistlerlib/worker:dev` image
 present locally (the fixture builds it on demand the first time —
-this costs 5–10 minutes for the R + radvertools install).
+this costs 5–10 minutes for the R + radvertools install). NLTK corpora
+(`stopwords`, `punkt`, `punkt_tab`) are auto-downloaded to `~/nltk_data`
+on first run because examples 03 (n-grams) and 04 (sentiment) call
+`nltk.corpus.stopwords` on the client side.
 """
 
 from __future__ import annotations
 
 import os
 import shutil
+import socket
 import subprocess
 import time
 from pathlib import Path
@@ -37,11 +41,20 @@ import pytest
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 COMPOSE_FILE = REPO_ROOT / 'docker' / 'docker-compose.yml'
-WORKER_IMAGE = 'whistlerlib/worker:test'
+WORKER_IMAGE = 'whistlerlib/worker:dev'
 PROJECT_NAME = 'whistlerlib-examples'
 SCHEDULER_HOST = 'localhost'
 SCHEDULER_PORT = 8786
 SCHEDULER_READY_TIMEOUT_S = 120
+
+# Corpora that `compute_ngram_histogram` / `compute_sentiment_range_spanish`
+# load on the client. Mapped to their `nltk.data.find` lookup paths so we
+# can skip the download when the corpus is already cached on the host.
+NLTK_CORPORA = {
+    'stopwords': 'corpora/stopwords',
+    'punkt': 'tokenizers/punkt',
+    'punkt_tab': 'tokenizers/punkt_tab',
+}
 
 
 def _docker_available() -> bool:
@@ -91,6 +104,49 @@ def _build_worker_image() -> None:
     )
 
 
+def _ensure_nltk_corpora() -> None:
+    """Pre-download NLTK corpora the example tests need on the host.
+
+    The bridges in `dask/alt_python_algs/algs.py` call `nltk.download()`
+    lazily on the client. On hosts where IPv6 routing is broken (common
+    in residential / corporate networks) the default `getaddrinfo`
+    returns the IPv6 record first and the download stalls in `SYN-SENT`
+    for the full TCP retry budget — multiple minutes per corpus, which
+    looks identical to a hung test. Force IPv4 for the download window.
+    """
+    import nltk
+
+    missing = [name for name, path in NLTK_CORPORA.items()
+               if _nltk_missing(nltk, path)]
+    if not missing:
+        return
+
+    orig_getaddrinfo = socket.getaddrinfo
+
+    def _ipv4_only(host, port, family=0, *args, **kwargs):
+        return orig_getaddrinfo(host, port, socket.AF_INET, *args, **kwargs)
+
+    socket.getaddrinfo = _ipv4_only
+    try:
+        for name in missing:
+            print(f'[examples-fixture] downloading NLTK corpus: {name}')
+            if not nltk.download(name, quiet=True):
+                raise RuntimeError(
+                    f'failed to download NLTK corpus {name!r} '
+                    '— check network connectivity to raw.githubusercontent.com'
+                )
+    finally:
+        socket.getaddrinfo = orig_getaddrinfo
+
+
+def _nltk_missing(nltk_module, lookup_path: str) -> bool:
+    try:
+        nltk_module.data.find(lookup_path)
+        return False
+    except LookupError:
+        return True
+
+
 def _wait_for_scheduler(host: str = SCHEDULER_HOST,
                         port: int = SCHEDULER_PORT,
                         timeout: int = SCHEDULER_READY_TIMEOUT_S) -> None:
@@ -131,23 +187,18 @@ def whistlerlib_swarm():
         except subprocess.CalledProcessError as exc:
             pytest.fail(f'failed to build {WORKER_IMAGE}: {exc}')
 
-    # Bring stack up. Override the worker image tag to our locally-built
-    # `:test` tag via a build/image hint in compose.yml's default service.
-    # The compose file currently references `:dev` for worker; override via
-    # the `--profile` trick or env var. Simpler: docker-compose lets us set
-    # the image with a one-off env IF compose.yml uses `${VARIABLE}`. Since
-    # ours uses a literal `whistlerlib/worker:dev`, we need a different path.
-    #
-    # Pragmatic: tag our `:test` image as `:dev` for the duration of the
-    # session so the unmodified compose.yml picks it up.
-    subprocess.run(['docker', 'tag', WORKER_IMAGE, 'whistlerlib/worker:dev'],
-                   check=True)
+    _ensure_nltk_corpora()
 
     up = compose + ['-f', str(COMPOSE_FILE),
                     '-p', PROJECT_NAME,
                     'up', '-d', '--no-build']
+    # Use a high host port for the dashboard so we don't fight whatever else
+    # the dev box has on 8787 (it's a common dev port — Jupyter, RStudio,
+    # other Dask clusters, etc.).
+    env = os.environ.copy()
+    env.setdefault('DASK_DASHBOARD_HOST_PORT', '18787')
     print(f'\n[examples-fixture] Bringing up cluster ({" ".join(up)})...')
-    subprocess.run(up, check=True)
+    subprocess.run(up, check=True, env=env)
 
     try:
         _wait_for_scheduler()
@@ -168,6 +219,20 @@ def whistlerlib_context(whistlerlib_swarm):
     from whistlerlib import Context
     host, port = whistlerlib_swarm
     return Context('processes', host, port)
+
+
+def pytest_collection_modifyitems(config, items):
+    """Bump the per-test timeout for `docker`-marked tests.
+
+    The repo-wide pytest-timeout is 30s (good default for fast unit tests),
+    but docker-backed example tests legitimately need more — first-run
+    `docker compose up` can take 30-60s on its own pulling daskdev/dask,
+    and an end-to-end run inside the cluster adds another 10-60s. Without
+    this hook, every docker test would fail in the fixture setup phase.
+    """
+    for item in items:
+        if any(m.name == 'docker' for m in item.iter_markers()):
+            item.add_marker(pytest.mark.timeout(600))  # 10 min ceiling
 
 
 @pytest.fixture

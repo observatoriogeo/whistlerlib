@@ -12,6 +12,7 @@ Run with the cluster up:
 
 from __future__ import annotations
 
+import os
 import sys
 import tempfile
 
@@ -38,6 +39,9 @@ def _write_csv() -> str:
                                     encoding='utf-8')
     pd.DataFrame(_ROWS, columns=['Date', 'text']).to_csv(f.name, index=False)
     f.close()
+    # Make the tempfile readable from inside the worker container, which
+    # runs as a different user but sees host /tmp via the compose volume mount.
+    os.chmod(f.name, 0o644)
     return f.name
 
 

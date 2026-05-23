@@ -6,18 +6,26 @@
 
 services:
   master:
-    # The Dask scheduler is the upstream maintained image — no whistlerlib
-    # dependencies live here. Pin tracks `dask` in `uv.lock` (currently
-    # 2026.3.0) so scheduler and worker speak the same wire protocol.
-    image: daskdev/dask:2026.3.0-py3.11
+    # IMPORTANT: the scheduler needs whistlerlib in its Python env for Dask's
+    # task-graph deserialization (Dask requires consistent environments between
+    # client / scheduler / workers — not just workers running closures).
+    # We reuse the worker image here; R goes unused on the scheduler but the
+    # storage cost is small vs publishing a separate lean-master image.
+    image: whistlerlib/worker:dev
     container_name: whistlerlib-master
-    command: ["dask-scheduler", "--dashboard-prefix", "/dask"]
+    # Override the worker image's ENTRYPOINT=["dask-worker"]: this service is
+    # the scheduler.
+    entrypoint: ["dask-scheduler"]
+    command: ["--dashboard-prefix", "/dask"]
     networks:
       - whistlerlib
-    # Scheduler + dashboard, bound to localhost only.
+    # Scheduler + dashboard, bound to localhost only. Dashboard host port is
+    # parametrized so tests can pick a non-conflicting one
+    # (`DASK_DASHBOARD_HOST_PORT=18787 docker compose up`) when something
+    # else on the dev box already holds 8787.
     ports:
       - "127.0.0.1:8786:8786"
-      - "127.0.0.1:8787:8787"
+      - "127.0.0.1:${DASK_DASHBOARD_HOST_PORT:-8787}:8787"
     healthcheck:
       test: ["CMD-SHELL", "python -c 'from dask.distributed import Client; Client(\"tcp://127.0.0.1:8786\", timeout=5).close()'"]
       interval: 5s
@@ -40,6 +48,18 @@ services:
       replicas: 2
     # Pass the scheduler address via CMD override (matches the master service name).
     command: ["tcp://master:8786"]
+    # /tmp is bind-mounted RO (so the worker can read host-written CSVs); R
+    # defaults R_TempDir to /tmp and aborts when it can't write there.
+    # Point both R and Python tempfile machinery at /var/tmp (writable, RW).
+    environment:
+      TMPDIR: /var/tmp
+    # `Context.load_csv(filen=<path>)` makes the workers read the file from
+    # their own filesystem. For examples and dev iteration we bind-mount the
+    # host /tmp so a CSV written by the client (`tempfile.NamedTemporaryFile`)
+    # is visible to workers under the same path. Production users will
+    # configure their own data mounts (e.g. NFS) — see docker/stack.yml.
+    volumes:
+      - /tmp:/tmp:ro
 
 networks:
   whistlerlib:

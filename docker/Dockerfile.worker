@@ -29,11 +29,15 @@ WORKDIR /app
 
 COPY pyproject.toml uv.lock README.md ./
 RUN --mount=type=cache,target=/root/.cache/uv \
-    uv sync --frozen --no-dev --no-install-project
+    uv sync --frozen --no-dev --no-editable --no-install-project
 
 COPY src ./src
+# `--reinstall-package whistlerlib` forces uv to rebuild the wheel from the
+# freshly-copied src/ instead of reusing the cached wheel (the buildkit
+# cache mount survives `docker build --no-cache`, so a stale wheel can
+# otherwise mask edits to non-Python package data like the R scripts).
 RUN --mount=type=cache,target=/root/.cache/uv \
-    uv sync --frozen --no-dev
+    uv sync --frozen --no-dev --no-editable --reinstall-package whistlerlib
 
 
 # ------------------------------------------------------------------------- #
@@ -44,26 +48,52 @@ RUN --mount=type=cache,target=/root/.cache/uv \
 # ------------------------------------------------------------------------- #
 FROM python:3.11-bookworm
 
-# R install via Debian's r-cran-* binary packages (pre-built, faster than
-# install.packages from source). The exact list mirrors what the .R scripts
-# under `src/whistlerlib/dask/r_algs/funcs/*` call via `library(...)`.
+# R install — three paths:
+#   1. Debian's `r-cran-*` binary packages for what's pre-built upstream
+#      (fastest).
+#   2. Apache Arrow's official APT repo for `libarrow-dev` — the R arrow
+#      package then links against the system C++ libs via pkg-config
+#      instead of source-compiling ~500 .cc files (saves 30+ min).
+#   3. Posit Package Manager binary R wheels for the remaining CRAN
+#      packages (`RWeka`, `syuzhet`, `arrow` R wrapper).
 RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+        ca-certificates wget && \
+    wget -q https://apache.jfrog.io/artifactory/arrow/debian/apache-arrow-apt-source-latest-bookworm.deb \
+        -O /tmp/apache-arrow-apt-source.deb && \
+    apt-get install -y --no-install-recommends /tmp/apache-arrow-apt-source.deb && \
+    rm /tmp/apache-arrow-apt-source.deb && \
+    apt-get update && \
     apt-get install -y --no-install-recommends \
         r-base \
         r-cran-tm \
         r-cran-slam \
         r-cran-snowballc \
-        r-cran-rweka \
         r-cran-reshape2 \
         r-cran-dplyr \
         r-cran-tidyr \
         r-cran-nlp \
-        r-cran-syuzhet \
         r-cran-stringr \
         r-cran-remotes \
-        r-cran-arrow \
         r-cran-vctrs \
+        default-jre-headless \
+        cmake \
+        libcurl4-openssl-dev \
+        libssl-dev \
+        libxml2-dev \
+        libarrow-dev \
+        libarrow-dataset-dev \
+        libparquet-dev \
         && rm -rf /var/lib/apt/lists/*
+
+# Three R packages not in Debian Bookworm's r-cran-* repo. From Posit
+# Package Manager (binary wheels for Bookworm). The `arrow` R wrapper
+# detects the system libarrow installed above via pkg-config and skips
+# the heavy native build.
+RUN R -e "install.packages( \
+        c('RWeka', 'syuzhet', 'arrow'), \
+        repos='https://packagemanager.posit.co/cran/__linux__/bookworm/latest', \
+        Ncpus=4)"
 
 # `advertools` Python lib uses an R companion fork (`radvertools`). The legacy
 # image installed from a personal GitHub fork without a SHA pin — replicating
@@ -88,7 +118,8 @@ COPY --chown=whistler:whistler docker/smoke.py /app/smoke.py
 ENV PATH="/app/.venv/bin:${PATH}" \
     PYTHONUNBUFFERED=1 \
     WHISTLERLIB_R_PATH=/usr/bin \
-    WHISTLERLIB_R_SCRIPTS_PATH=/app/.venv/lib/python3.11/site-packages/whistlerlib/dask/r_algs/funcs
+    WHISTLERLIB_R_SCRIPTS_PATH=/app/.venv/lib/python3.11/site-packages/whistlerlib/dask/r_algs/funcs \
+    TMPDIR=/var/tmp
 
 USER whistler
 

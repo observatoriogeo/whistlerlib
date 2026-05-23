@@ -1,7 +1,6 @@
 #Libraries
-library(tm) 
+library(tm)
 library(SnowballC)
-library(twitteR)
 library(arrow)
 
 #Defined function
