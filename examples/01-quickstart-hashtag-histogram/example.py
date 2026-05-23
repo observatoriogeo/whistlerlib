@@ -21,16 +21,16 @@ import pandas as pd
 from whistlerlib import Context
 
 _ROWS = [
-    ('2022-01-01T00:00:00', 'mañana en la ciudad #cdmx #política @gob'),
-    ('2022-01-01T01:00:00', 'avances en ciencia #ciencia #datos @unam'),
-    ('2022-01-01T02:00:00', 'noticias del día #noticias #cdmx @senado'),
-    ('2022-01-01T03:00:00', 'reforma laboral #política #economía @scjn'),
-    ('2022-01-01T04:00:00', 'investigación urbana #cdmx #urbanismo @uam'),
-    ('2022-01-01T05:00:00', 'cultura digital #cultura #tecnología @ipn'),
-    ('2022-01-01T06:00:00', 'salud pública #salud #noticias @imss'),
-    ('2022-01-01T07:00:00', 'movilidad metropolitana #cdmx #movilidad @semovi'),
-    ('2022-01-01T08:00:00', 'tendencias económicas #economía #méxico @hacienda'),
-    ('2022-01-01T09:00:00', 'congreso aprueba ley #política #méxico @senado'),
+    ('2022-01-01T00:00:00', 'morning model release #ai #python'),
+    ('2022-01-01T01:00:00', 'dataset paper accepted #ai #data'),
+    ('2022-01-01T02:00:00', 'climate insights from satellites #ai #climate'),
+    ('2022-01-01T03:00:00', 'training loop in python #python #ml'),
+    ('2022-01-01T04:00:00', 'open data day announcement #data #python'),
+    ('2022-01-01T05:00:00', 'reinforcement learning notes #ai #ml'),
+    ('2022-01-01T06:00:00', 'open weights update #ai'),
+    ('2022-01-01T07:00:00', 'pandas patch shipped #python'),
+    ('2022-01-01T08:00:00', 'data engineering tip #data'),
+    ('2022-01-01T09:00:00', 'jupyter notebook collection'),
 ]
 
 

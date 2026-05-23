@@ -1,0 +1,52 @@
+/**
+ * Whistlerlib docs theme.
+ *
+ * The Whistlerlib logo is sky-blue (#50a0e0), but a primary sampled
+ * from the logo would clash with the two neighboring Observatorio
+ * docs sites that already occupy the blue family:
+ *
+ *   Weaverlet       primary #004a78 (deep navy)
+ *   Dash Sylvereye  primary #0470bc (mid sky-blue)
+ *
+ * Whistlerlib's primary is a desaturated slate blue-gray. The sky-blue
+ * logo carries the brand color; the chrome stays understated. The hue
+ * is in the blue family (so the logo fits visually) but desaturated
+ * enough to read as distinctly different from the other two sites.
+ *
+ * Primary (light mode):  #37474f (Material Blue Gray 800)
+ * Link color (light):    #455a64 (Blue Gray 700, slightly brighter for body links)
+ * Primary (dark mode):   #90a4ae (Blue Gray 300, lighter for dark backgrounds)
+ */
+
+:root {
+  --ifm-color-primary: #37474f;
+  --ifm-color-primary-dark: #303f47;
+  --ifm-color-primary-darker: #2c3a41;
+  --ifm-color-primary-darkest: #263238;
+  --ifm-color-primary-light: #3d4f58;
+  --ifm-color-primary-lighter: #455a64;
+  --ifm-color-primary-lightest: #546e7a;
+  --ifm-code-font-size: 95%;
+  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.1);
+
+  /* Links use a brighter blue-gray than the primary so they read as
+     links against body text. The primary stays for hero/buttons/sidebar. */
+  --ifm-link-color: #455a64;
+  --ifm-link-hover-color: var(--ifm-color-primary);
+}
+
+/* Lighter blue-gray in dark mode for readability against dark backgrounds. */
+[data-theme='dark'] {
+  --ifm-color-primary: #90a4ae;
+  --ifm-color-primary-dark: #8499a3;
+  --ifm-color-primary-darker: #7d939d;
+  --ifm-color-primary-darkest: #607d8b;
+  --ifm-color-primary-light: #9caeb7;
+  --ifm-color-primary-lighter: #a8b8c1;
+  --ifm-color-primary-lightest: #b8c5cc;
+  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.3);
+
+  /* Dark mode link color follows primary (already bright enough on dark bg). */
+  --ifm-link-color: var(--ifm-color-primary);
+  --ifm-link-hover-color: var(--ifm-color-primary-light);
+}

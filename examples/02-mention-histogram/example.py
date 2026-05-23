@@ -15,16 +15,16 @@ import pandas as pd
 from whistlerlib import Context
 
 _ROWS = [
-    ('2022-01-01T00:00:00', 'tema legislativo @Senado @unam @gob'),
-    ('2022-01-01T01:00:00', 'investigación universitaria @unam @ipn'),
-    ('2022-01-01T02:00:00', 'noticias @senado @scjn'),
-    ('2022-01-01T03:00:00', 'políticas públicas @gob @hacienda'),
-    ('2022-01-01T04:00:00', 'educación superior @unam @uam'),
-    ('2022-01-01T05:00:00', 'cultura y arte @cultura @ipn'),
-    ('2022-01-01T06:00:00', 'salud pública @imss @issste'),
-    ('2022-01-01T07:00:00', 'movilidad urbana @semovi @adip'),
-    ('2022-01-01T08:00:00', 'economía nacional @hacienda @economia'),
-    ('2022-01-01T09:00:00', 'derechos del consumidor @profeco @gob'),
+    ('2022-01-01T00:00:00', 'morning tools roundup @kaggle @openai'),
+    ('2022-01-01T01:00:00', 'new model leaderboard @kaggle @huggingface'),
+    ('2022-01-01T02:00:00', 'climate dashboard @kaggle @nasa'),
+    ('2022-01-01T03:00:00', 'fine-tuning report @openai @huggingface'),
+    ('2022-01-01T04:00:00', 'community competition @kaggle @openai'),
+    ('2022-01-01T05:00:00', 'open-source weights @huggingface @kaggle'),
+    ('2022-01-01T06:00:00', 'safety paper @openai'),
+    ('2022-01-01T07:00:00', 'mars rover update @nasa'),
+    ('2022-01-01T08:00:00', 'newsroom retrospective @bbc'),
+    ('2022-01-01T09:00:00', 'product launch'),
 ]
 
 

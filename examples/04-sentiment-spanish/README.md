@@ -16,20 +16,53 @@ Rows scoring in [0.9, 1.0]:
 
 (Exact scores will vary slightly between runs, the model isn't deterministic across TF versions.)
 
-## How it works
+## The code
 
-1. Each partition's text column is run through `cleanText` (URL/mention/hashtag/punctuation/stopword removal).
-2. The cleaned text is fed to `SentimentAnalysisSpanish().sentiment(...)` which returns a float in `[0, 1]`.
-3. The Dask DataFrame is filtered by `left_end ≤ score ≤ right_end` and `.compute()`'d back to a pandas DataFrame.
-
-## Markers
+Rows 0 to 4 carry deliberately positive Spanish phrases so the `[0.9, 1.0]` window always returns a non-empty result; rows 5 to 9 are neutral fillers:
 
 ```python
-pytestmark = [pytest.mark.docker, pytest.mark.slow]
+_ROWS = [
+    ('2022-01-01T00:00:00', 'excelente maravilloso totalmente fantástico'),
+    ('2022-01-01T01:00:00', 'muy bueno me encanta este trabajo magnífico'),
+    ('2022-01-01T02:00:00', 'magnífico extraordinario lo mejor de todo'),
+    ('2022-01-01T03:00:00', 'fantástico genial perfecto fenomenal increíble'),
+    ('2022-01-01T04:00:00', 'increíble experiencia maravillosa felicidades'),
+    ('2022-01-01T05:00:00', 'ciudad metro urbano social política cultura'),
+    # ...4 more neutral rows...
+]
 ```
 
-To run it, opt in to both markers:
+Unlike the histogram tutorials, this analytic returns rows rather than a top-k:
+
+```python
+from whistlerlib import Context
+
+ctx = Context('processes', 'localhost', 8786)
+ds = ctx.load_csv(
+    filen=csv_path,
+    meta={
+        'column_mapping': {'date_column': 'Date', 'text_column': 'text'},
+        'file_encoding': 'utf-8',
+    },
+    num_partitions=2,
+)
+print(f'Loaded {ds.tweet_count()} tweets.')
+positive = ds.sentiment_range_spanish_alt_python(left_end=0.9, right_end=1.0)
+print(positive.to_string(index=False))
+```
+
+`sentiment_range_spanish_alt_python(left_end, right_end)` cleans each row's text (URL, mention, hashtag, punctuation, stopword removal), feeds it to `SentimentAnalysisSpanish().sentiment(...)` (a TensorFlow/Keras model from the [`sentiment-analysis-spanish`](https://pypi.org/project/sentiment-analysis-spanish/) package, score in `[0, 1]`), keeps rows whose score falls in `[left_end, right_end]`, and `.compute()`s the survivors to a pandas DataFrame. The model is lazily loaded on each worker the first time the partition closure runs; that's why this tutorial carries the `slow` marker in addition to `docker`.
+
+The full file (including the tempfile setup and CLI shim) is at
+[`examples/04-sentiment-spanish/example.py`](https://github.com/observatoriogeo/whistlerlib/blob/main/examples/04-sentiment-spanish/example.py).
+
+## Run it
+
+*First run downloads the sentiment-analysis-spanish model and may take a couple of minutes; subsequent runs reuse the cached weights.*
 
 ```bash
-uv run pytest -m "docker and slow" tests/integration/test_04_sentiment_spanish.py
+# From examples/04-sentiment-spanish/, bring up a local Dask cluster, run the example, tear it down.
+docker compose -f ../../docker/docker-compose.yml up -d
+python example.py
+docker compose -f ../../docker/docker-compose.yml down
 ```

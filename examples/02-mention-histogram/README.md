@@ -7,13 +7,52 @@
 ```
 Loaded 10 tweets.
 Top 5 mentions:
-   Mentions  Frequency
-     @unam          3
-   @senado          2
-      @gob          2
-     @scjn          1
-   @profeco         1
+    Mentions  Frequency
+     @kaggle          5
+     @openai          4
+@huggingface          3
+       @nasa          2
+        @bbc          1
 ```
+
+## The code
+
+The inline dataset pairs two mentions per row so the frequencies are easy to verify by eye:
+
+```python
+_ROWS = [
+    ('2022-01-01T00:00:00', 'morning tools roundup @kaggle @openai'),
+    ('2022-01-01T01:00:00', 'new model leaderboard @kaggle @huggingface'),
+    ('2022-01-01T02:00:00', 'climate dashboard @kaggle @nasa'),
+    ('2022-01-01T03:00:00', 'fine-tuning report @openai @huggingface'),
+    # ...5 more rows...
+    ('2022-01-01T09:00:00', 'product launch'),
+]
+```
+
+The work is identical to tutorial 01 except for the analytic call:
+
+```python
+from whistlerlib import Context
+
+ctx = Context('processes', 'localhost', 8786)
+ds = ctx.load_csv(
+    filen=csv_path,
+    meta={
+        'column_mapping': {'date_column': 'Date', 'text_column': 'text'},
+        'file_encoding': 'utf-8',
+    },
+    num_partitions=2,
+)
+print(f'Loaded {ds.tweet_count()} tweets.')
+histogram = ds.mention_histogram_alt_python(k=5)
+print(histogram.to_string(index=False))
+```
+
+`mention_histogram_alt_python(k=5)` ships a `map_partitions` closure that calls `advertools.extract_mentions` per partition; the scheduler merges the partial frequency tables and returns the top-5 as a pandas DataFrame.
+
+The full file (including the tempfile setup and CLI shim) is at
+[`examples/02-mention-histogram/example.py`](https://github.com/observatoriogeo/whistlerlib/blob/main/examples/02-mention-histogram/example.py).
 
 ## Differences from example 01
 
@@ -23,7 +62,8 @@ Top 5 mentions:
 ## Run it
 
 ```bash
+# From examples/02-mention-histogram/, bring up a local Dask cluster, run the example, tear it down.
 docker compose -f ../../docker/docker-compose.yml up -d
 python example.py
-uv run pytest -m docker tests/integration/test_02_mention_histogram.py
+docker compose -f ../../docker/docker-compose.yml down
 ```

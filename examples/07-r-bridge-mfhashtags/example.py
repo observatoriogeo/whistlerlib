@@ -16,16 +16,16 @@ import pandas as pd
 from whistlerlib import Context
 
 _ROWS = [
-    ('2022-01-01T00:00:00', 'política y cdmx #política #cdmx'),
-    ('2022-01-01T01:00:00', 'noticias urbanas #cdmx #noticias'),
-    ('2022-01-01T02:00:00', 'investigación científica #ciencia #datos'),
-    ('2022-01-01T03:00:00', 'reforma política #política #economía'),
-    ('2022-01-01T04:00:00', 'cultura mexicana #cultura #méxico'),
-    ('2022-01-01T05:00:00', 'salud pública #salud #noticias'),
-    ('2022-01-01T06:00:00', 'movilidad metropolitana #cdmx #movilidad'),
-    ('2022-01-01T07:00:00', 'datos abiertos #datos #código'),
-    ('2022-01-01T08:00:00', 'tecnología cívica #tecnología #cultura'),
-    ('2022-01-01T09:00:00', 'congreso aprueba ley #política #méxico'),
+    ('2022-01-01T00:00:00', 'morning briefing #news #climate'),
+    ('2022-01-01T01:00:00', 'satellite imagery #news #space'),
+    ('2022-01-01T02:00:00', 'rainfall report #news #climate'),
+    ('2022-01-01T03:00:00', 'mars mission #space #news'),
+    ('2022-01-01T04:00:00', 'open data drop #data #climate'),
+    ('2022-01-01T05:00:00', 'climate budget #news #climate'),
+    ('2022-01-01T06:00:00', 'launch window #space'),
+    ('2022-01-01T07:00:00', 'weather modeling #data'),
+    ('2022-01-01T08:00:00', 'briefing call'),
+    ('2022-01-01T09:00:00', 'breaking story #science'),
 ]
 
 

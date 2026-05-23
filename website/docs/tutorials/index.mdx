@@ -1,0 +1,41 @@
+---
+id: index
+title: Tutorials
+sidebar_position: 0
+slug: /tutorials/
+---
+
+# Tutorials
+
+Seven runnable end-to-end examples, ordered from simplest to most involved. Each pairs a `TweetDataset` method with the kind of input it expects and shows the actual output you'll see.
+
+| # | Tutorial | Method exercised | Notes |
+|---|---|---|---|
+| 01 | [Quickstart: top hashtags](/docs/tutorials/01-quickstart-hashtag-histogram) | `hashtag_histogram_alt_python` | Minimum viable usage. Start here. |
+| 02 | [Mention histogram](/docs/tutorials/02-mention-histogram) | `mention_histogram_alt_python` | Same shape as #01 but for `@user` tokens. |
+| 03 | [Bilingual n-grams](/docs/tutorials/03-ngram-histogram-bilingual) | `ngram_histogram_alt_python` with `lan='spanish'` / `lan='english'` | Stopword handling per language. |
+| 04 | [Spanish sentiment range](/docs/tutorials/04-sentiment-spanish) | `sentiment_range_spanish_alt_python` | **First run is slow**: loads a TensorFlow model. |
+| 05 | [Hashtag co-occurrence network](/docs/tutorials/05-hashtag-coonet) | `hashtag_weighted_coonet` | Returns an `igraph.Graph`. |
+| 06 | [Mention co-occurrence network](/docs/tutorials/06-mention-coonet) | `mention_weighted_coonet` | Same as #05, on mentions. |
+| 07 | [R-bridge: top hashtags](/docs/tutorials/07-r-bridge-mfhashtags) | `hashtag_histogram_r` | The R-bridge path. Worker container only. |
+
+> **The pages here are auto-generated** from each `examples/<slug>/README.md` by `scripts/sync_tutorials.py`. Edit the source README; CI fails on drift.
+
+## How to read them
+
+Each tutorial has the same three sections:
+
+1. **What you'll see**: the actual stdout the example prints, so you can match it against your run.
+2. **How it works**: the call chain from `TweetDataset` method down through `base_algs`.
+3. **Run it**: exact shell commands to bring up the cluster, run the example, and tear it down.
+
+## Prerequisites
+
+- Whistlerlib installed on the client (see [Install from PyPI](/docs/installation/pip)).
+- A running Whistlerlib cluster on `localhost:8786` (see [Install with Docker](/docs/installation/docker)).
+- For tutorial 07: the cluster must be running the `albertogarob/whistlerlib` image (R lives only there).
+
+## Related
+
+- [Algorithm families](/docs/concepts/algorithm-families), which method routes to which base primitive.
+- [Architecture](/docs/concepts/architecture), what runs where.

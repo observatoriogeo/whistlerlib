@@ -1,0 +1,350 @@
+---
+id: index
+title: API reference
+sidebar_position: 0
+slug: /api/
+---
+
+# API reference
+
+The user-facing surface is two classes:
+
+- [`Context`](#context) — the entry point. Connects to a Dask cluster and produces datasets.
+- [`TweetDataset`](#tweetdataset-analytics) — the analytic surface. Every method returns a `pandas.DataFrame` or an `igraph.Graph`.
+
+For the architecture behind these methods, see [Algorithm families](/docs/concepts/algorithm-families) and [Context and datasets](/docs/concepts/context-and-datasets).
+
+## At a glance
+
+| Method | Layer | Underlying library | Returns |
+|---|---|---|---|
+| [`hashtag_histogram_alt_python`](#hashtag_histogram_alt_python) | Python | `advertools` | top-`k` `(tag, freq)` DataFrame |
+| [`hashtag_histogram_r`](#hashtag_histogram_r) | R-bridge | R `tm` + `radvertools` | top-`k` `(tag, freq)` DataFrame |
+| [`mention_histogram_alt_python`](#mention_histogram_alt_python) | Python | `advertools` | top-`k` `(Mentions, Frequency)` DataFrame |
+| [`mention_histogram_r`](#mention_histogram_r) | R-bridge | R `tm` + `radvertools` | top-`k` `(mentions, Freq)` DataFrame |
+| [`ngram_histogram_alt_python`](#ngram_histogram_alt_python) | Python | `sklearn.CountVectorizer` + NLTK stopwords | top-`k` `(N_Tokens, Freq)` DataFrame |
+| [`ngram_histogram_r`](#ngram_histogram_r) | R-bridge | R `RWeka::NGramTokenizer` | top-`k` `(N_Tokens, Freq)` DataFrame |
+| [`sentiment_range_spanish_alt_python`](#sentiment_range_spanish_alt_python) | Python | `sentiment-analysis-spanish` + NLTK Spanish stopwords | filtered `(text, score)` DataFrame |
+| [`sentiment_histogram_and_sum_r`](#sentiment_histogram_and_sum_r) | R-bridge | R `syuzhet` | per-emotion `(emotion, count, sum)` DataFrame |
+| [`hashtag_weighted_coonet`](#hashtag_weighted_coonet) | Python | `advertools` (extraction) + igraph (graph) | `(edge DataFrame, igraph.Graph)` |
+| [`mention_weighted_coonet`](#mention_weighted_coonet) | Python | `advertools` (extraction) + igraph (graph) | `(edge DataFrame, igraph.Graph)` |
+
+Utility methods on `TweetDataset` (no analytics, just dataset shaping): [`tweet_count`](#tweet_count), [`group_by_date`](#group_by_date), [`range_by_dates`](#range_by_dates), [`repartition`](#repartition), [`get_num_partitions`](#get_num_partitions), [`create_index`](#create_index).
+
+## Common parameters
+
+Several analytic methods share the same flags. They behave identically across methods:
+
+| Parameter | Type | Default | Meaning |
+|---|---|---|---|
+| `k` | `int` | (required) | Top-`k` cutoff. The result is sorted by frequency, descending, and truncated to the top `k` rows. |
+| `distributed_sorting` | `bool` | `False` | When `False`, the top-`k` selection runs locally on the client after distributed aggregation (deterministic). When `True`, `nlargest` runs in the Dask graph; **ties may be ordered non-deterministically** (depends on partition count). |
+| `return_time_profile` | `bool` | `False` | When `True`, returns a tuple `(result, time_profile_df)` where the profile DataFrame breaks down per-stage wall time with `_dist` / `_local` suffixes marking distributed vs client-local work. See [Architecture](/docs/concepts/architecture). |
+
+## `Context`
+
+The entry point. Connects to a Dask cluster and serves as a factory for datasets.
+
+### Constructor
+
+```python
+Context(dask_scheduler, dask_scheduler_host, dask_scheduler_port)
+```
+
+| Parameter | Type | Description |
+|---|---|---|
+| `dask_scheduler` | `str` | The Dask scheduling mode; typically `'processes'` for a remote cluster, `'threads'` for a local thread pool. Forwarded to `dask.config.set(scheduler=...)`. |
+| `dask_scheduler_host` | `str` | Hostname or IP of the scheduler, e.g. `'localhost'` for a local Compose cluster. |
+| `dask_scheduler_port` | `int` | TCP port of the scheduler, typically `8786`. |
+
+```python
+from whistlerlib import Context
+
+ctx = Context('processes', 'localhost', 8786)
+```
+
+### `Context.load_csv`
+
+```python
+ctx.load_csv(filen, meta, num_partitions=1) -> TweetDataset
+```
+
+Reads a CSV from the dataset repository and returns a partitioned [`TweetDataset`](#tweetdataset-analytics).
+
+| Parameter | Type | Description |
+|---|---|---|
+| `filen` | `str` | Path to the CSV (relative to the dataset repository root). |
+| `meta` | `dict` | Must contain `'column_mapping'` with keys `'date_column'` and `'text_column'`. Optional `'file_encoding'` (defaults to `'utf-8'`). |
+| `num_partitions` | `int` | Dask partition count. Default `1`. |
+
+The loader reads **only** the two named columns and forces the date column to tz-naive (Dask cannot compare tz-naive and tz-aware datetimes across partitions). See [Context and datasets](/docs/concepts/context-and-datasets) for the full contract.
+
+```python
+ds = ctx.load_csv(
+    filen='posts.csv',
+    meta={
+        'column_mapping': {'date_column': 'Date', 'text_column': 'text'},
+        'file_encoding': 'utf-8',
+    },
+    num_partitions=8,
+)
+```
+
+## `TweetDataset` analytics
+
+All analytic methods are called on a `TweetDataset` instance produced by `Context.load_csv(...)` (or returned by `TweetDataset.range_by_dates(...)`). Every method honors `return_time_profile`.
+
+### Hashtag histograms
+
+#### `hashtag_histogram_alt_python`
+
+```python
+ds.hashtag_histogram_alt_python(k, distributed_sorting=False, return_time_profile=False)
+```
+
+Top-`k` hashtags in the dataset, pure-Python implementation.
+
+- **Layer:** pure Python (`alt_python_algs`).
+- **Underlying library:** [`advertools`](https://advertools.readthedocs.io/) `extract_hashtags`.
+- **Base primitive:** `compute_vector_histogram`.
+- **Returns:** `pandas.DataFrame` with columns `['tag', 'freq']`, sorted by `freq` descending, length `≤ k`.
+
+Tutorial: [01 — Quickstart hashtag histogram](/docs/tutorials/01-quickstart-hashtag-histogram).
+
+#### `hashtag_histogram_r`
+
+```python
+ds.hashtag_histogram_r(k, distributed_sorting=False, return_time_profile=False)
+```
+
+Top-`k` hashtags, R-bridge implementation. Requires the `albertogarob/whistlerlib` worker image.
+
+- **Layer:** R-bridge (`r_algs`); subprocess to `Rscript`.
+- **Underlying library:** R [`tm`](https://cran.r-project.org/package=tm) + [`radvertools`](https://github.com/albertogarob/radvertools) via the `getMFHashtags.R` script.
+- **Base primitive:** `compute_vector_histogram`.
+- **Returns:** `pandas.DataFrame` with columns `['tag', 'freq']`, sorted by `freq` descending, length `≤ k`. Same shape as `_alt_python`.
+
+### Mention histograms
+
+#### `mention_histogram_alt_python`
+
+```python
+ds.mention_histogram_alt_python(k, distributed_sorting=False, return_time_profile=False)
+```
+
+Top-`k` user mentions (`@handle`), pure-Python implementation.
+
+- **Layer:** pure Python.
+- **Underlying library:** [`advertools`](https://advertools.readthedocs.io/) `extract_mentions`.
+- **Base primitive:** `compute_vector_histogram`.
+- **Returns:** `pandas.DataFrame` with columns `['Mentions', 'Frequency']`, sorted by `Frequency` descending, length `≤ k`.
+
+Tutorial: [02 — Mention histogram](/docs/tutorials/02-mention-histogram).
+
+#### `mention_histogram_r`
+
+```python
+ds.mention_histogram_r(k, distributed_sorting=False, return_time_profile=False)
+```
+
+Top-`k` user mentions, R-bridge implementation.
+
+- **Layer:** R-bridge.
+- **Underlying library:** R `tm` + `radvertools` via the `getMentions.R` script.
+- **Base primitive:** `compute_vector_histogram`.
+- **Returns:** `pandas.DataFrame` with columns `['mentions', 'Freq']`. Same row-shape as `_alt_python` but the column names are lowercased and abbreviated.
+
+:::note Column-name divergence
+
+`mention_histogram_alt_python` returns `['Mentions', 'Frequency']` while `mention_histogram_r` returns `['mentions', 'Freq']`. Downstream code that needs to swap implementations should `.rename(columns=...)` after the call.
+
+:::
+
+### N-gram histograms
+
+#### `ngram_histogram_alt_python`
+
+```python
+ds.ngram_histogram_alt_python(n, k, lan, w, distributed_sorting=False, return_time_profile=False)
+```
+
+Top-`k` word or character n-grams, pure-Python implementation.
+
+- **Layer:** pure Python.
+- **Underlying library:** `sklearn.feature_extraction.text.CountVectorizer` + NLTK stopwords.
+- **Base primitive:** `compute_vector_histogram`.
+- **Returns:** `pandas.DataFrame` with columns `['N_Tokens', 'Freq']`, sorted by `Freq` descending, length `≤ k`.
+
+| Parameter | Type | Description |
+|---|---|---|
+| `n` | `int` | n-gram order (e.g. `1` for unigrams, `2` for bigrams). |
+| `k` | `int` | Top-`k` cutoff. |
+| `lan` | `str` | NLTK language code for the stopword list (e.g. `'english'`, `'spanish'`). On first use, the stopwords corpus is downloaded automatically. |
+| `w` | `str` | `CountVectorizer`'s `analyzer`: `'word'` for word n-grams, `'char'` for character n-grams. |
+
+Tutorial: [03 — N-gram histogram (bilingual)](/docs/tutorials/03-ngram-histogram-bilingual).
+
+#### `ngram_histogram_r`
+
+```python
+ds.ngram_histogram_r(n, k, distributed_sorting=False, return_time_profile=False)
+```
+
+Top-`k` word n-grams, R-bridge implementation.
+
+- **Layer:** R-bridge.
+- **Underlying library:** R [`RWeka`](https://cran.r-project.org/package=RWeka) `NGramTokenizer` + `tm`.
+- **Base primitive:** `compute_vector_histogram`.
+- **Returns:** `pandas.DataFrame` with columns `['N_Tokens', 'Freq']`, same shape as `_alt_python`.
+
+Note: the R version does not expose `lan` or `w` parameters; it tokenizes words using `RWeka`'s defaults.
+
+### Spanish sentiment range
+
+#### `sentiment_range_spanish_alt_python`
+
+```python
+ds.sentiment_range_spanish_alt_python(left_end, right_end, return_time_profile=False)
+```
+
+Returns **all rows** whose Spanish-sentiment score falls in `[left_end, right_end]`. Unlike the histograms, this is a per-row filter, not an aggregation.
+
+- **Layer:** pure Python.
+- **Underlying library:** [`sentiment-analysis-spanish`](https://pypi.org/project/sentiment-analysis-spanish/) (deep-learning Spanish polarity model, score in `[0, 1]`) + NLTK Spanish stopwords for text cleaning.
+- **Base primitive:** `compute_vector_range`.
+- **Returns:** `pandas.DataFrame` with columns `['text', 'score']`. Order is not guaranteed.
+
+| Parameter | Type | Description |
+|---|---|---|
+| `left_end` | `float` | Inclusive lower bound (typically in `[0, 1]`). |
+| `right_end` | `float` | Inclusive upper bound. |
+
+Tutorial: [04 — Spanish sentiment](/docs/tutorials/04-sentiment-spanish).
+
+### Emotion vectors (Syuzhet)
+
+#### `sentiment_histogram_and_sum_r`
+
+```python
+ds.sentiment_histogram_and_sum_r(language, method, return_time_profile=False)
+```
+
+Per-emotion counts and score sums, using the [`syuzhet`](https://cran.r-project.org/package=syuzhet) R package's emotion lexicon (NRC). Requires the R-bridge worker image.
+
+- **Layer:** R-bridge.
+- **Underlying library:** R [`syuzhet`](https://cran.r-project.org/package=syuzhet) (NRC emotion lexicon).
+- **Base primitive:** `compute_matrix_nz_histogram_and_sum`.
+- **Returns:** `pandas.DataFrame` with columns roughly `['emotion', 'count', 'sum']` — one row per emotion (`Anger`, `Anticipation`, `Disgust`, `Fear`, `Joy`, `Sadness`, `Surprise`, `Trust`, `Negative`, `Positive`), sorted by `count` descending. `count` is the number of tweets that scored non-zero on the emotion; `sum` is the total score across the corpus.
+
+| Parameter | Type | Description |
+|---|---|---|
+| `language` | `str` | Language code for `syuzhet`, e.g. `'english'`, `'spanish'`. Must match a `syuzhet`-supported lexicon. |
+| `method` | `str` | `syuzhet` sentiment method: `'syuzhet'`, `'bing'`, `'afinn'`, `'nrc'`. For per-emotion output, use `'nrc'`. |
+
+### Co-occurrence networks
+
+Both methods return a **tuple** `(edge_df, graph)`, where `edge_df` is a `pandas.DataFrame` of weighted edges and `graph` is an `igraph.Graph` with the edges and nodes already loaded. With `return_time_profile=True`, the return is `(edge_df, graph, time_profile_df)`.
+
+The output is **deterministic across partition counts** (edges are sorted by `(source, target)`, nodes alphabetically inside `compute_weighted_coonet`).
+
+#### `hashtag_weighted_coonet`
+
+```python
+ds.hashtag_weighted_coonet(return_time_profile=False)
+```
+
+Hashtag co-occurrence: edges connect two hashtags that appeared together in the same tweet; the edge weight is the count of such tweets.
+
+- **Layer:** pure Python (via `coonet_algs`).
+- **Underlying library:** `advertools` (extraction) + `igraph` (graph object).
+- **Base primitive:** `compute_weighted_coonet`.
+- **Returns:** `(pandas.DataFrame, igraph.Graph)`. Edge DataFrame columns: `['source', 'target', 'weight']`.
+
+Tutorial: [05 — Hashtag co-occurrence network](/docs/tutorials/05-hashtag-coonet).
+
+#### `mention_weighted_coonet`
+
+```python
+ds.mention_weighted_coonet(return_time_profile=False)
+```
+
+Mention co-occurrence: edges connect two `@handle`s mentioned together in the same tweet.
+
+- **Layer:** pure Python (via `coonet_algs`).
+- **Underlying library:** `advertools` + `igraph`.
+- **Base primitive:** `compute_weighted_coonet`.
+- **Returns:** `(pandas.DataFrame, igraph.Graph)`. Edge DataFrame columns: `['source', 'target', 'weight']`.
+
+Tutorial: [06 — Mention co-occurrence network](/docs/tutorials/06-mention-coonet).
+
+## `TweetDataset` utilities
+
+These methods reshape or summarize the dataset; they don't run analytics.
+
+### `tweet_count`
+
+```python
+ds.tweet_count(return_time_profile=False) -> int
+```
+
+Number of rows in the dataset. Triggers a Dask `len(...)` (which materializes partition lengths). With `return_time_profile=True`, returns `(count, time_profile_df)`.
+
+### `group_by_date`
+
+```python
+ds.group_by_date() -> pandas.DataFrame
+```
+
+Returns a `pandas.DataFrame` with columns `['Date', 'Count']`: posts per calendar day, computed via a Dask `groupby(date_column.dt.date).size()`.
+
+### `range_by_dates`
+
+```python
+ds.range_by_dates(start_date, end_date) -> TweetDataset
+```
+
+Returns a **new** `TweetDataset` filtered to rows whose date column lies in `[start_date, end_date]`, repartitioned and persisted. The original `ds` is unchanged.
+
+### `repartition`
+
+```python
+ds.repartition(num_partitions) -> None
+```
+
+Re-partitions the underlying Dask DataFrame in place. Mutates `ds`.
+
+### `get_num_partitions`
+
+```python
+ds.get_num_partitions() -> int
+```
+
+Returns the current partition count.
+
+### `create_index`
+
+```python
+ds.create_index() -> None
+```
+
+Mutates `ds` to add an integer index across all partitions (used for paging). Persists the result, so the cluster keeps the indexed dataset in memory.
+
+## Internal modules
+
+These are stable internal modules that power the public surface. They are not the user-facing API; they're listed here for orientation if you're contributing or reading source.
+
+| Module | What lives here |
+|---|---|
+| `whistlerlib` | `Context` (re-exported from `whistlerlib.context`). |
+| `whistlerlib.context` | `Context` class. |
+| `whistlerlib.dataset` | `TweetDataset` class, all analytic methods. |
+| `whistlerlib.dask.alt_python_algs` | `compute_*` wrappers for the pure-Python algorithm family. |
+| `whistlerlib.dask.r_algs` | `compute_*` wrappers for the R-bridged algorithm family. |
+| `whistlerlib.dask.coonet_algs` | `to_graph`, `compute_*_weighted_coonet`. |
+| `whistlerlib.dask.base_algs` | The four base Dask primitives (`compute_vector_histogram`, `compute_vector_range`, `compute_matrix_nz_histogram_and_sum`, `compute_weighted_coonet`). |
+
+`whistlerlib.clients`, `whistlerlib.config`, `whistlerlib.logger`, `whistlerlib.time_profile`, and every `funcs/` subpackage are private.
+
+## Roadmap
+
+This page is a curated, hand-maintained catalog. Per-symbol generated pages (via [`pdoc`](https://pdoc.dev/)) are planned: a CI workflow on tag pushes will run `uvx pdoc -o website/docs/api/generated whistlerlib` and commit the per-module reference alongside this catalog. Until then, the [source](https://github.com/observatoriogeo/whistlerlib/tree/main/src/whistlerlib) is the ground truth for signatures.

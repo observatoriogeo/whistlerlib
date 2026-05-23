@@ -7,30 +7,62 @@ The minimum-viable Whistlerlib workflow. Connects to a running Dask cluster, loa
 ```
 Loaded 10 tweets.
 Top 5 hashtags:
-       tag  freq
-   #cdmx     3
-#política     2
- #méxico     2
-#noticias     2
- #ciencia     1
+     tag  freq
+     #ai     5
+ #python     4
+   #data     3
+     #ml     2
+#climate     1
 ```
+
+## The code
+
+The tutorial ships ten inline rows of fake tweets so it runs without any external data:
+
+```python
+_ROWS = [
+    ('2022-01-01T00:00:00', 'morning model release #ai #python'),
+    ('2022-01-01T01:00:00', 'dataset paper accepted #ai #data'),
+    ('2022-01-01T02:00:00', 'climate insights from satellites #ai #climate'),
+    ('2022-01-01T03:00:00', 'training loop in python #python #ml'),
+    # ...5 more rows...
+    ('2022-01-01T09:00:00', 'jupyter notebook collection'),
+]
+```
+
+These rows get written to a tempfile (`_write_csv()`) so the cluster's workers can read them through the Compose bind-mount on host `/tmp`. The analytical work itself is six lines:
+
+```python
+from whistlerlib import Context
+
+ctx = Context('processes', 'localhost', 8786)
+ds = ctx.load_csv(
+    filen=csv_path,
+    meta={
+        'column_mapping': {'date_column': 'Date', 'text_column': 'text'},
+        'file_encoding': 'utf-8',
+    },
+    num_partitions=2,
+)
+print(f'Loaded {ds.tweet_count()} tweets.')
+histogram = ds.hashtag_histogram_alt_python(k=5)
+print(histogram.to_string(index=False))
+```
+
+`Context(...)` opens a Dask client against the scheduler exposed by the master service in `docker/docker-compose.yml`. `load_csv(...)` wraps `dask.dataframe.read_csv`, reads only the two columns named in `column_mapping`, and partitions the result into two Dask partitions. `hashtag_histogram_alt_python(k=5)` ships a `map_partitions` closure to each worker (using `advertools` to extract hashtags), the scheduler merges the partial frequency tables, and the top-5 by frequency is returned as a pandas DataFrame.
+
+The full file (including the tempfile setup and CLI shim) is at
+[`examples/01-quickstart-hashtag-histogram/example.py`](https://github.com/observatoriogeo/whistlerlib/blob/main/examples/01-quickstart-hashtag-histogram/example.py).
 
 ## How it works
 
-1. **`Context('processes', host, port)`** opens a Dask client against the scheduler exposed by the master service in `docker/docker-compose.yml`.
-2. **`load_csv(...)`** wraps `dask.dataframe.read_csv` and returns a `TweetDataset` over a Dask DataFrame partitioned across the cluster's workers.
-3. **`hashtag_histogram_alt_python(k=5)`** ships a `map_partitions` closure to each worker, each worker runs `advertools`-style hashtag extraction on its slice, the scheduler merges the partial frequency tables, and the top-5 by frequency is returned as a pandas DataFrame.
+The three calls above form the canonical Whistlerlib pipeline: `Context` is the entry point, `load_csv` returns a `TweetDataset` backed by a partitioned Dask DataFrame, and the analytic method (`hashtag_histogram_alt_python`) is what actually does the distributed work. Every other tutorial in this series follows the same skeleton with a different analytic.
 
 ## Run it
 
 ```bash
+# From examples/01-quickstart-hashtag-histogram/, bring up a local Dask cluster, run the example, tear it down.
 docker compose -f ../../docker/docker-compose.yml up -d
 python example.py
 docker compose -f ../../docker/docker-compose.yml down
-```
-
-Or via pytest:
-
-```bash
-uv run pytest -m docker tests/integration/test_01_quickstart_hashtag_histogram.py
 ```

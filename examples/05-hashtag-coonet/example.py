@@ -15,20 +15,20 @@ import pandas as pd
 
 from whistlerlib import Context
 
-# Each row carries TWO hashtags so co-occurrences exist. Cyclic pairing of
-# 10 hashtags across 10 rows yields a 10-node, 10-edge cycle plus the same
-# hashtag pair repeated when rows share content → some edges weight 2.
+# Each row carries TWO hashtags so co-occurrences exist. The corpus uses
+# five hashtags across ten rows; #ai #python recurs three times to give
+# the heaviest edge.
 _ROWS = [
-    ('2022-01-01T00:00:00', 'política nacional #política #cdmx'),
-    ('2022-01-01T01:00:00', 'noticias del día #cdmx #noticias'),
-    ('2022-01-01T02:00:00', 'avances científicos #noticias #ciencia'),
-    ('2022-01-01T03:00:00', 'investigación urbana #ciencia #datos'),
-    ('2022-01-01T04:00:00', 'datos abiertos #datos #código'),
-    ('2022-01-01T05:00:00', 'tecnología cívica #código #tecnología'),
-    ('2022-01-01T06:00:00', 'cultura digital #tecnología #cultura'),
-    ('2022-01-01T07:00:00', 'salud pública #cultura #salud'),
-    ('2022-01-01T08:00:00', 'economía nacional #salud #economía'),
-    ('2022-01-01T09:00:00', 'cierre del ciclo #economía #política'),
+    ('2022-01-01T00:00:00', 'tech roundup #ai #python'),
+    ('2022-01-01T01:00:00', 'data team update #ai #python'),
+    ('2022-01-01T02:00:00', 'new dataset #ai #data'),
+    ('2022-01-01T03:00:00', 'ml notes #ai #ml'),
+    ('2022-01-01T04:00:00', 'pandas tip #python #data'),
+    ('2022-01-01T05:00:00', 'fine-tune diary #ai #python'),
+    ('2022-01-01T06:00:00', 'research notes #ai #ml'),
+    ('2022-01-01T07:00:00', 'weekend reading #data #ml'),
+    ('2022-01-01T08:00:00', 'open source #python #data'),
+    ('2022-01-01T09:00:00', 'climate paper #ai #climate'),
 ]
 
 

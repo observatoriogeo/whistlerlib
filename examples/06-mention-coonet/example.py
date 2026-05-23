@@ -1,7 +1,7 @@
 """Mention co-occurrence network, the mirror of example 05.
 
-Two mentions per row, cyclic pairing of 10 unique mentions across 10 rows
-to produce a non-trivial graph.
+Two mentions per row, six unique accounts across ten rows; the pair
+@kaggle @openai recurs four times to produce the heaviest edge.
 """
 
 from __future__ import annotations
@@ -15,16 +15,16 @@ import pandas as pd
 from whistlerlib import Context
 
 _ROWS = [
-    ('2022-01-01T00:00:00', 'política federal @gob @senado'),
-    ('2022-01-01T01:00:00', 'debate parlamentario @senado @scjn'),
-    ('2022-01-01T02:00:00', 'resolución judicial @scjn @ipn'),
-    ('2022-01-01T03:00:00', 'beca de posgrado @ipn @unam'),
-    ('2022-01-01T04:00:00', 'investigación @unam @conahcyt'),
-    ('2022-01-01T05:00:00', 'ciencia y datos @conahcyt @inegi'),
-    ('2022-01-01T06:00:00', 'estadísticas oficiales @inegi @sct'),
-    ('2022-01-01T07:00:00', 'transporte público @sct @semovi'),
-    ('2022-01-01T08:00:00', 'movilidad cdmx @semovi @adip'),
-    ('2022-01-01T09:00:00', 'cierre del ciclo @adip @gob'),
+    ('2022-01-01T00:00:00', 'morning brief @kaggle @openai'),
+    ('2022-01-01T01:00:00', 'data dive @kaggle @openai'),
+    ('2022-01-01T02:00:00', 'leaderboards @kaggle @huggingface'),
+    ('2022-01-01T03:00:00', 'paper drop @openai @huggingface'),
+    ('2022-01-01T04:00:00', 'ai roundup @kaggle @openai'),
+    ('2022-01-01T05:00:00', 'tool tip @huggingface @kaggle'),
+    ('2022-01-01T06:00:00', 'satellite update @nasa @bbc'),
+    ('2022-01-01T07:00:00', 'climate dash @nasa @kaggle'),
+    ('2022-01-01T08:00:00', 'newsroom note @bbc @reuters'),
+    ('2022-01-01T09:00:00', 'product launch @openai @kaggle'),
 ]
 
 
