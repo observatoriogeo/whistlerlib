@@ -24,7 +24,7 @@
   align-items: center;
   gap: 1.25rem;
   margin-bottom: 1.25rem;
-  min-height: 88px;
+  min-height: 104px;
 }
 
 .featureIcon {
@@ -37,6 +37,14 @@
   -webkit-mask-size: contain;
   -webkit-mask-repeat: no-repeat;
   -webkit-mask-position: center;
+}
+
+/* Docker's whale silhouette has more whitespace than the other marks,
+   so it reads smaller at the shared 80px size. Bump to 96px so it
+   visually matches Dask / Python / R in the row above. */
+.iconDocker {
+  width: 96px;
+  height: 96px;
 }
 
 .iconDask {
