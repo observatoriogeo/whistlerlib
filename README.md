@@ -1,11 +1,11 @@
 <!--
-  Logo path is RELATIVE so it renders on GitHub's web UI (and locally).
-  PyPI's long-description renderer does NOT follow relative paths;
-  before the first PyPI publish rewrite to an absolute URL like
-  https://raw.githubusercontent.com/observatoriogeo/whistlerlib/v0.2.0/website/static/img/whistlerlib-logo.png
+  Logo is served via the live docs site (GitHub Pages CDN). Absolute
+  URL so the image renders on PyPI's project page too (PyPI's long-
+  description renderer does not follow relative paths). Updates
+  automatically whenever the website redeploys.
 -->
 <p align="center">
-  <img src="website/static/img/whistlerlib-logo.png" width="240" height="269" alt="Whistlerlib" title="Whistlerlib">
+  <img src="https://whistlerlib.observatoriogeo.mx/img/whistlerlib-logo.png" width="240" height="269" alt="Whistlerlib" title="Whistlerlib">
 </p>
 
 <p align="center">
