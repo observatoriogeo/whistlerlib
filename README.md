@@ -25,7 +25,7 @@
 
 ---
 
-**Whistlerlib**, developed by the [Observatorio Metropolitano CentroGeo](https://observatoriogeo.mx) at [CentroGeo](https://www.centrogeo.org.mx/), turns a [Dask](https://www.dask.org/) cluster into a distributed analytical engine for large social-media datasets. A single analytical query (top-`k` hashtags, weighted co-occurrence networks, Spanish sentiment ranges, …) fans out across a cluster of workers and comes back as a pandas `DataFrame` or an `igraph.Graph`.
+[**Whistlerlib**](https://whistlerlib.observatoriogeo.mx), developed by the [Observatorio Metropolitano CentroGeo](https://observatoriogeo.mx) at [CentroGeo](https://www.centrogeo.org.mx/), turns a [Dask](https://www.dask.org/) cluster into a distributed analytical engine for large social-media datasets. A single analytical query (top-`k` hashtags, weighted co-occurrence networks, Spanish sentiment ranges, …) fans out across a cluster of workers and comes back as a pandas `DataFrame` or an `igraph.Graph`.
 
 It's aimed at:
 
