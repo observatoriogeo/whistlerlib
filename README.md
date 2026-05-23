@@ -1,134 +1,143 @@
+<p align="center">
+  <img src="https://github.com/observatoriogeo/whistlerlib/raw/main/docs/_assets/logo.png" alt="Whistlerlib" width="320">
+</p>
 
 # Whistlerlib
 
-**Whistlerlib** is a Python library developed at the CentroGeo Metropolitan Observatory, designed for distributed processing of large social media datasets. Utilizing data exploratory techniques in social network analysis (SNA) and natural language processing (NLP), Whistlerlib enables complex analyses on multi-core clusters.
+**Whistlerlib** is a Python library for distributed processing of large social-media datasets, developed at the [CentroGeo](https://www.centrogeo.org.mx/) Metropolitan Observatory. It combines social-network-analysis (SNA) and natural-language-processing (NLP) primitives with a [Dask](https://www.dask.org/)-backed execution model: a single analytical query (top-`k` hashtags, weighted co-occurrence networks, Spanish sentiment ranges, …) fans out across a cluster of workers and returns a pandas `DataFrame` or an `igraph.Graph`.
 
-## Features
+## Status
 
-Whistlerlib offers a variety of functions for analyzing social media data, including:
+The library has been **modernized** from a 2021-2022 codebase to current Python (3.11+), Dask (2026.3), and pandas (2.x). The current development version is `0.2.0` (pre-release).
 
-- Hashtag histograms
-- Mention histograms
-- N-gram histograms
-- Sentiment polarity analysis
-- Emotion analysis (fear, anger, joy, etc.)
-- Weighted co-occurrence networks of hashtags
-- Weighted co-occurrence networks of mentions
+| Surface | State |
+|---|---|
+| Source layout | `src/whistlerlib/` (PEP 621, hatchling, [`uv.lock`](https://github.com/observatoriogeo/whistlerlib/blob/main/uv.lock) committed) |
+| Tests | 119 unit tests (97 % coverage) + 7 docker-backed integration tests, all green |
+| Docs | [`docs/`](https://github.com/observatoriogeo/whistlerlib/blob/main/docs/) tree (renderable on GitHub, portable to Docusaurus) |
+| Examples | 7 runnable end-to-end examples under [`examples/`](https://github.com/observatoriogeo/whistlerlib/blob/main/examples/) |
+| Docker image | `whistlerlib/worker:<version>` (built locally; Docker Hub publish pending) |
+| PyPI | not yet published; release in progress |
 
-These functionalities are supported by distributed algorithms that operate on the Dask framework, optimizing performance on multi-core systems and computing clusters.
+Full release notes in [`CHANGELOG.md`](https://github.com/observatoriogeo/whistlerlib/blob/main/CHANGELOG.md); upgrade path from the pre-revival snapshot in [`MIGRATION.md`](https://github.com/observatoriogeo/whistlerlib/blob/main/MIGRATION.md).
 
-Whistlerlib accelerates several third-party libraries, which include:
+## What it does
 
-- advertools: For extracting mentions.
-- Syuzhet: For generating emotion and polarity scores.
-- sentiment-analysis-spanish: For computing sentiment scores on Spanish datasets.
+| Analytic family | Pure-Python | R-bridge |
+|---|---|---|
+| Hashtag histogram | `hashtag_histogram_alt_python` | `hashtag_histogram_r` |
+| Mention histogram | `mention_histogram_alt_python` | `mention_histogram_r` |
+| N-gram histogram | `ngram_histogram_alt_python` | `ngram_histogram_r` |
+| Spanish sentiment range | `sentiment_range_spanish_alt_python` | (n/a) |
+| Emotion vectors (Syuzhet) | (n/a) | `sentiment_histogram_and_sum_r` |
+| Hashtag co-occurrence network | `hashtag_weighted_coonet` | (n/a) |
+| Mention co-occurrence network | `mention_weighted_coonet` | (n/a) |
 
-## Basic Usage
+Pure-Python methods wrap `advertools`, `nltk`, `sklearn`, and `sentiment-analysis-spanish`. R-bridge methods shell out to `Rscript` (via the `tm`, `RWeka`, `syuzhet`, and `radvertools` R packages) running inside the published `whistlerlib/worker` Docker image; the host never installs R.
 
-Here's a quick example of how to use Whistlerlib to analyze a Twitter dataset:
+See [docs/concepts/algorithm-families.md](https://github.com/observatoriogeo/whistlerlib/blob/main/docs/concepts/algorithm-families.md) for the dispatch story.
+
+## Quickstart
+
+Against a Dask cluster reachable at `localhost:8786`:
 
 ```python
-
 from whistlerlib import Context
 
-# create the Whistlerlib context and pass the IP and port of the Dask server
-wl_context = Context('processes', '127.0.0.1', 8786)
+ctx = Context('processes', 'localhost', 8786)
 
-# load a CSV file with X posts, and make 8 distributed partitions
-dataset = wl_context.load_csv(filen='x_dataset.csv',
-                              meta={
-                                  'column_mapping': {
-                                      'date_column': 'Date',
-                                      'text_column': 'text'
-                                  },
-                                  'file_encoding': 'latin-1'
-                              },
-                              num_partitions=8)
+ds = ctx.load_csv(
+    filen='posts.csv',
+    meta={
+        'column_mapping': {'date_column': 'Date', 'text_column': 'text'},
+        'file_encoding': 'utf-8',
+    },
+    num_partitions=8,
+)
 
-# get the number of posts in a distributed fashion
-posts_count = dataset.tweet_count()
-print(f'Posts count: {posts_count}')
-
-# compute the posts with sentiment scores between 0.9 and 0.95 in a distributed fashion
-posts_with_scores = dataset.sentiment_range_spanish_alt_python(0.9, 0.95)
-print(posts_with_scores)
+print(f'Loaded {ds.tweet_count()} posts.')
+print(ds.hashtag_histogram_alt_python(k=5))
 ```
 
-## Development Status
+Full walkthrough including how to bring up the cluster: [Tutorial 01](https://github.com/observatoriogeo/whistlerlib/blob/main/docs/tutorials/01-quickstart-hashtag-histogram.md).
 
-**Please note:** Whistlerlib is currently under active development. This project is considered a work in progress, and it may undergo significant changes or improvements. We encourage users to wait for the first official release before utilizing this library for critical applications.
+## Install
 
+### Client (Python)
 
-### Upcoming Releases
+```bash
+pip install whistlerlib
+```
 
-Upon completion, Whistlerlib will be available as a PyPi package, allowing for easy installation via pip. This will simplify the integration of Whistlerlib into existing Python environments and projects.
+> If you use [uv](https://docs.astral.sh/uv/): `uv pip install whistlerlib`.
 
+(PyPI publish is pending; until then, install from a clone: `pip install -e .` from the repo root.)
 
-### Docker Support
+A pip install gives you the **pure-Python** algorithm surface. R-bridge methods require the worker Docker image.
 
-Whistlerlib publishes **one custom Docker image**: `whistlerlib/worker`, designed to run in a Dask cluster on Docker Compose (single host) or Docker Swarm (production multi-node). The scheduler/"master" role uses the **upstream `daskdev/dask` image** directly because Whistlerlib's scheduler runs no whistlerlib code (it routes serialized task graphs; the algorithms all execute on workers).
+### Cluster (Docker)
 
-| Role | Image | Notes |
-|---|---|---|
-| Scheduler / master | `daskdev/dask:2026.3.0-py3.11` (upstream, maintained by the Dask Foundation) | Routes task graphs. Pinned to match the worker's Dask version. |
-| Worker | `whistlerlib/worker:<version>` | The whistlerlib package + R + the full R library set. Where the algorithms actually execute. |
-| Client | Whatever Python env you have | `pip install whistlerlib` and connect with `Context(...)`. |
-
-The worker image bakes in Python 3.11, Dask 2026.x, R, and every R package `whistlerlib.dask.r_algs` calls (`tm`, `slam`, `snowballc`, `rweka`, `syuzhet`, `dplyr`, `tidyr`, `stringr`, `nlp`, `arrow`, `radvertools`, …). **Your host machine never needs to install R, R packages, or set any `WHISTLERLIB_R_*` env vars**, those are worker-image-internal details.
-
-#### Quick start, single host with Docker Compose
+Single-host development cluster:
 
 ```bash
 docker compose -f docker/docker-compose.yml up -d
-# Dashboard: http://localhost:8787
-# Scheduler: tcp://localhost:8786
-
-# Smoke-test the running cluster:
-docker compose -f docker/docker-compose.yml \
-    run --rm worker python /app/smoke.py master 8786
+# Scheduler:  tcp://localhost:8786
+# Dashboard:  http://localhost:8787
 ```
 
-#### Production, Docker Swarm
+Multi-node production cluster on Docker Swarm:
 
 ```bash
-docker stack deploy -c docker/stack.yml whistlerlib
-# Manager node hosts the master; worker nodes run N×whistlerlib/worker.
+VERSION=0.2.0 docker stack deploy -c docker/stack.yml whistlerlib
 ```
 
-The Swarm stack file places the master on a `manager` node and spreads workers across `worker` nodes, matching the legacy Linode + Ansible production layout the library was designed for.
+Full Swarm setup (initialization, node labelling, image distribution, shared storage, scaling): [docs/installation/docker.md](https://github.com/observatoriogeo/whistlerlib/blob/main/docs/installation/docker.md).
 
-#### Image tags
+## Architecture
 
-| Tag | When | What |
-|---|---|---|
-| `latest` | each tagged release | most recent published version |
-| `<major>.<minor>` | each tagged release | floating tag for that minor line |
-| `<major>.<minor>.<patch>` | each tagged release | pinned version |
-| `dev-<sha>` | manual `workflow_dispatch` runs | development builds (no `latest` retag) |
+```mermaid
+flowchart LR
+    Client["Client (your Python)"] -->|cloudpickle| Scheduler
+    Scheduler -->|tasks| W1["Worker 1<br/>whistlerlib/worker"]
+    Scheduler -->|tasks| W2["Worker 2"]
+    Scheduler -->|tasks| WN["Worker N"]
+    W1 -.->|subprocess| R1["Rscript"]
+    W2 -.->|subprocess| R2["Rscript"]
+    WN -.->|subprocess| RN["Rscript"]
+```
 
+Both the scheduler ("master") and the workers run the same `whistlerlib/worker` image; the scheduler service overrides the `ENTRYPOINT` to `dask-scheduler`. This keeps the Python environments consistent across client / scheduler / workers (a Dask requirement for task-graph serialization). R lives only inside the worker image.
+
+See [docs/concepts/architecture.md](https://github.com/observatoriogeo/whistlerlib/blob/main/docs/concepts/architecture.md) for the full picture.
+
+## Documentation
+
+| Section | Pointer |
+|---|---|
+| Introduction | [docs/intro.md](https://github.com/observatoriogeo/whistlerlib/blob/main/docs/intro.md) |
+| Install (pip) | [docs/installation/pip.md](https://github.com/observatoriogeo/whistlerlib/blob/main/docs/installation/pip.md) |
+| Install (Docker / Swarm) | [docs/installation/docker.md](https://github.com/observatoriogeo/whistlerlib/blob/main/docs/installation/docker.md) |
+| Architecture | [docs/concepts/architecture.md](https://github.com/observatoriogeo/whistlerlib/blob/main/docs/concepts/architecture.md) |
+| `Context` & datasets | [docs/concepts/context-and-datasets.md](https://github.com/observatoriogeo/whistlerlib/blob/main/docs/concepts/context-and-datasets.md) |
+| Algorithm families | [docs/concepts/algorithm-families.md](https://github.com/observatoriogeo/whistlerlib/blob/main/docs/concepts/algorithm-families.md) |
+| Tutorials (7 examples) | [docs/tutorials/](https://github.com/observatoriogeo/whistlerlib/blob/main/docs/tutorials/) |
+| Migration from pre-revival | [docs/migration/from-pre-revival.md](https://github.com/observatoriogeo/whistlerlib/blob/main/docs/migration/from-pre-revival.md) |
 
 ## Development
 
-Contributors and integrators can install Whistlerlib in editable mode.
-
-### Recommended: `uv` (Astral)
-
-[uv](https://docs.astral.sh/uv/) is the project's default package / environment manager, ~10× faster than `pip` and provides a reproducible lockfile.
+[`uv`](https://docs.astral.sh/uv/) is the project's package and environment manager (Astral, ~10x faster than pip, ships a reproducible lockfile).
 
 ```bash
-git clone <repo-url>
+git clone https://github.com/observatoriogeo/whistlerlib.git
 cd whistlerlib
-uv sync --extra dev    # creates .venv/, resolves uv.lock, installs deps + dev tools
-uv run pytest           # run the test suite
-uv run python -c "import whistlerlib; print(whistlerlib.Context)"
+uv sync --extra dev    # creates .venv/, installs deps + dev tools
+uv run pytest          # 119 unit tests, ~12 s
 ```
 
-### Fallback: plain `pip` + `venv`
-
-Plain `pip` is fully supported; `uv` is the project's *internal* preference, not an installation requirement.
+Plain `pip` + `venv` is supported as a fallback:
 
 ```bash
-git clone <repo-url>
+git clone https://github.com/observatoriogeo/whistlerlib.git
 cd whistlerlib
 python3.11 -m venv .venv
 source .venv/bin/activate
@@ -136,25 +145,19 @@ pip install -e ".[dev]"
 pytest
 ```
 
-### R bridge
+Running the docker-backed integration tests against a real local cluster:
 
-The R-backed algorithms in `whistlerlib.dask.r_algs` (R-implemented hashtag / mention / n-gram / sentiment) run inside the published Whistlerlib Docker images (**both master and worker** ship with R + the R libraries baked in). **You do not need to install R, or any R packages, or set any `WHISTLERLIB_R_*` env vars** to use whistlerlib, that's the whole point of the Docker images.
+```bash
+uv run pytest -m docker tests/integration
+```
 
-- **`pip install whistlerlib` on a bare machine** gives you the alt-python algorithm surface (hashtag / mention / n-gram histograms, sentiment-spanish, weighted co-occurrence networks). R-bridge methods aren't available in this mode; that's by design, not a missing dependency.
-- **For the R-bridge methods**, deploy via the published `whistlerlib/worker` image (the scheduler uses upstream `daskdev/dask`), either with `docker compose` (single-host) or `docker stack deploy` on a Docker Swarm. The worker image sets `WHISTLERLIB_R_PATH` and `WHISTLERLIB_R_SCRIPTS_PATH` internally; you never set them yourself.
-- **R-bridge tests skip locally.** The `r_required` pytest marker gates them on the two env vars, absent on a dev box, so they skip cleanly. They run inside the Docker images.
-
+The `docker` marker is **deselected by default** so a plain `pytest` stays fast and doesn't require Docker. CI runs the docker job on every push to `main` and on manual `workflow_dispatch`.
 
 ## License
 
-Whistlerlib is distributed under the GPL-3 license. See the `LICENSE` file for more details.
-
+Whistlerlib is distributed under **GPL-3.0-or-later**. See [LICENSE](https://github.com/observatoriogeo/whistlerlib/blob/main/LICENSE).
 
 ## Contact
 
-If you have specific questions about the project, you can contact the developers via [GitHub Issues](link_to_your_github_issues) or directly by email at [agarcia@centrogeo.edu.mx](mailto:agarcia@centrogeo.edu.mx).
-
----
-
-For more information and updates, follow our project on GitHub.
-
+- Bug reports / feature requests: [GitHub Issues](https://github.com/observatoriogeo/whistlerlib/issues)
+- Academic / collaboration: [agarcia@centrogeo.edu.mx](mailto:agarcia@centrogeo.edu.mx)
