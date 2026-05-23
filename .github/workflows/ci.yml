@@ -66,10 +66,17 @@ jobs:
   docker-examples:
     # Phase 4 example tests, each against a real local Docker cluster
     # (compose-managed by examples/conftest.py). Heavy: needs the
-    # `whistlerlib/worker:test` image which takes ~5–10 min to build.
-    # Triggered only via `workflow_dispatch` so PR / push runs stay fast.
+    # `whistlerlib/worker:dev` image which takes ~5–10 min to build the
+    # first time.
+    #
+    # Triggers (see `if:` below):
+    #   * `workflow_dispatch` — manual button for ad-hoc PR / branch testing
+    #   * `push` to `main`  — validates every merge to main without slowing
+    #     PR / feature-branch runs (lint+unit only on those)
     name: docker-backed example tests
-    if: github.event_name == 'workflow_dispatch'
+    if: >-
+      github.event_name == 'workflow_dispatch'
+      || (github.event_name == 'push' && github.ref == 'refs/heads/main')
     needs: lint-and-test
     runs-on: ubuntu-latest
     steps:
@@ -86,8 +93,11 @@ jobs:
       - name: Sync deps (dev extras)
         run: uv sync --extra dev --python 3.11
 
-      - name: Build whistlerlib/worker:test
-        run: env DOCKER_BUILDKIT=1 docker build -f docker/Dockerfile.worker -t whistlerlib/worker:test .
+      - name: Build whistlerlib/worker:dev
+        # Tag must match `WORKER_IMAGE` in examples/conftest.py; otherwise
+        # the conftest fixture detects "image missing" and rebuilds it,
+        # doubling the CI cost.
+        run: env DOCKER_BUILDKIT=1 docker build -f docker/Dockerfile.worker -t whistlerlib/worker:dev .
 
       - name: Run docker-backed example tests
         # `-m "docker and not slow"` runs 6 of the 7 examples (everything
