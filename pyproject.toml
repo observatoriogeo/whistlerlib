@@ -95,6 +95,26 @@ markers = [
     "slow: tests that take >5s — sentiment model load, heavy compute. Excluded by default.",
 ]
 
+[tool.coverage.run]
+source = ["src/whistlerlib"]
+# Excluded from the unit-test coverage gate (Phase 3) because they're tightly
+# coupled to Dask graphs and the plan defers them to integration coverage
+# (Phase 4) — see `.plans/REVIVAL-PLAN.md` Phase 3 §Targets entry #10.
+omit = [
+    "src/whistlerlib/dask/base_algs/*",
+    "src/whistlerlib/dask/coonet_algs/*",
+    "src/whistlerlib/dask/r_algs/*",
+]
+
+[tool.coverage.report]
+show_missing = true
+fail_under = 80
+exclude_lines = [
+    "pragma: no cover",
+    "raise NotImplementedError",
+    "if TYPE_CHECKING:",
+]
+
 [tool.ruff]
 line-length = 100
 target-version = "py311"

@@ -12,6 +12,9 @@ This entry tracks work toward the upcoming `0.2.0` revival release. See also
 pre-revival snapshot.
 
 ### Added
+- **Comprehensive unit test suite** under `tests/unit/` — 91 fast, isolated tests covering the pure-Python `funcs/` (cleanText, getHashtags, getMentions, getNgrams, getSentimentScore) and the orchestration layer (Context, TweetDataset, config, DatasetRepositoryClient). No Dask cluster, no real models, no network — full run in ~13s.
+- Unit-test coverage gate: **fail_under=80%** in `[tool.coverage.report]`. Current measured coverage **86.97%** (`funcs/` modules at 100%, orchestration at 89–100%; deferred dask alg modules omitted per the plan).
+- CI now runs `pytest tests/unit/ --cov ... --cov-report=html` and uploads the HTML report as a build artifact.
 - PEP 621 `pyproject.toml` with hatchling build backend.
 - `src/whistlerlib/` package layout.
 - Python 3.11+ requirement declared via `requires-python` and `.python-version`.
