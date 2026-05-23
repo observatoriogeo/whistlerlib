@@ -12,3 +12,53 @@
 .featureLink {
   font-weight: 600;
 }
+
+/* Brand icons above each feature card.
+   The SVGs in static/img/brands/ are simple-icons monochrome marks
+   (no fill attribute); we render them as colored silhouettes via
+   CSS mask + background-color so each picks up its official brand
+   color while keeping a uniform stroke weight across the row. */
+.featureIcons {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1.25rem;
+  margin-bottom: 1.25rem;
+  min-height: 88px;
+}
+
+.featureIcon {
+  display: inline-block;
+  width: 80px;
+  height: 80px;
+  mask-size: contain;
+  mask-repeat: no-repeat;
+  mask-position: center;
+  -webkit-mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+}
+
+.iconDask {
+  mask-image: url('/img/brands/dask.svg');
+  -webkit-mask-image: url('/img/brands/dask.svg');
+  background-color: #FDA61A;
+}
+
+.iconPython {
+  mask-image: url('/img/brands/python.svg');
+  -webkit-mask-image: url('/img/brands/python.svg');
+  background-color: #3776AB;
+}
+
+.iconR {
+  mask-image: url('/img/brands/r.svg');
+  -webkit-mask-image: url('/img/brands/r.svg');
+  background-color: #276DC3;
+}
+
+.iconDocker {
+  mask-image: url('/img/brands/docker.svg');
+  -webkit-mask-image: url('/img/brands/docker.svg');
+  background-color: #2496ED;
+}

@@ -4,10 +4,16 @@ import Link from '@docusaurus/Link';
 import Heading from '@theme/Heading';
 import styles from './styles.module.css';
 
+type FeatureIcon = {
+  alt: string;
+  className: string;
+};
+
 type FeatureItem = {
   title: string;
   description: ReactNode;
   link?: {to: string; label: string};
+  icons?: FeatureIcon[];
 };
 
 const FeatureList: FeatureItem[] = [
@@ -20,6 +26,7 @@ const FeatureList: FeatureItem[] = [
       </>
     ),
     link: {to: '/docs/concepts/architecture', label: 'Architecture →'},
+    icons: [{alt: 'Dask', className: styles.iconDask}],
   },
   {
     title: 'Python or R, your choice',
@@ -32,6 +39,10 @@ const FeatureList: FeatureItem[] = [
       </>
     ),
     link: {to: '/docs/concepts/algorithm-families', label: 'Algorithm families →'},
+    icons: [
+      {alt: 'Python', className: styles.iconPython},
+      {alt: 'R', className: styles.iconR},
+    ],
   },
   {
     title: 'Docker-deployable cluster',
@@ -42,13 +53,27 @@ const FeatureList: FeatureItem[] = [
       </>
     ),
     link: {to: '/docs/installation/docker', label: 'Docker install →'},
+    icons: [{alt: 'Docker', className: styles.iconDocker}],
   },
 ];
 
-function Feature({title, description, link}: FeatureItem) {
+function Feature({title, description, link, icons}: FeatureItem) {
   return (
     <div className={clsx('col col--4', styles.feature)}>
       <div className="padding-horiz--md">
+        {icons && icons.length > 0 && (
+          <div className={styles.featureIcons}>
+            {icons.map((icon) => (
+              <span
+                key={icon.alt}
+                role="img"
+                aria-label={icon.alt}
+                title={icon.alt}
+                className={clsx(styles.featureIcon, icon.className)}
+              />
+            ))}
+          </div>
+        )}
         <Heading as="h3">{title}</Heading>
         <p>{description}</p>
         {link && (

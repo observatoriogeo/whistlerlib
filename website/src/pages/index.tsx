@@ -38,6 +38,11 @@ function HomepageHeader() {
           </Link>
           <Link
             className="button button--outline button--secondary button--lg"
+            href="https://doi.org/10.1007/s11042-024-19827-z">
+            Read the paper
+          </Link>
+          <Link
+            className="button button--outline button--secondary button--lg"
             href="https://github.com/observatoriogeo/whistlerlib">
             GitHub
           </Link>
@@ -166,10 +171,63 @@ function FeatureCallout() {
   );
 }
 
+const BIBTEX = `@article{garcia2024whistlerlib,
+  author  = {Garcia-Robledo, A. and Espejel-Trujillo, A.},
+  title   = {Whistlerlib: a distributed computing library for exploratory data analysis on large social network datasets},
+  journal = {Multimedia Tools and Applications},
+  volume  = {83},
+  pages   = {87071--87104},
+  year    = {2024},
+  doi     = {10.1007/s11042-024-19827-z},
+}`;
+
+function CitePanel() {
+  return (
+    <section className={styles.cite}>
+      <div className={clsx('container', styles.citeInner)}>
+        <Heading as="h2">Cite this work</Heading>
+        <p className={styles.citeIntro}>
+          If you use Whistlerlib in your research, please cite the original paper:
+        </p>
+        <p className={styles.citeReference}>
+          Garcia-Robledo, A., Espejel-Trujillo, A.{' '}
+          <strong>
+            Whistlerlib: a distributed computing library for exploratory data
+            analysis on large social network datasets.
+          </strong>{' '}
+          <em>Multimedia Tools and Applications</em>{' '}
+          <strong>83</strong>, 87071-87104 (2024).
+        </p>
+        <p className={styles.citeDoi}>
+          <Link href="https://doi.org/10.1007/s11042-024-19827-z">
+            https://doi.org/10.1007/s11042-024-19827-z
+          </Link>
+        </p>
+        <div className={styles.citeBibtex}>
+          <CodeBlock language="bibtex">{BIBTEX}</CodeBlock>
+        </div>
+        <div className={styles.buttons}>
+          <Link
+            className="button button--primary button--lg"
+            href="https://doi.org/10.1007/s11042-024-19827-z">
+            Read the paper (DOI ↗)
+          </Link>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// Paper-mentioning description for the homepage's <meta name="description">
+// and og:description tags. Per-page <Layout description> overrides the
+// site-wide tagline fallback. Other pages keep the tagline default.
+const HOMEPAGE_DESCRIPTION =
+  'Whistlerlib: distributed NLP and social-network analytics for X / Twitter datasets, built on Dask. Companion site to the MTAP 2024 paper by Garcia-Robledo and Espejel-Trujillo (DOI 10.1007/s11042-024-19827-z).';
+
 export default function Home(): ReactNode {
   const {siteConfig} = useDocusaurusContext();
   return (
-    <Layout title={siteConfig.title} description={siteConfig.tagline}>
+    <Layout title={siteConfig.title} description={HOMEPAGE_DESCRIPTION}>
       <HomepageHeader />
       <main>
         <HomepageFeatures />
@@ -255,6 +313,7 @@ export default function Home(): ReactNode {
           }
           code={TIMEPROFILE_CODE}
         />
+        <CitePanel />
         <FeatureCallout />
       </main>
     </Layout>
