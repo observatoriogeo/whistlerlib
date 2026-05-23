@@ -48,7 +48,7 @@ Current release: **`0.2.0`**. Runs on Python 3.11+, Dask 2026.3.x, pandas 2.x, i
 | Tests | 119 unit tests (97 % coverage) + 7 docker-backed integration tests, all green |
 | Docs | [`docs/`](https://github.com/observatoriogeo/whistlerlib/blob/main/docs/) tree (renderable on GitHub, portable to Docusaurus) |
 | Examples | 7 runnable end-to-end examples under [`examples/`](https://github.com/observatoriogeo/whistlerlib/blob/main/examples/) |
-| Docker image | `albertogarob/whistlerlib:<version>` (build locally from `docker/Dockerfile.worker`; Docker Hub publish planned) |
+| Docker image | [`albertogarob/whistlerlib`](https://hub.docker.com/r/albertogarob/whistlerlib) on Docker Hub: `0.2.0`, `0.2`, `latest` (multi-arch: `linux/amd64` + `linux/arm64`) |
 | PyPI | GitHub release only; PyPI publish planned |
 
 Full release notes in [`CHANGELOG.md`](https://github.com/observatoriogeo/whistlerlib/blob/main/CHANGELOG.md); upgrade path from 0.1.0 in [`docs/migration/from-0.1.0.md`](https://github.com/observatoriogeo/whistlerlib/blob/main/docs/migration/from-0.1.0.md).

@@ -45,11 +45,24 @@ The fast path: one host, scheduler + N workers managed by Compose.
 docker compose -f docker/docker-compose.yml up -d
 ```
 
-This gives you:
+This pulls `albertogarob/whistlerlib:latest` from Docker Hub on first run and brings up:
 
 - A scheduler container on `tcp://localhost:8786`.
 - A dashboard at `http://localhost:8787` (port parametrized via `DASK_DASHBOARD_HOST_PORT`).
 - Two worker containers connected to the scheduler.
+
+To pin to a specific version instead of `latest`:
+
+```bash
+WHISTLERLIB_TAG=0.2.0 docker compose -f docker/docker-compose.yml up -d
+```
+
+To use a locally-built image (for hacking on `Dockerfile.worker`):
+
+```bash
+docker build -f docker/Dockerfile.worker -t albertogarob/whistlerlib:dev .
+WHISTLERLIB_TAG=dev docker compose -f docker/docker-compose.yml up -d
+```
 
 ### 2. Verify
 

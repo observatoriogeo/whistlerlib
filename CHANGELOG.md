@@ -13,8 +13,10 @@ comprehensive test suite, runnable examples, a portable docs tree, and the
 `albertogarob/whistlerlib` Docker image. Upgrade notes from 0.1.0:
 [`docs/migration/from-0.1.0.md`](docs/migration/from-0.1.0.md).
 
-GitHub release only. PyPI publish + Docker Hub publish are deferred to a
-later release.
+Available on:
+- **GitHub**: [`v0.2.0`](https://github.com/observatoriogeo/whistlerlib/releases/tag/v0.2.0)
+- **Docker Hub**: [`albertogarob/whistlerlib`](https://hub.docker.com/r/albertogarob/whistlerlib) with tags `0.2.0`, `0.2`, `latest` (multi-arch: `linux/amd64` + `linux/arm64`)
+- **PyPI**: not yet published.
 
 ### Added
 - **Seven runnable examples under `examples/`** (`01-quickstart-hashtag-histogram`, `02-mention-histogram`, `03-ngram-histogram-bilingual`, `04-sentiment-spanish` [`slow`], `05-hashtag-coonet`, `06-mention-coonet`, `07-r-bridge-mfhashtags`). Each example dir contains `example.py` + `README.md`. The matching docker-backed integration test for each example lives under `tests/integration/test_<slug>.py` and shares a session-scoped Docker-cluster fixture.

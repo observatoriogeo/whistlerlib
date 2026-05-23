@@ -204,6 +204,11 @@ def whistlerlib_swarm():
     # other Dask clusters, etc.).
     env = os.environ.copy()
     env.setdefault('DASK_DASHBOARD_HOST_PORT', '18787')
+    # Point compose at the locally-built `:dev` image instead of the
+    # published `:latest` (compose's default). The fixture has just built
+    # `:dev` above, and the integration suite wants to exercise THAT image,
+    # not whatever's on Docker Hub.
+    env.setdefault('WHISTLERLIB_TAG', 'dev')
     print(f'\n[integration-fixture] Bringing up cluster ({" ".join(up)})...')
     subprocess.run(up, check=True, env=env)
 
