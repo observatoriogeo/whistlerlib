@@ -1,15 +1,22 @@
 # Docker Swarm production stack — the long-promised deployment story.
 #
-#   docker stack deploy -c docker/stack.yml whistlerlib
+#   VERSION=0.2.0 docker stack deploy -c docker/stack.yml whistlerlib
 #
-# Whistlerlib publishes ONE custom image: `whistlerlib/worker`. The scheduler
-# is the upstream Dask image — Whistlerlib's scheduler runs no whistlerlib
-# code, so there's nothing custom to bake in.
+# Whistlerlib publishes ONE custom image: `whistlerlib/worker`. Both the
+# scheduler and the workers run that image; the scheduler service just
+# overrides the ENTRYPOINT (which is `dask-worker`) to `dask-scheduler`.
 #
-# `VERSION` env var picks the worker image tag (matches Docker Hub releases):
-#   VERSION=1.0.0 docker stack deploy -c docker/stack.yml whistlerlib
-# `DASK_IMAGE` picks the scheduler image; default tracks `dask` in `uv.lock`
-# so master + worker speak the same wire protocol.
+# Why the scheduler ALSO needs whistlerlib (and we don't use upstream
+# `daskdev/dask`): Dask requires consistent Python environments between
+# client / scheduler / workers for task-graph (de)serialization metadata.
+# The scheduler runs no whistlerlib algorithm code, but it must be able
+# to deserialize the cloudpickle bytes the client submits, which means
+# whistlerlib has to be importable in the scheduler's env. See the
+# `docs/installation/docker.md` page for the architectural details.
+#
+# `VERSION` env var picks the worker image tag (matches Docker Hub
+# releases). Defaults to `latest`; pin in production:
+#   VERSION=0.2.0 docker stack deploy -c docker/stack.yml whistlerlib
 
 version: "3.9"
 
@@ -20,13 +27,16 @@ networks:
 
 services:
   master:
-    image: ${DASK_IMAGE:-daskdev/dask:2026.3.0-py3.11}
-    command: ["dask-scheduler", "--dashboard-prefix", "/dask"]
+    image: whistlerlib/worker:${VERSION:-latest}
+    # Override the worker image's ENTRYPOINT=["dask-worker"]: this
+    # service is the scheduler.
+    entrypoint: ["dask-scheduler"]
+    command: ["--dashboard-prefix", "/dask"]
     networks:
       - whistlerlib
     ports:
-      - "8786:8786"   # Dask scheduler
-      - "8787:8787"   # Dashboard
+      - "8786:8786"   # Dask scheduler — clients connect here
+      - "8787:8787"   # Dashboard — consider firewalling / reverse-proxying
     deploy:
       replicas: 1
       placement:
@@ -42,13 +52,20 @@ services:
     networks:
       - whistlerlib
     command: ["tcp://master:8786"]
+    # /tmp is bind-mounted RO inside the worker so R can write its own
+    # R_TempDir; see `docker-compose.yml` for the why. In Swarm you
+    # typically want a SHARED filesystem (NFS, gluster, s3fs) instead —
+    # see `docs/installation/docker.md` → "Shared storage".
+    environment:
+      TMPDIR: /var/tmp
     deploy:
       replicas: 4
       placement:
         constraints:
           - "node.role==worker"
         preferences:
-          # Spread workers across worker nodes.
+          # Spread workers across worker nodes when the cluster has
+          # nodes labelled with `zone=<az>`.
           - spread: node.labels.zone
       restart_policy:
         condition: any
