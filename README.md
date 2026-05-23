@@ -6,12 +6,37 @@
   v0.2.0/docs/_assets/logo.png) before the first publish.
 -->
 <p align="center">
-  <img src="docs/_assets/logo.png" alt="Whistlerlib" width="320">
+  <img src="docs/_assets/logo.png" width="375" height="300" alt="Whistlerlib" title="Whistlerlib">
 </p>
 
-# Whistlerlib
+<p align="center">
+  <b>Distributed social-network and NLP analytics for X / Twitter datasets, on Dask.</b>
+</p>
 
-**Whistlerlib** is a Python library for distributed processing of large social-media datasets, developed at the [CentroGeo](https://www.centrogeo.org.mx/) Metropolitan Observatory. It combines social-network-analysis (SNA) and natural-language-processing (NLP) primitives with a [Dask](https://www.dask.org/)-backed execution model: a single analytical query (top-`k` hashtags, weighted co-occurrence networks, Spanish sentiment ranges, …) fans out across a cluster of workers and returns a pandas `DataFrame` or an `igraph.Graph`.
+<p align="center">
+  Hashtag, mention, and n-gram histograms; Spanish sentiment ranges; multilingual emotion vectors; weighted co-occurrence networks. Pure-Python and R-bridged implementations sharing the same Dask task-graph primitives, with a single <code>whistlerlib/worker</code> Docker image that powers both single-host Compose and multi-node Swarm clusters.
+</p>
+
+<p align="center">
+  <a href="docs/"><img src="https://img.shields.io/badge/docs-in--repo-blue.svg" alt="Documentation"></a>
+  <a href="https://pypi.org/project/whistlerlib/"><img src="https://img.shields.io/badge/pypi-pending-yellow.svg" alt="PyPI"></a>
+  <a href="https://pypi.org/project/whistlerlib/"><img src="https://img.shields.io/badge/python-3.11+-blue.svg" alt="Python 3.11+"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-GPL--3.0--or--later-green.svg" alt="License: GPL-3.0-or-later"></a>
+</p>
+
+<p align="center">
+  📖 <b>Documentation:</b> <a href="docs/">in-repo <code>docs/</code></a> (Docusaurus site planned)
+</p>
+
+---
+
+Whistlerlib, developed by the [Observatorio Metropolitano CentroGeo](https://observatoriogeo.mx) at [CentroGeo](https://www.centrogeo.org.mx/), turns a [Dask](https://www.dask.org/) cluster into a distributed analytical engine for large social-media datasets. A single analytical query (top-`k` hashtags, weighted co-occurrence networks, Spanish sentiment ranges, …) fans out across a cluster of workers and comes back as a pandas `DataFrame` or an `igraph.Graph`.
+
+It's aimed at:
+
+- **Computational social scientists** working with X / Twitter (or similar) corpora that have outgrown a single-process pandas workflow.
+- **Quantitative humanities and digital-methods researchers** who want SNA + NLP primitives without writing Dask `map_partitions` boilerplate.
+- **Data engineers** who already deploy a small Dask cluster (Compose or Swarm) and want a thin, opinionated analytical layer on top of it.
 
 ## Status
 
