@@ -16,7 +16,7 @@ flowchart LR
     end
 
     subgraph WORKERS["Workers (one process per Docker container)"]
-        W1["Worker 1<br/>whistlerlib/worker"]
+        W1["Worker 1<br/>observatoriogeo/whistlerlib"]
         W2["Worker 2"]
         WN["Worker N"]
     end
@@ -50,7 +50,7 @@ flowchart LR
     TMP2 -.->|"read by Python"| P
 ```
 
-The host machine running the client never needs R. The scheduler never needs R. The whole R install, interpreter, system libs (`libarrow-dev`), and ~10 R packages, is baked into `whistlerlib/worker`.
+The host machine running the client never needs R. The scheduler never needs R. The whole R install, interpreter, system libs (`libarrow-dev`), and ~10 R packages, is baked into `observatoriogeo/whistlerlib`.
 
 See `whistlerlib.dask.r_algs.funcs.r_script_process.RScriptProcess` for the subprocess wrapper. Exit code `123` is a special "empty output, return empty DataFrame" signal, anything else propagates as `CalledProcessError`.
 

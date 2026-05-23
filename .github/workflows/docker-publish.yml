@@ -1,6 +1,6 @@
 name: Docker images
 
-# Builds and (optionally) publishes the `whistlerlib/worker` image. The
+# Builds and (optionally) publishes the `observatoriogeo/whistlerlib` image. The
 # scheduler/"master" is the upstream `daskdev/dask` image, Whistlerlib ships
 # no custom scheduler image because the scheduler runs no whistlerlib code.
 #
@@ -33,7 +33,7 @@ concurrency:
 
 jobs:
   build:
-    name: build whistlerlib/worker (multi-arch)
+    name: build observatoriogeo/whistlerlib (multi-arch)
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -71,15 +71,15 @@ jobs:
             MAJORMINOR="${VERSION%.*}"
             {
               echo "tags<<EOF"
-              echo "whistlerlib/worker:${VERSION}"
-              echo "whistlerlib/worker:${MAJORMINOR}"
-              echo "whistlerlib/worker:latest"
+              echo "observatoriogeo/whistlerlib:${VERSION}"
+              echo "observatoriogeo/whistlerlib:${MAJORMINOR}"
+              echo "observatoriogeo/whistlerlib:latest"
               echo "EOF"
             } >> "$GITHUB_OUTPUT"
           else
             # Manual run: tag with short SHA for traceability.
             SHA="${GITHUB_SHA:0:7}"
-            echo "tags=whistlerlib/worker:dev-${SHA}" >> "$GITHUB_OUTPUT"
+            echo "tags=observatoriogeo/whistlerlib:dev-${SHA}" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Build and (optionally) push

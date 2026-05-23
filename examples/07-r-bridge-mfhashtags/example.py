@@ -1,7 +1,7 @@
 """Top-k hashtags via the R bridge (`hashtag_histogram_r`).
 
 The same task as example 01, computed by R scripts running inside the
-whistlerlib/worker Docker image. R + the R libraries (tm, slam, snowballc, …)
+observatoriogeo/whistlerlib Docker image. R + the R libraries (tm, slam, snowballc, …)
 live ONLY in the worker image, your dev host doesn't need any R install.
 """
 

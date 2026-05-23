@@ -2,7 +2,7 @@
 #
 #   VERSION=0.2.0 docker stack deploy -c docker/stack.yml whistlerlib
 #
-# Whistlerlib publishes ONE custom image: `whistlerlib/worker`. Both the
+# Whistlerlib publishes ONE custom image: `observatoriogeo/whistlerlib`. Both the
 # scheduler and the workers run that image; the scheduler service just
 # overrides the ENTRYPOINT (which is `dask-worker`) to `dask-scheduler`.
 #
@@ -27,7 +27,7 @@ networks:
 
 services:
   master:
-    image: whistlerlib/worker:${VERSION:-latest}
+    image: observatoriogeo/whistlerlib:${VERSION:-latest}
     # Override the worker image's ENTRYPOINT=["dask-worker"]: this
     # service is the scheduler.
     entrypoint: ["dask-scheduler"]
@@ -48,7 +48,7 @@ services:
         max_attempts: 5
 
   worker:
-    image: whistlerlib/worker:${VERSION:-latest}
+    image: observatoriogeo/whistlerlib:${VERSION:-latest}
     networks:
       - whistlerlib
     command: ["tcp://master:8786"]

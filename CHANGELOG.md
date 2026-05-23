@@ -10,7 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 First public release of Whistlerlib as a packaged Python library. Brings the
 codebase to current Python (3.11+), Dask (2026.3.x), and pandas (2.x); adds a
 comprehensive test suite, runnable examples, a portable docs tree, and the
-`whistlerlib/worker` Docker image. Upgrade notes from 0.1.0:
+`observatoriogeo/whistlerlib` Docker image. Upgrade notes from 0.1.0:
 [`docs/migration/from-0.1.0.md`](docs/migration/from-0.1.0.md).
 
 GitHub release only. PyPI publish + Docker Hub publish are deferred to a
@@ -18,10 +18,10 @@ later release.
 
 ### Added
 - **Seven runnable examples under `examples/`** (`01-quickstart-hashtag-histogram`, `02-mention-histogram`, `03-ngram-histogram-bilingual`, `04-sentiment-spanish` [`slow`], `05-hashtag-coonet`, `06-mention-coonet`, `07-r-bridge-mfhashtags`). Each example dir contains `example.py` + `README.md`. The matching docker-backed integration test for each example lives under `tests/integration/test_<slug>.py` and shares a session-scoped Docker-cluster fixture.
-- **`tests/integration/conftest.py`** with a session-scoped `whistlerlib_swarm` fixture that brings up a real local Docker cluster (locally-built `whistlerlib/worker:dev` for both scheduler and workers) via Compose, waits for scheduler readiness, yields `(host, port)`, and tears down on session exit. Auto-skips when Docker is unavailable.
+- **`tests/integration/conftest.py`** with a session-scoped `whistlerlib_swarm` fixture that brings up a real local Docker cluster (locally-built `observatoriogeo/whistlerlib:dev` for both scheduler and workers) via Compose, waits for scheduler readiness, yields `(host, port)`, and tears down on session exit. Auto-skips when Docker is unavailable.
 - New pytest marker `docker`, deselected from default `pytest` run; opt in with `-m docker`.
 - CI `docker-examples` job (runs on `workflow_dispatch` and on push to `main`) builds the worker image and runs the integration suite end-to-end.
-- **`whistlerlib/worker` Docker image**: built with `uv` in a multi-stage `python:3.11-bookworm` base, shipping the whistlerlib package + R + the full R library set (`r-cran-tm`, `r-cran-slam`, `r-cran-snowballc`, `r-cran-reshape2`, `r-cran-dplyr`, `r-cran-tidyr`, `r-cran-nlp`, `r-cran-stringr`, `r-cran-remotes`, `r-cran-vctrs`, `r-cran-arrow`) + `RWeka` / `syuzhet` / `arrow` from Posit Package Manager + `radvertools` from upstream GitHub. This is the only custom image whistlerlib publishes; both the scheduler ("master") and worker services in `docker/docker-compose.yml` and `docker/stack.yml` use this image, with the master service overriding the `ENTRYPOINT` to `dask-scheduler`.
+- **`observatoriogeo/whistlerlib` Docker image**: built with `uv` in a multi-stage `python:3.11-bookworm` base, shipping the whistlerlib package + R + the full R library set (`r-cran-tm`, `r-cran-slam`, `r-cran-snowballc`, `r-cran-reshape2`, `r-cran-dplyr`, `r-cran-tidyr`, `r-cran-nlp`, `r-cran-stringr`, `r-cran-remotes`, `r-cran-vctrs`, `r-cran-arrow`) + `RWeka` / `syuzhet` / `arrow` from Posit Package Manager + `radvertools` from upstream GitHub. This is the only custom image whistlerlib publishes; both the scheduler ("master") and worker services in `docker/docker-compose.yml` and `docker/stack.yml` use this image, with the master service overriding the `ENTRYPOINT` to `dask-scheduler`.
 - `docker/Dockerfile.worker`, `docker/docker-compose.yml` (single-host development), `docker/stack.yml` (Swarm production).
 - `docker/smoke.py`, runs hashtag / mention / coonet + (when R env vars are set) R-bridge calls against a running scheduler. Baked into the worker image at `/app/smoke.py`.
 - `.github/workflows/docker-publish.yml`, multi-arch (`linux/amd64`, `linux/arm64`) buildx workflow for the worker image. Publishes on `v*` git tags; `workflow_dispatch` allows manual build-only runs (opt-in `push` input).

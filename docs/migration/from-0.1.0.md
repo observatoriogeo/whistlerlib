@@ -65,7 +65,7 @@ You need to:
 
 The legacy `../whistlerlib/docker/linode/` two-image stack (custom scheduler image + custom worker image) is replaced by a simpler shape:
 
-- **Single custom image**: `whistlerlib/worker:<version>`. Carries whistlerlib + Dask + R + the full R library set. Both worker and scheduler roles in the published Docker Compose / Swarm stacks use this image; the scheduler service overrides the entrypoint to `dask-scheduler`.
+- **Single custom image**: `observatoriogeo/whistlerlib:<version>`. Carries whistlerlib + Dask + R + the full R library set. Both worker and scheduler roles in the published Docker Compose / Swarm stacks use this image; the scheduler service overrides the entrypoint to `dask-scheduler`.
 - **No `whistlerlib/master` image.** It would just be a worse copy of the worker image.
 
 Deployment commands:
