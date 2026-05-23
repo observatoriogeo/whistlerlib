@@ -1,6 +1,6 @@
 """Integration test for example 07 (R-bridge hashtag histogram).
 
-R + the R libraries live only inside the worker container — no `r_required`
+R + the R libraries live only inside the worker container, no `r_required`
 marker needed here because the `docker` fixture brings up the worker image
 which has all of them. On a clean dev box without Docker, the conftest's
 `_docker_available()` check skips the whole test instead.

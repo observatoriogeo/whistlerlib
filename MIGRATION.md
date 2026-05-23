@@ -19,7 +19,7 @@ land.
 
 ### Dependencies removed
 
-- **`dask_sql`** — removed entirely. The package is unmaintained upstream and its `2024.5.0` release is broken against `dask>=2025` (Dask folded `dask_expr` into its main namespace; `dask_sql.context.create_table` still tries `from dask_expr.io.parquet import ReadParquet` and crashes). Since the SQL surface was used by **zero tests** and not advertised in the README example, it was dropped rather than replaced. See "API breaking changes" below for the workaround.
+- **`dask_sql`**: removed entirely. The package is unmaintained upstream and its `2024.5.0` release is broken against `dask>=2025` (Dask folded `dask_expr` into its main namespace; `dask_sql.context.create_table` still tries `from dask_expr.io.parquet import ReadParquet` and crashes). Since the SQL surface was used by **zero tests** and not advertised in the README example, it was dropped rather than replaced. See "API breaking changes" below for the workaround.
 
 ### Dependencies renamed / replaced
 
@@ -63,13 +63,13 @@ land.
 
 Seven examples in `examples/<slug>/` that triple as integration tests, learning material, and docs source. Each runnable as `python example.py [host [port]]` against a running Whistlerlib cluster, and tested via `pytest -m docker examples/` against a session-managed local cluster (upstream `daskdev/dask` master + `whistlerlib/worker:test`). The R-bridge example (`07-r-bridge-mfhashtags`) runs in the worker container where R lives, so a clean dev host needs zero R install to verify R-path behaviour.
 
-`pytest` (no flags) stays fast — `testpaths` is restricted to `tests/unit` + `examples/`, the docker-marked examples are deselected, and the legacy LocalCluster integration suite under `tests/test_*.py` is now opt-in via `pytest tests/ --ignore=tests/unit`. CI runs all three layers (unit, integration, docker examples) in separate steps.
+`pytest` (no flags) stays fast, `testpaths` is restricted to `tests/unit` + `examples/`, the docker-marked examples are deselected, and the legacy LocalCluster integration suite under `tests/test_*.py` is now opt-in via `pytest tests/ --ignore=tests/unit`. CI runs all three layers (unit, integration, docker examples) in separate steps.
 
-### Deployment changes — Docker images (Phase 5)
+### Deployment changes, Docker images (Phase 5)
 
 The README's long-standing promise of Docker support is now delivered, but the architecture is simpler than the legacy `../whistlerlib/docker/linode/` two-image setup suggested:
 
-- **`whistlerlib/worker`** — the only custom image. Built from `python:3.11-slim-bookworm` via a multi-stage `uv` install. Carries whistlerlib + Dask + R + the full R library set (`r-cran-tm`, `r-cran-slam`, `r-cran-snowballc`, `r-cran-rweka`, `r-cran-syuzhet`, `r-cran-dplyr`, `r-cran-tidyr`, `r-cran-stringr`, `r-cran-nlp`, `r-cran-arrow`, `r-cran-vctrs`, `r-cran-remotes`, `r-cran-reshape2`) + `radvertools`.
+- **`whistlerlib/worker`**: the only custom image. Built from `python:3.11-slim-bookworm` via a multi-stage `uv` install. Carries whistlerlib + Dask + R + the full R library set (`r-cran-tm`, `r-cran-slam`, `r-cran-snowballc`, `r-cran-rweka`, `r-cran-syuzhet`, `r-cran-dplyr`, `r-cran-tidyr`, `r-cran-stringr`, `r-cran-nlp`, `r-cran-arrow`, `r-cran-vctrs`, `r-cran-remotes`, `r-cran-reshape2`) + `radvertools`.
 - **No `whistlerlib/master` image.** The scheduler uses the upstream `daskdev/dask:<version>-py3.11` image directly. Dask's scheduler routes serialized task graphs and runs no whistlerlib code, so wrapping `daskdev/dask` with our own brand would be a lagging copy. The scheduler image tag is pinned in `docker/docker-compose.yml` and `docker/stack.yml` to track the worker's Dask version (currently `2026.3.0-py3.11`).
 
 Replaces the legacy `daskdev/dask` + `conda env update` + `libffi6`-hack stack. Modern Dask 2026, Python 3.11, `uv` for ~10× faster builds, multi-arch (`linux/amd64` + `linux/arm64`) via GitHub Actions buildx.
@@ -77,7 +77,7 @@ Replaces the legacy `daskdev/dask` + `conda env update` + `libffi6`-hack stack. 
 **Host-machine impact:**
 
 - A host running `pip install whistlerlib` **does not need** R, R packages, or any `WHISTLERLIB_R_*` env vars. The alt-python algorithm surface works out of the box. R-bridge methods are unavailable on a bare host by design.
-- A host running the Docker stack **does not need** R either — that's the entire point. `docker compose up` or `docker stack deploy` and you're done.
+- A host running the Docker stack **does not need** R either, that's the entire point. `docker compose up` or `docker stack deploy` and you're done.
 
 **Deployment commands:**
 

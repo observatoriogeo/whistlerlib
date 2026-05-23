@@ -2,7 +2,7 @@
 
 The same task as example 01, computed by R scripts running inside the
 whistlerlib/worker Docker image. R + the R libraries (tm, slam, snowballc, …)
-live ONLY in the worker image — your dev host doesn't need any R install.
+live ONLY in the worker image, your dev host doesn't need any R install.
 """
 
 from __future__ import annotations

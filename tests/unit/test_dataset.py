@@ -2,7 +2,7 @@
 
 These verify the orchestration layer in isolation: constructor wiring,
 partition arithmetic, range/group helpers. Algorithm modules (`r_algs`,
-`alt_python_algs`, `coonet_algs`) are exercised by the integration suite —
+`alt_python_algs`, `coonet_algs`) are exercised by the integration suite;
 here they're mocked so each unit test runs in <100ms.
 """
 

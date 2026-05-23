@@ -11,8 +11,8 @@ Designed to run inside the published images:
         run --rm worker python /app/smoke.py master 8786
 
 Exit codes:
-    0 — all assertions passed
-    1 — anything raised
+    0, all assertions passed
+    1, anything raised
 """
 
 from __future__ import annotations
@@ -27,7 +27,7 @@ from whistlerlib import Context
 
 
 def _write_synthetic_csv() -> str:
-    """10-row CSV, 10 distinct hashtags, 10 distinct mentions — matches the
+    """10-row CSV, 10 distinct hashtags, 10 distinct mentions, matches the
     `tests/conftest.py` pattern but inlined so this script has no test deps."""
     rows = [
         (f'2022-01-01T{i:02d}:00:00',
@@ -73,16 +73,16 @@ def run_smoke(scheduler_host: str, scheduler_port: int) -> None:
     print(f'  graph: {graph.vcount()} nodes, {graph.ecount()} edges')
     assert graph.vcount() > 0 and graph.ecount() > 0
 
-    # R bridge — only runs inside the master/worker Docker images (or any
+    # R bridge, only runs inside the master/worker Docker images (or any
     # environment where both WHISTLERLIB_R_* env vars are set AND the R
     # libraries listed in the Dockerfiles are installed).
     if os.getenv('WHISTLERLIB_R_PATH') and os.getenv('WHISTLERLIB_R_SCRIPTS_PATH'):
-        print('[smoke] R bridge env vars detected — exercising hashtag_histogram_r(k=3):')
+        print('[smoke] R bridge env vars detected, exercising hashtag_histogram_r(k=3):')
         hist = ds.hashtag_histogram_r(k=3)
         print(hist)
         assert len(hist) == 3, f'expected k=3 R rows, got {len(hist)}'
     else:
-        print('[smoke] WHISTLERLIB_R_* env vars not set — skipping R-bridge check')
+        print('[smoke] WHISTLERLIB_R_* env vars not set, skipping R-bridge check')
 
     print('[smoke] PASSED')
 

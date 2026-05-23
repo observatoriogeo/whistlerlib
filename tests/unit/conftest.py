@@ -5,7 +5,7 @@ up a Dask LocalCluster, NOT load real models, and NOT touch the filesystem
 beyond `tmp_path`. Mocks live here.
 
 The parent `tests/conftest.py` is still loaded by pytest because it's higher
-in the path; that's fine — it only side-effects when its fixtures are
+in the path; that's fine, it only side-effects when its fixtures are
 explicitly requested.
 """
 
@@ -43,7 +43,7 @@ def english_stopwords():
 
 @pytest.fixture
 def text_df():
-    """A small `pd.DataFrame` with a 'text' column — what the funcs/ wrappers expect."""
+    """A small `pd.DataFrame` with a 'text' column, what the funcs/ wrappers expect."""
     return pd.DataFrame({
         'text': [
             'hello world #fun #cool @alice @bob',

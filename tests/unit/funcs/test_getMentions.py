@@ -39,7 +39,7 @@ def test_getMentions_direct_call():
 
 
 def test_wrapper_lowercases_mentions():
-    """advertools normalizes mentions to lowercase — assert this stays true."""
+    """advertools normalizes mentions to lowercase, assert this stays true."""
     df = pd.DataFrame({'text': ['hi @Alice', '@alice and @ALICE']})
     out = get_mentions_wrapper(df, 'text')
     counts = dict(zip(out['Mentions'], out['Frequency']))

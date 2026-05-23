@@ -1,4 +1,4 @@
-# 05 — Hashtag co-occurrence network
+# 05. Hashtag co-occurrence network
 
 `hashtag_weighted_coonet` builds a weighted undirected graph where:
 
@@ -6,7 +6,7 @@
 - **Edges** connect hashtags that co-appear in the same tweet.
 - **Weights** are the number of tweets where the pair co-occurs.
 
-The result is an [`igraph.Graph`](https://python.igraph.org/) plus a pandas DataFrame of edges — handy for direct downstream analysis (centrality, communities, layouts).
+The result is an [`igraph.Graph`](https://python.igraph.org/) plus a pandas DataFrame of edges, handy for direct downstream analysis (centrality, communities, layouts).
 
 ## What you'll see
 

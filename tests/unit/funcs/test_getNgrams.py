@@ -28,7 +28,7 @@ def test_bigrams(spanish_stopwords):
     df = pd.DataFrame({'text': ['ciudad metro urbano']})
     out = get_ngrams_wrapper(df, 'text', n=2, w='word', stopwords=spanish_stopwords)
     counts = dict(zip(out['N_Tokens'], out['Freq']))
-    # Expected bigrams in some order — sklearn lowercases internally.
+    # Expected bigrams in some order, sklearn lowercases internally.
     expected = {'ciudad metro', 'metro urbano'}
     assert set(counts.keys()) >= expected
 
@@ -61,7 +61,7 @@ def test_uses_modern_sklearn_api():
 
 def test_empty_text_raises_or_returns_empty(spanish_stopwords):
     """sklearn's CountVectorizer raises on empty vocab. Either behaviour is
-    acceptable — the test pins down which one we get so a future regression is
+    acceptable, the test pins down which one we get so a future regression is
     visible."""
     df = pd.DataFrame({'text': ['']})
     try:

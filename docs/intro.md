@@ -4,7 +4,7 @@
 
 # Whistlerlib
 
-**Whistlerlib** is a Python library for distributed processing of large social-media datasets, developed at the [CentroGeo](https://www.centrogeo.org.mx/) Metropolitan Observatory. It combines social-network-analysis (SNA) and natural-language-processing (NLP) primitives with a [Dask](https://www.dask.org/)-backed execution model, so a single analytical query — top-`k` hashtags, weighted co-occurrence networks, Spanish sentiment ranges, etc. — fans out across a cluster of workers and comes back as a pandas DataFrame or an `igraph.Graph`.
+**Whistlerlib** is a Python library for distributed processing of large social-media datasets, developed at the [CentroGeo](https://www.centrogeo.org.mx/) Metropolitan Observatory. It combines social-network-analysis (SNA) and natural-language-processing (NLP) primitives with a [Dask](https://www.dask.org/)-backed execution model, so a single analytical query, top-`k` hashtags, weighted co-occurrence networks, Spanish sentiment ranges, etc., fans out across a cluster of workers and comes back as a pandas DataFrame or an `igraph.Graph`.
 
 ## What it does
 
@@ -16,8 +16,8 @@
 
 Each analytic comes in two flavours:
 
-- **`*_alt_python`** — pure Python implementation (uses `advertools`, `nltk`, `sentiment-analysis-spanish`, …).
-- **`*_r`** — runs an `Rscript` subprocess on each worker, wrapping a third-party R library (`tm`, `syuzhet`, `radvertools`, …).
+- **`*_alt_python`**, pure Python implementation (uses `advertools`, `nltk`, `sentiment-analysis-spanish`, …).
+- **`*_r`**, runs an `Rscript` subprocess on each worker, wrapping a third-party R library (`tm`, `syuzhet`, `radvertools`, …).
 
 Both flavours produce identically-shaped results; you pick based on which third-party tooling you trust for the domain at hand. See [Algorithm families](concepts/algorithm-families.md) for the dispatch story.
 
@@ -49,7 +49,7 @@ ds = ctx.load_csv(
     num_partitions=8,
 )
 
-# Top-5 hashtags — distributed.
+# Top-5 hashtags, distributed.
 top5 = ds.hashtag_histogram_alt_python(k=5)
 print(top5)
 ```
@@ -60,7 +60,7 @@ The full quickstart, including how to spin up a local cluster with Docker Compos
 
 - **Install**: [pip](installation/pip.md) (client) or [Docker](installation/docker.md) (cluster).
 - **Learn the model**: [Architecture](concepts/architecture.md), [Context & datasets](concepts/context-and-datasets.md), [Algorithm families](concepts/algorithm-families.md).
-- **Run something**: [Tutorials](tutorials/) — seven runnable end-to-end examples.
+- **Run something**: [Tutorials](tutorials/), seven runnable end-to-end examples.
 - **Upgrade from a pre-revival snapshot**: [Migration guide](migration/from-pre-revival.md).
 
 ## License

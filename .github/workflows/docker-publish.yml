@@ -1,7 +1,7 @@
 name: Docker images
 
 # Builds and (optionally) publishes the `whistlerlib/worker` image. The
-# scheduler/"master" is the upstream `daskdev/dask` image — Whistlerlib ships
+# scheduler/"master" is the upstream `daskdev/dask` image, Whistlerlib ships
 # no custom scheduler image because the scheduler runs no whistlerlib code.
 #
 # Triggers:

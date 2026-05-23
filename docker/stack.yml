@@ -1,4 +1,4 @@
-# Docker Swarm production stack — the long-promised deployment story.
+# Docker Swarm production stack, the long-promised deployment story.
 #
 #   VERSION=0.2.0 docker stack deploy -c docker/stack.yml whistlerlib
 #
@@ -35,8 +35,8 @@ services:
     networks:
       - whistlerlib
     ports:
-      - "8786:8786"   # Dask scheduler — clients connect here
-      - "8787:8787"   # Dashboard — consider firewalling / reverse-proxying
+      - "8786:8786"   # Dask scheduler, clients connect here
+      - "8787:8787"   # Dashboard, consider firewalling / reverse-proxying
     deploy:
       replicas: 1
       placement:
@@ -54,8 +54,8 @@ services:
     command: ["tcp://master:8786"]
     # /tmp is bind-mounted RO inside the worker so R can write its own
     # R_TempDir; see `docker-compose.yml` for the why. In Swarm you
-    # typically want a SHARED filesystem (NFS, gluster, s3fs) instead —
-    # see `docs/installation/docker.md` → "Shared storage".
+    # typically want a SHARED filesystem (NFS, gluster, s3fs) instead.
+    # See `docs/installation/docker.md` → "Shared storage".
     environment:
       TMPDIR: /var/tmp
     deploy:

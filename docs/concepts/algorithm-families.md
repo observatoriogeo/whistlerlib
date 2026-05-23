@@ -58,7 +58,7 @@ Generic distributed top-`k` over `(token, freq)` pairs. Every `*_histogram_*` me
 - `groupby(token_col).sum()` → merged frequencies.
 - Top-`k` by frequency (local `nlargest` for small `k`; distributed `nlargest` when `distributed_sorting=True`).
 
-The `distributed_sorting=True` branch is documented to produce **non-deterministic ordering within tie groups** — if two tokens both have freq 7, which one comes first depends on partition count. Use `distributed_sorting=False` (the default) for reproducible output.
+The `distributed_sorting=True` branch is documented to produce **non-deterministic ordering within tie groups**: if two tokens both have freq 7, which one comes first depends on partition count. Use `distributed_sorting=False` (the default) for reproducible output.
 
 ### `compute_vector_range(df, left_end, right_end, func, ...)`
 
@@ -91,6 +91,6 @@ The `coonet_algs.to_graph(nodes, edges, weights)` helper turns the three lists i
 | You should pick | When |
 |---|---|
 | `*_alt_python` | You want zero R install. You're running on a host without the worker Docker image. The Python implementations cover hashtags, mentions, n-grams, and Spanish sentiment well. |
-| `*_r` | You want a specific behaviour from an R library you trust — `tm`-style hashtag tokenization, `syuzhet`-style emotion vectors, `RWeka` n-grams. R-bridge methods are only callable against a cluster running the `whistlerlib/worker` image (R isn't available otherwise). |
+| `*_r` | You want a specific behaviour from an R library you trust, `tm`-style hashtag tokenization, `syuzhet`-style emotion vectors, `RWeka` n-grams. R-bridge methods are only callable against a cluster running the `whistlerlib/worker` image (R isn't available otherwise). |
 
 The output schemas are matched between `*_alt_python` and `*_r` versions of the same analytic, so you can swap one for the other in a downstream pipeline without changing the consumer.

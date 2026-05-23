@@ -29,6 +29,20 @@ jobs:
         run: python scripts/sync_tutorials.py --check
       - name: Doc link check
         run: python scripts/check_doc_links.py
+      - name: No em-dashes
+        # Em-dashes (U+2014) are prohibited in tracked prose; use comma,
+        # colon, semicolon, or period instead. Plain hyphens are fine.
+        run: |
+          if grep -rln --include='*.py' --include='*.md' --include='*.yml' \
+                      --include='*.yaml' --include='*.toml' \
+                      --include='Dockerfile*' --include='*.R' \
+                      $'\xe2\x80\x94' . 2>/dev/null \
+              | grep -v '.venv\|htmlcov\|__pycache__\|node_modules'; then
+            echo ""
+            echo "ERROR: em-dashes (U+2014) found in the files above."
+            echo "Replace with comma, colon, semicolon, or period."
+            exit 1
+          fi
 
   lint-and-test:
     name: lint + test (py${{ matrix.python-version }})
@@ -77,7 +91,7 @@ jobs:
         # local dev iteration stays fast; we run it explicitly here.
         # `-m 'not slow'` is the default via [tool.pytest.ini_options];
         # R-bridge tests skip automatically (WHISTLERLIB_R_* env vars not
-        # set in CI — R lives only in the worker Docker image, Phase 5).
+        # set in CI, R lives only in the worker Docker image, Phase 5).
         # No --cov here: coverage is enforced on the unit suite only.
         run: uv run pytest tests/ --ignore=tests/unit --tb=short
 
@@ -88,8 +102,8 @@ jobs:
     # first time.
     #
     # Triggers (see `if:` below):
-    #   * `workflow_dispatch` — manual button for ad-hoc PR / branch testing
-    #   * `push` to `main`  — validates every merge to main without slowing
+    #   * `workflow_dispatch`: manual button for ad-hoc PR / branch testing
+    #   * `push` to `main`: validates every merge to main without slowing
     #     PR / feature-branch runs (lint+unit only on those)
     name: docker-backed example tests
     if: >-
@@ -120,5 +134,5 @@ jobs:
       - name: Run docker-backed example tests
         # `-m "docker and not slow"` runs 6 of the 7 examples (everything
         # except the sentiment one, which is also marked `slow` because of
-        # the TensorFlow model load — opt in separately if needed).
+        # the TensorFlow model load, opt in separately if needed).
         run: uv run pytest examples/ -m "docker and not slow" --tb=short

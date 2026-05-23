@@ -21,7 +21,7 @@ Run only the docker-backed examples:
     pytest -m docker examples/
 
 Pre-requisites: Docker daemon running, `whistlerlib/worker:dev` image
-present locally (the fixture builds it on demand the first time —
+present locally (the fixture builds it on demand the first time;
 this costs 5–10 minutes for the R + radvertools install). NLTK corpora
 (`stopwords`, `punkt`, `punkt_tab`) are auto-downloaded to `~/nltk_data`
 on first run because examples 03 (n-grams) and 04 (sentiment) call
@@ -111,7 +111,7 @@ def _ensure_nltk_corpora() -> None:
     lazily on the client. On hosts where IPv6 routing is broken (common
     in residential / corporate networks) the default `getaddrinfo`
     returns the IPv6 record first and the download stalls in `SYN-SENT`
-    for the full TCP retry budget — multiple minutes per corpus, which
+    for the full TCP retry budget, multiple minutes per corpus, which
     looks identical to a hung test. Force IPv4 for the download window.
     """
     import nltk
@@ -132,8 +132,8 @@ def _ensure_nltk_corpora() -> None:
             print(f'[examples-fixture] downloading NLTK corpus: {name}')
             if not nltk.download(name, quiet=True):
                 raise RuntimeError(
-                    f'failed to download NLTK corpus {name!r} '
-                    '— check network connectivity to raw.githubusercontent.com'
+                    f'failed to download NLTK corpus {name!r}; '
+                    'check network connectivity to raw.githubusercontent.com'
                 )
     finally:
         socket.getaddrinfo = orig_getaddrinfo
@@ -176,7 +176,7 @@ def whistlerlib_swarm():
     we promote to actual Swarm in CI.
     """
     if not _docker_available():
-        pytest.skip('Docker not available — install Docker daemon to run '
+        pytest.skip('Docker not available, install Docker daemon to run '
                     'example tests')
 
     compose = _compose_cmd()
@@ -193,7 +193,7 @@ def whistlerlib_swarm():
                     '-p', PROJECT_NAME,
                     'up', '-d', '--no-build']
     # Use a high host port for the dashboard so we don't fight whatever else
-    # the dev box has on 8787 (it's a common dev port — Jupyter, RStudio,
+    # the dev box has on 8787 (it's a common dev port, Jupyter, RStudio,
     # other Dask clusters, etc.).
     env = os.environ.copy()
     env.setdefault('DASK_DASHBOARD_HOST_PORT', '18787')
@@ -225,7 +225,7 @@ def pytest_collection_modifyitems(config, items):
     """Bump the per-test timeout for `docker`-marked tests.
 
     The repo-wide pytest-timeout is 30s (good default for fast unit tests),
-    but docker-backed example tests legitimately need more — first-run
+    but docker-backed example tests legitimately need more, first-run
     `docker compose up` can take 30-60s on its own pulling daskdev/dask,
     and an end-to-end run inside the cluster adds another 10-60s. Without
     this hook, every docker test would fail in the fixture setup phase.
@@ -240,7 +240,7 @@ def example_module(request):
     """Load the sibling `example.py` of the requesting test by file path.
 
     Avoids the Python-module-name collision that would happen if we let each
-    `test_example.py` do `from example import run` — there are 7 `example.py`
+    `test_example.py` do `from example import run`, there are 7 `example.py`
     files in 7 sibling directories whose names (`01-quickstart-...`) aren't
     valid Python identifiers, so the standard package-style imports don't
     work. `importlib.util.spec_from_file_location` loads each one by path.

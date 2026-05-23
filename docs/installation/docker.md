@@ -1,6 +1,6 @@
 # Install with Docker
 
-Whistlerlib ships **one custom Docker image** — `whistlerlib/worker` — that runs both worker and scheduler roles in a Dask cluster. R and every R library the R-bridge calls (`tm`, `syuzhet`, `radvertools`, `RWeka`, …) are baked in, so your host never installs R.
+Whistlerlib ships **one custom Docker image**: `whistlerlib/worker`, that runs both worker and scheduler roles in a Dask cluster. R and every R library the R-bridge calls (`tm`, `syuzhet`, `radvertools`, `RWeka`, …) are baked in, so your host never installs R.
 
 Two deployment shapes are supported out of the box:
 
@@ -69,7 +69,7 @@ ctx = Context('processes', 'localhost', 8786)
 # ... ds = ctx.load_csv(...) ...
 ```
 
-The Compose file bind-mounts host `/tmp` into each worker as **read-only**, so a CSV written by the client (via `tempfile.NamedTemporaryFile`) is visible to workers under the same path. For non-trivial data, configure your own mount — edit `docker/docker-compose.yml` and add a `volumes:` entry mounting your data directory into each worker.
+The Compose file bind-mounts host `/tmp` into each worker as **read-only**, so a CSV written by the client (via `tempfile.NamedTemporaryFile`) is visible to workers under the same path. For non-trivial data, configure your own mount, edit `docker/docker-compose.yml` and add a `volumes:` entry mounting your data directory into each worker.
 
 ### 4. Scale workers
 
@@ -114,12 +114,12 @@ Swarm is the production target. The workflow has more moving parts than Compose,
 
 - ≥2 Linux hosts with Docker Engine ≥ 20.10.
 - Network reachability between every node on:
-  - **2377/tcp** — cluster management.
-  - **7946/tcp + 7946/udp** — node communication / gossip.
-  - **4789/udp** — overlay-network data plane.
-  - **8786/tcp** — Dask scheduler (clients → manager).
-  - **8787/tcp** — dashboard (optional; firewall this if exposed publicly).
-- A way for every node to **pull the `whistlerlib/worker` image** — either Docker Hub (default for public images) or a private registry. See [Image distribution](#image-distribution).
+  - **2377/tcp**: cluster management.
+  - **7946/tcp + 7946/udp**: node communication / gossip.
+  - **4789/udp**: overlay-network data plane.
+  - **8786/tcp**: Dask scheduler (clients → manager).
+  - **8787/tcp**: dashboard (optional; firewall this if exposed publicly).
+- A way for every node to **pull the `whistlerlib/worker` image**: either Docker Hub (default for public images) or a private registry. See [Image distribution](#image-distribution).
 - A **shared filesystem** workers can read data from. See [Shared storage](#shared-storage).
 
 ### 1. Initialize the swarm
@@ -155,19 +155,19 @@ docker node update --label-add zone=us-east-1b worker-node-2
 # ...
 ```
 
-If you don't set `zone` labels, the `spread` directive is silently ignored — Swarm just uses default scheduling.
+If you don't set `zone` labels, the `spread` directive is silently ignored, Swarm just uses default scheduling.
 
 ### 3. Image distribution
 
 Swarm pulls the image **on every node that runs a service replica**. You have three options:
 
-**Option A — Docker Hub (default, recommended once published).** Once `whistlerlib/worker:<version>` is published to Docker Hub (Phase 7), every node just pulls it:
+**Option A: Docker Hub (default, recommended once published).** Once `whistlerlib/worker:<version>` is published to Docker Hub (Phase 7), every node just pulls it:
 
 ```bash
-# Nothing to do — `docker stack deploy` triggers the pulls.
+# Nothing to do, `docker stack deploy` triggers the pulls.
 ```
 
-**Option B — Private registry.** If you have a private registry (Harbor, ECR, GitLab Container Registry, …):
+**Option B: Private registry.** If you have a private registry (Harbor, ECR, GitLab Container Registry, …):
 
 ```bash
 # Tag the locally-built image for your registry:
@@ -177,7 +177,7 @@ docker push myregistry.example.com/whistlerlib/worker:0.2.0
 # log every node into the registry: docker login myregistry.example.com
 ```
 
-**Option C — Manual transfer (offline / air-gapped).** Save and load:
+**Option C: Manual transfer (offline / air-gapped).** Save and load:
 
 ```bash
 # On a build host:
@@ -191,7 +191,7 @@ zcat whistlerlib-worker-0.2.0.tar.gz | docker load
 
 Workers need to be able to read the data the client wants to process. Three patterns:
 
-**Pattern A — NFS / shared filesystem mount on every node.** The classical approach. Mount the same NFS export at the same path on every node (e.g. `/mnt/data`), then add a bind mount in `stack.yml`:
+**Pattern A: NFS / shared filesystem mount on every node.** The classical approach. Mount the same NFS export at the same path on every node (e.g. `/mnt/data`), then add a bind mount in `stack.yml`:
 
 ```yaml
 services:
@@ -202,7 +202,7 @@ services:
 
 The client then loads CSVs by path `/data/posts.csv`.
 
-**Pattern B — Object storage (S3 / GCS / MinIO).** Skip filesystem mounts entirely. Read CSVs through `fsspec`-compatible URLs:
+**Pattern B: Object storage (S3 / GCS / MinIO).** Skip filesystem mounts entirely. Read CSVs through `fsspec`-compatible URLs:
 
 ```python
 ds = ctx.load_csv(filen='s3://my-bucket/posts.csv', meta=..., num_partitions=8)
@@ -221,15 +221,15 @@ services:
 
 For credentials you don't want in env vars, use `docker secret` and read them in via the worker entrypoint.
 
-**Pattern C — In-cluster volume driver.** GlusterFS, Ceph, Portworx, … any Docker volume driver that gives you a multi-host volume. Add the volume to `stack.yml` under `volumes:`.
+**Pattern C: In-cluster volume driver.** GlusterFS, Ceph, Portworx, … any Docker volume driver that gives you a multi-host volume. Add the volume to `stack.yml` under `volumes:`.
 
 ### 5. Configure the stack
 
 The shipped `docker/stack.yml` has sensible defaults. Override via env vars:
 
-- `VERSION` — image tag to pull (defaults to `latest`; **pin in production**).
+- `VERSION`, image tag to pull (defaults to `latest`; **pin in production**).
 
-Edit the file for things that aren't parametrized — `replicas`, `volumes`, `environment`, additional service configs.
+Edit the file for things that aren't parametrized, `replicas`, `volumes`, `environment`, additional service configs.
 
 ### 6. Deploy
 
@@ -243,7 +243,7 @@ Verify:
 
 ```bash
 docker stack services whistlerlib
-# Expect: 2 services — master (1/1), worker (4/4)
+# Expect: 2 services, master (1/1), worker (4/4)
 
 docker service logs whistlerlib_master --since 1m
 # Look for: "Scheduler at: tcp://...:8786"
@@ -304,7 +304,7 @@ This removes services and the overlay network. The image stays on each node (`do
 ### Health-check tips
 
 - **Scheduler not reachable from a node**: ensure the overlay network port 4789/udp isn't blocked. Most firewall surprises are here.
-- **Workers connect, then drop**: usually a Python environment mismatch — verify all nodes are pulling the **same** `whistlerlib/worker:<tag>`. The bare-`latest` tag floats; pin to `<x.y.z>` in production.
+- **Workers connect, then drop**: usually a Python environment mismatch, verify all nodes are pulling the **same** `whistlerlib/worker:<tag>`. The bare-`latest` tag floats; pin to `<x.y.z>` in production.
 - **`docker service logs whistlerlib_worker` shows R errors**: see `docs/concepts/architecture.md` → R bridge section. The worker image bakes in R + libraries; if you've built a custom image and stripped something, the R bridge will fail.
 
 ---
@@ -329,5 +329,5 @@ docker buildx build --platform linux/amd64,linux/arm64 \
 
 ## Next
 
-- [Tutorial 01](../tutorials/01-quickstart-hashtag-histogram.md) — first end-to-end run against the local cluster.
-- [Architecture](../concepts/architecture.md) — what the scheduler, workers, and R bridge actually do.
+- [Tutorial 01](../tutorials/01-quickstart-hashtag-histogram.md), first end-to-end run against the local cluster.
+- [Architecture](../concepts/architecture.md), what the scheduler, workers, and R bridge actually do.

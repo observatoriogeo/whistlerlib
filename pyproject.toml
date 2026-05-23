@@ -33,7 +33,7 @@ classifiers = [
     "Topic :: Text Processing :: Linguistic",
 ]
 
-# Runtime dependencies — modern floors set per the Phase 2 plan. Phase 1 only
+# Runtime dependencies, modern floors set per the Phase 2 plan. Phase 1 only
 # verifies that `pip install -e .` resolves; actual API compatibility (Dask
 # graph behaviour, pandas 2.x dtypes, etc.) is the focus of Phase 2.
 dependencies = [
@@ -84,7 +84,7 @@ Changelog = "https://github.com/CentroGeo/whistlerlib/blob/main/CHANGELOG.md"
 
 [tool.pytest.ini_options]
 # The DEFAULT `pytest` run executes the unit suite and discovers (but
-# deselects) the docker-backed example tests — total ~10s, suitable for
+# deselects) the docker-backed example tests, total ~10s, suitable for
 # every-commit / every-edit feedback.
 #
 # Phase 2's full integration suite under `tests/test_*.py` runs against a
@@ -93,18 +93,18 @@ Changelog = "https://github.com/CentroGeo/whistlerlib/blob/main/CHANGELOG.md"
 # The CI workflow runs unit + integration + (gated) example tests in
 # separate steps.
 testpaths = ["tests/unit", "examples"]
-# Hard fail any single test that takes more than 30s — for verification
+# Hard fail any single test that takes more than 30s, for verification
 # (not profiling), no individual test should be long-running.
 timeout = 30
 timeout_method = "thread"
 # Default runs exclude `slow` tests (sentiment-analysis-spanish model load,
 # anything else needing >5s of real work) AND `docker` tests (Phase 4
 # example tests requiring a running Docker daemon + the
-# `whistlerlib/worker:test` image — many minutes for a full bring-up).
+# `whistlerlib/worker:test` image, many minutes for a full bring-up).
 # Opt in with `-m slow`, `-m docker`, or `-m 'slow or docker'`.
 addopts = "-m 'not slow and not docker' --import-mode=importlib"
 markers = [
-    "slow: tests that take >5s — sentiment model load, heavy compute. Excluded by default.",
+    "slow: tests that take >5s, sentiment model load, heavy compute. Excluded by default.",
     "docker: example tests that require a running local Docker cluster (Compose). Excluded by default; opt in with `-m docker`.",
 ]
 
@@ -112,7 +112,7 @@ markers = [
 source = ["src/whistlerlib"]
 omit = [
     # R-subprocess wrappers and igraph coonet edge extractors run only
-    # end-to-end (Phase 4) — `getMFHashtags.py` etc. shell out to Rscript,
+    # end-to-end (Phase 4), `getMFHashtags.py` etc. shell out to Rscript,
     # so unit-testing them in isolation would mean mocking the whole
     # subprocess interface and yields no real signal. The thin `algs.py`
     # dispatcher in each package IS unit-tested in `tests/unit/dask/`.
@@ -135,14 +135,14 @@ target-version = "py311"
 extend-exclude = [".venv", "build", "dist", "tests/fixtures"]
 
 [tool.ruff.lint]
-# Start permissive on this legacy codebase — pyflakes (real bugs) +
+# Start permissive on this legacy codebase, pyflakes (real bugs) +
 # isort (import hygiene) only. Style rules (E/W) can be enabled in
 # follow-up PRs as legacy code gets touched.
 select = ["F", "I"]
 
 [tool.ruff.lint.per-file-ignores]
 # __init__.py files re-export symbols by importing them. F401 (imported but
-# unused) is the wrong rule there — the import IS the re-export.
+# unused) is the wrong rule there, the import IS the re-export.
 "**/__init__.py" = ["F401"]
 
 [tool.hatch.build.targets.wheel]

@@ -1,6 +1,6 @@
 """Bigram histograms in Spanish and English over the same dataset.
 
-Same algorithm (`ngram_histogram_alt_python`), same data — but different
+Same algorithm (`ngram_histogram_alt_python`), same data, but different
 `lan=` arguments produce different top-k bigrams because each language's
 stopword list filters different tokens before the histogram step.
 """
@@ -17,7 +17,7 @@ from whistlerlib import Context
 
 # Mixed-language content. Spanish + English content words appear together
 # so that for the Spanish call the Spanish words remain (English stopwords
-# are NOT in the Spanish corpus, but English content words ARE — and vice
+# are NOT in the Spanish corpus, but English content words ARE, and vice
 # versa). Stopwords for each language are filtered out.
 _ROWS = [
     ('2022-01-01T00:00:00',

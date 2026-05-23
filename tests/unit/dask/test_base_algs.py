@@ -1,10 +1,10 @@
 """Unit tests for `whistlerlib.dask.base_algs.algs`.
 
-Unlike the higher-level `*_algs` modules — which we can mock-and-verify —
+Unlike the higher-level `*_algs` modules, which we can mock-and-verify,
 `base_algs` *is* the Dask pipeline (`map_partitions`, distributed
 groupby/sum, conditional `nlargest` vs local `sort_values+head`). The
 behaviour is the logic, so we exercise it for real against small
-`dd.from_pandas` DataFrames under the **synchronous scheduler** — no
+`dd.from_pandas` DataFrames under the **synchronous scheduler**: no
 LocalCluster, no worker processes, no cluster bring-up. Each test runs
 in milliseconds.
 """
@@ -70,12 +70,12 @@ def test_vector_histogram_local_sort_topk():
     )
     assert list(local_df.columns) == ['tag', 'freq']
     assert len(local_df) == 2
-    # #cdmx appears 3 times, #datos twice — top-2
+    # #cdmx appears 3 times, #datos twice, top-2
     assert local_df.iloc[0]['tag'] == '#cdmx'
     assert local_df.iloc[0]['freq'] == 3
     assert local_df.iloc[1]['tag'] == '#datos'
     assert local_df.iloc[1]['freq'] == 2
-    # time profile shape — stages threaded through
+    # time profile shape, stages threaded through
     assert {'description', 'elapsed'}.issubset(profile.columns)
 
 
@@ -211,7 +211,7 @@ def test_matrix_nz_histogram_and_sum_aggregates_counts_and_sums():
     assert joy['count'] == 1
     assert joy['sum'] == 2
     assert joy['sentiment'] == 'Joy'
-    # sorted by count desc — sadness first
+    # sorted by count desc, sadness first
     assert list(stats['sentiment']) == ['Sadness', 'Joy']
     assert {'description', 'elapsed'}.issubset(profile.columns)
 
@@ -235,8 +235,8 @@ def _edges_extract(df, text_column):
 def test_weighted_coonet_dedups_parallel_edges_and_sorts():
     pdf = pd.DataFrame({'text': [
         'a-b',          # partition 0 row 0
-        'a-b|b-c',      # partition 0 row 1 — duplicate a-b edge
-        'b-c',          # partition 1 row 0 — duplicate b-c edge
+        'a-b|b-c',      # partition 0 row 1, duplicate a-b edge
+        'b-c',          # partition 1 row 0, duplicate b-c edge
         'c-d',          # partition 1 row 1
     ]})
     ddf = dd.from_pandas(pdf, npartitions=2)
@@ -304,7 +304,7 @@ def test_vector_histogram_asserts_partition_count_matches():
 # --------------------------------------------------------------------------- #
 
 def test_vector_histogram_warns_under_distributed_sorting():
-    """`distributed_sorting=True` carries a tie-ordering caveat — the
+    """`distributed_sorting=True` carries a tie-ordering caveat, the
     function logs a warning each call. We assert the log fires."""
     from whistlerlib.dask.base_algs import algs as base_algs_module
 

@@ -8,7 +8,7 @@ services:
   master:
     # IMPORTANT: the scheduler needs whistlerlib in its Python env for Dask's
     # task-graph deserialization (Dask requires consistent environments between
-    # client / scheduler / workers — not just workers running closures).
+    # client / scheduler / workers, not just workers running closures).
     # We reuse the worker image here; R goes unused on the scheduler but the
     # storage cost is small vs publishing a separate lean-master image.
     image: whistlerlib/worker:dev
@@ -43,7 +43,7 @@ services:
     depends_on:
       master:
         condition: service_healthy
-    # Two workers locally — matches the test fixture's LocalCluster size.
+    # Two workers locally, matches the test fixture's LocalCluster size.
     deploy:
       replicas: 2
     # Pass the scheduler address via CMD override (matches the master service name).
@@ -57,7 +57,7 @@ services:
     # their own filesystem. For examples and dev iteration we bind-mount the
     # host /tmp so a CSV written by the client (`tempfile.NamedTemporaryFile`)
     # is visible to workers under the same path. Production users will
-    # configure their own data mounts (e.g. NFS) — see docker/stack.yml.
+    # configure their own data mounts (e.g. NFS), see docker/stack.yml.
     volumes:
       - /tmp:/tmp:ro
 

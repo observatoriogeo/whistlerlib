@@ -87,7 +87,7 @@ def dask_address(dask_cluster):
 # --------------------------------------------------------------------------- #
 # Synthetic 10-row tweet CSV
 #
-# Deliberately tiny — Phase 2's goal is "does the code path work end-to-end",
+# Deliberately tiny, Phase 2's goal is "does the code path work end-to-end",
 # not realistic profiling. The 10 rows are hand-crafted (not random) to
 # satisfy every assertion the inherited test suite makes:
 #
@@ -104,7 +104,7 @@ TESTS_DATASET_SIZE = 10
 
 
 # 30 distinct hashtags and 30 distinct mentions, 3 per row across 10 rows.
-# Row i carries hashtags 3i..3i+2 and mentions 3i..3i+2 — none repeat across rows.
+# Row i carries hashtags 3i..3i+2 and mentions 3i..3i+2, none repeat across rows.
 # This gives:
 #   * 30 unique hashtags / mentions → k=10, k=20, k=30 histogram tests all succeed
 #   * 30 distinct co-occurrence pairs (C(3,2)=3 per row × 10) → coonet tests non-empty
@@ -173,7 +173,7 @@ def synthetic_tweets_csv(tmp_path_factory):
 #
 # Architecture: the CSV is loaded into a Dask DataFrame ONCE per session and
 # persisted. Each test gets a fresh `TweetDataset` wrapper over the same base
-# DataFrame — wrappers can repartition independently because `dd.repartition`
+# DataFrame, wrappers can repartition independently because `dd.repartition`
 # returns a new object rather than mutating the source. Per-test cost is
 # therefore tens of milliseconds rather than seconds.
 # --------------------------------------------------------------------------- #

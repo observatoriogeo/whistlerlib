@@ -13,7 +13,7 @@ flowchart LR
     D -->|"same analytics as ds"| E
 ```
 
-## `Context` — your connection to a Dask cluster
+## `Context`, your connection to a Dask cluster
 
 ```python
 from whistlerlib import Context
@@ -31,14 +31,14 @@ What `__init__` actually does:
 
 1. Stores the three args.
 2. Calls `dask.config.set(scheduler=...)`.
-3. Opens a `dask.distributed.Client(f'{host}:{port}')` — a real TCP connection, immediately.
+3. Opens a `dask.distributed.Client(f'{host}:{port}')`, a real TCP connection, immediately.
 4. Instantiates a `DatasetRepositoryClient` for CSV loading.
 
 > **The scheduler must already be reachable when you construct `Context`.** No retry, no fallback. Set up your cluster before instantiating.
 
 `Context` is currently a single-cluster handle. Multiple contexts in the same process work but are unusual.
 
-## `load_csv` — wrap a CSV in a Dask DataFrame
+## `load_csv`, wrap a CSV in a Dask DataFrame
 
 ```python
 ds = ctx.load_csv(
@@ -63,9 +63,9 @@ Returns a [`TweetDataset`](#tweetdataset-the-analytic-surface).
 
 The loader only reads **the two columns named in `column_mapping`** to keep memory predictable across very large CSVs. Other columns in the file are skipped, not stored.
 
-## `TweetDataset` — the analytic surface
+## `TweetDataset`, the analytic surface
 
-A `TweetDataset` wraps a Dask DataFrame plus metadata (column names, partition count, optional date range). Every analytic method dispatches to one of the four algorithm families — see [Algorithm families](algorithm-families.md).
+A `TweetDataset` wraps a Dask DataFrame plus metadata (column names, partition count, optional date range). Every analytic method dispatches to one of the four algorithm families, see [Algorithm families](algorithm-families.md).
 
 The shape of every analytic method follows the same pattern:
 
@@ -78,7 +78,7 @@ def hashtag_histogram_alt_python(self, k, distributed_sorting=False, return_time
         return df_out
 ```
 
-So every method takes an optional `return_time_profile=True` flag to return a per-stage timing breakdown alongside the result — useful when tuning partition counts or comparing alt-python vs R implementations.
+So every method takes an optional `return_time_profile=True` flag to return a per-stage timing breakdown alongside the result, useful when tuning partition counts or comparing alt-python vs R implementations.
 
 ### Method catalogue
 
@@ -90,29 +90,29 @@ Frequency analytics:
 
 Sentiment:
 
-- `sentiment_range_spanish_alt_python(left_end, right_end, ...)` — keep posts whose Spanish sentiment score falls in `[left_end, right_end]`.
-- `sentiment_histogram_and_sum_r(language, method, ...)` — non-zero counts and score sums per emotion via the `syuzhet` R package.
+- `sentiment_range_spanish_alt_python(left_end, right_end, ...)`, keep posts whose Spanish sentiment score falls in `[left_end, right_end]`.
+- `sentiment_histogram_and_sum_r(language, method, ...)`, non-zero counts and score sums per emotion via the `syuzhet` R package.
 
 Networks:
 
-- `hashtag_weighted_coonet(...)` — returns `(edges_df, igraph.Graph)`.
-- `mention_weighted_coonet(...)` — same but for mentions.
+- `hashtag_weighted_coonet(...)`, returns `(edges_df, igraph.Graph)`.
+- `mention_weighted_coonet(...)`, same but for mentions.
 
 Bookkeeping:
 
-- `tweet_count()` — row count of the current view (distributed).
-- `repartition(num_partitions)` — change the partition count in place.
-- `get_num_partitions()` — read the partition count.
-- `group_by_date()` — group rows by `date_column`.
-- `range_by_dates(start_date, end_date)` — return a **new** `TweetDataset` covering just that date range (the original is unchanged).
+- `tweet_count()`, row count of the current view (distributed).
+- `repartition(num_partitions)`, change the partition count in place.
+- `get_num_partitions()`, read the partition count.
+- `group_by_date()`, group rows by `date_column`.
+- `range_by_dates(start_date, end_date)`, return a **new** `TweetDataset` covering just that date range (the original is unchanged).
 
 ### Derived datasets preserve identity
 
-`range_by_dates` returns a new `TweetDataset` carrying its own metadata (`ranged=True`, `range_start_date`, `range_end_date`). Analytics methods on a ranged dataset behave identically — they just operate on fewer rows.
+`range_by_dates` returns a new `TweetDataset` carrying its own metadata (`ranged=True`, `range_start_date`, `range_end_date`). Analytics methods on a ranged dataset behave identically, they just operate on fewer rows.
 
 The library used to use these flags to deduplicate `dask_sql` table names per derived view. That SQL surface was removed in `0.2.0` (see the [Migration guide](../migration/from-pre-revival.md)), but the flags stayed because downstream callers may still inspect them.
 
 ## Next
 
-- [Algorithm families](algorithm-families.md) — how `*_alt_python` and `*_r` dispatch through the four primitives.
-- [Tutorial 01](../tutorials/01-quickstart-hashtag-histogram.md) — end-to-end run of the most common analytic.
+- [Algorithm families](algorithm-families.md), how `*_alt_python` and `*_r` dispatch through the four primitives.
+- [Tutorial 01](../tutorials/01-quickstart-hashtag-histogram.md), end-to-end run of the most common analytic.

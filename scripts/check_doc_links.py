@@ -21,12 +21,12 @@ from urllib.parse import unquote, urlsplit
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 
-# Markdown inline link: [text](href) — non-greedy on text, allows href to
+# Markdown inline link: [text](href), non-greedy on text, allows href to
 # contain anything but ')' and whitespace. Fragments and queries stripped
 # at check time.
 MD_LINK_RE = re.compile(r'\[(?:[^\]]*)\]\(([^)\s]+)(?:\s+"[^"]*")?\)')
 
-# HTML <img src="..."> — keep simple, only matches double quotes.
+# HTML <img src="...">, keep simple, only matches double quotes.
 IMG_SRC_RE = re.compile(r'<img\b[^>]*\bsrc="([^"]+)"', re.IGNORECASE)
 
 
@@ -79,7 +79,7 @@ def main(argv: list[str]) -> int:
         for b in broken:
             print(f'  - {b}', file=sys.stderr)
         return 1
-    print(f'OK — all relative links in {root.relative_to(REPO_ROOT)} resolve.')
+    print(f'OK, all relative links in {root.relative_to(REPO_ROOT)} resolve.')
     return 0
 
 

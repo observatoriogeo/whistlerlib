@@ -1,6 +1,6 @@
 # Architecture
 
-Whistlerlib is a thin Python library sitting on top of a Dask cluster. The library itself is small (a few hundred lines, four algorithm families). The interesting part is **what runs where** — and the answer is "almost everything on the workers."
+Whistlerlib is a thin Python library sitting on top of a Dask cluster. The library itself is small (a few hundred lines, four algorithm families). The interesting part is **what runs where**: and the answer is "almost everything on the workers."
 
 ## The three-tier picture
 
@@ -32,8 +32,8 @@ flowchart LR
 ```
 
 - **Client**: your laptop, a Jupyter kernel, a CI runner. Builds a Dask task graph by chaining `Context` and `TweetDataset` methods. Calls `.compute()` (directly or via a histogram/range/coonet wrapper) to materialize a result.
-- **Scheduler**: a single Dask process. Routes serialized task graphs (cloudpickle bytes) from the client to workers and routes results back. Runs **no whistlerlib code**. Despite that, the scheduler image **does** include whistlerlib in its Python env — Dask requires consistent environments between client/scheduler/workers for serialization metadata.
-- **Workers**: where every closure runs. Hashtag extraction, n-gram tokenization, sentiment scoring, R subprocesses, igraph edge dedup — all on workers.
+- **Scheduler**: a single Dask process. Routes serialized task graphs (cloudpickle bytes) from the client to workers and routes results back. Runs **no whistlerlib code**. Despite that, the scheduler image **does** include whistlerlib in its Python env, Dask requires consistent environments between client/scheduler/workers for serialization metadata.
+- **Workers**: where every closure runs. Hashtag extraction, n-gram tokenization, sentiment scoring, R subprocesses, igraph edge dedup, all on workers.
 
 ## Why R lives only in the worker image
 
@@ -50,9 +50,9 @@ flowchart LR
     TMP2 -.->|"read by Python"| P
 ```
 
-The host machine running the client never needs R. The scheduler never needs R. The whole R install — interpreter, system libs (`libarrow-dev`), and ~10 R packages — is baked into `whistlerlib/worker`.
+The host machine running the client never needs R. The scheduler never needs R. The whole R install, interpreter, system libs (`libarrow-dev`), and ~10 R packages, is baked into `whistlerlib/worker`.
 
-See `whistlerlib.dask.r_algs.funcs.r_script_process.RScriptProcess` for the subprocess wrapper. Exit code `123` is a special "empty output, return empty DataFrame" signal — anything else propagates as `CalledProcessError`.
+See `whistlerlib.dask.r_algs.funcs.r_script_process.RScriptProcess` for the subprocess wrapper. Exit code `123` is a special "empty output, return empty DataFrame" signal, anything else propagates as `CalledProcessError`.
 
 ## How a query becomes work
 
@@ -71,7 +71,7 @@ flowchart TD
 
 Step **D** is the only distributed step in the histogram path: each partition runs `get_hashtags_wrapper` independently on a worker, producing a partial `(tag, freq)` table. Steps **E** + **F** are run by Dask's `compute()`: a distributed groupby/sum merges the partial tables, then the small result is `sort_values`'d locally on the client.
 
-All four base primitives — `compute_vector_histogram`, `compute_vector_range`, `compute_matrix_nz_histogram_and_sum`, `compute_weighted_coonet` — follow this "distributed map_partitions → distributed groupby/agg → local sort" shape. See [Algorithm families](algorithm-families.md) for which user-facing method funnels into which primitive.
+All four base primitives, `compute_vector_histogram`, `compute_vector_range`, `compute_matrix_nz_histogram_and_sum`, `compute_weighted_coonet`, follow this "distributed map_partitions → distributed groupby/agg → local sort" shape. See [Algorithm families](algorithm-families.md) for which user-facing method funnels into which primitive.
 
 ## The `processes` mode
 

@@ -1,6 +1,6 @@
-# 04 — Spanish sentiment (positive range)
+# 04. Spanish sentiment (positive range)
 
-`sentiment_range_spanish_alt_python(left_end=0.9, right_end=1.0)` — selects rows whose Spanish text scores ≥0.9 from the [`sentiment-analysis-spanish`](https://pypi.org/project/sentiment-analysis-spanish/) TensorFlow/Keras model. The model is small but loading and running it is several seconds, so this example is marked `slow` in addition to `docker`.
+`sentiment_range_spanish_alt_python(left_end=0.9, right_end=1.0)`, selects rows whose Spanish text scores ≥0.9 from the [`sentiment-analysis-spanish`](https://pypi.org/project/sentiment-analysis-spanish/) TensorFlow/Keras model. The model is small but loading and running it is several seconds, so this example is marked `slow` in addition to `docker`.
 
 ## What you'll see
 
@@ -14,7 +14,7 @@ Rows scoring in [0.9, 1.0]:
    magnífico extraordinario lo mejor  0.962
 ```
 
-(Exact scores will vary slightly between runs — the model isn't deterministic across TF versions.)
+(Exact scores will vary slightly between runs, the model isn't deterministic across TF versions.)
 
 ## How it works
 

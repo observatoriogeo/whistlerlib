@@ -49,7 +49,7 @@ def test_init_creates_dataset_repository_client(mock_client_cls, mock_dask_set):
 @patch('dask.config.set')
 @patch('dask.distributed.Client')
 def test_init_does_not_create_dask_sql_context(mock_client_cls, mock_dask_set):
-    """Phase 2 dropped the dask_sql surface — assert the attribute is gone."""
+    """Phase 2 dropped the dask_sql surface, assert the attribute is gone."""
     ctx = Context('processes', '127.0.0.1', 8786)
     assert not hasattr(ctx, 'dask_sql_context')
 

@@ -1,6 +1,6 @@
-# 03 — Bigram histograms in two languages
+# 03. Bigram histograms in two languages
 
-`ngram_histogram_alt_python` with `lan='spanish'` and `lan='english'`. Same algorithm, same dataset — but Whistlerlib passes the language down to NLTK's stopword corpus, so each call filters out a different set of common words before n-gram counting.
+`ngram_histogram_alt_python` with `lan='spanish'` and `lan='english'`. Same algorithm, same dataset, but Whistlerlib passes the language down to NLTK's stopword corpus, so each call filters out a different set of common words before n-gram counting.
 
 ## What this teaches
 

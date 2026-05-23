@@ -4,7 +4,7 @@ If your code is built against the **abandoned pre-revival Whistlerlib snapshot**
 
 > **Canonical source:** [`MIGRATION.md`](../../MIGRATION.md) at the repo root carries the release-notes-style version of the same information. This page is a docs-context adaptation of it.
 
-If you've never used the pre-revival snapshot, skip this — `pip install whistlerlib` is your starting point, see [Install from PyPI](../installation/pip.md).
+If you've never used the pre-revival snapshot, skip this, `pip install whistlerlib` is your starting point, see [Install from PyPI](../installation/pip.md).
 
 ## TL;DR
 
@@ -12,9 +12,9 @@ You need to:
 
 1. **Install via `pip install whistlerlib`** instead of `PYTHONPATH`-ing a clone.
 2. **Move to Python 3.11+** (was 3.7 / 3.8-era code).
-3. **Drop any `dask_sql_context` / `run_query` usage** — the SQL surface is gone (see [API breaking changes](#api-breaking-changes)).
-4. **Stop setting `WHISTLERLIB_R_PATH` / `WHISTLERLIB_R_SCRIPTS_PATH` on the host** — those are worker-image-internal now.
-5. **Deploy via Docker** if you used the legacy `docker/linode/` setup — the production target is now Docker Swarm or Compose (see [Install with Docker](../installation/docker.md)).
+3. **Drop any `dask_sql_context` / `run_query` usage**: the SQL surface is gone (see [API breaking changes](#api-breaking-changes)).
+4. **Stop setting `WHISTLERLIB_R_PATH` / `WHISTLERLIB_R_SCRIPTS_PATH` on the host**: those are worker-image-internal now.
+5. **Deploy via Docker** if you used the legacy `docker/linode/` setup, the production target is now Docker Swarm or Compose (see [Install with Docker](../installation/docker.md)).
 
 ## Packaging changes
 
@@ -29,14 +29,14 @@ You need to:
 
 **Removed:**
 
-- **`dask_sql`** — removed entirely. Upstream `dask_sql==2024.5.0` crashes against modern Dask because Dask folded `dask_expr` into the main namespace. Since the SQL surface was used by **zero tests** and not advertised in the README example, it was dropped rather than replaced. See [API breaking changes](#api-breaking-changes) for the workaround.
+- **`dask_sql`**: removed entirely. Upstream `dask_sql==2024.5.0` crashes against modern Dask because Dask folded `dask_expr` into the main namespace. Since the SQL surface was used by **zero tests** and not advertised in the README example, it was dropped rather than replaced. See [API breaking changes](#api-breaking-changes) for the workaround.
 
 **Renamed / replaced:**
 
 | Old | New |
 |---|---|
 | `python-igraph` | `igraph` (PyPI rename; same library) |
-| `dask_sql==2024.5.0` | *(removed — see above)* |
+| `dask_sql==2024.5.0` | *(removed, see above)* |
 
 **Added:**
 
@@ -57,7 +57,7 @@ You need to:
 
 - **`whistlerlib.config.config` no longer asserts R-bridge env vars at import.** Previously, `import whistlerlib` would fail with `AssertionError` unless both `WHISTLERLIB_R_SCRIPTS_PATH` and `WHISTLERLIB_R_PATH` were set, regardless of whether the caller used the R bridge. Now those variables default to `None` when unset; validation lives in the R-bridge code paths that actually need them.
 
-  **Impact:** non-R workflows can now `import whistlerlib` without setting any env vars; R-bridge workflows behave identically as long as the env vars are set before the R call sites run. With the Docker images, you don't set them yourself — the worker image sets them internally.
+  **Impact:** non-R workflows can now `import whistlerlib` without setting any env vars; R-bridge workflows behave identically as long as the env vars are set before the R call sites run. With the Docker images, you don't set them yourself, the worker image sets them internally.
 
 - **NLTK stopwords are no longer downloaded unconditionally.** The algorithm code now does `try: nltk.data.find('corpora/stopwords') except LookupError: nltk.download(...)`. Behaviour is identical on fresh machines; the change makes the code work offline when the corpus is already cached.
 

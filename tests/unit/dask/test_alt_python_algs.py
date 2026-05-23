@@ -11,7 +11,7 @@ The four `compute_*` functions are thin orchestration wrappers over the
 - handles NLTK-data presence / absence without doing a real network
   download (we mock `nltk.download`)
 
-Heavy/Dask-graph behaviour belongs in the Phase 4 example suite — these
+Heavy/Dask-graph behaviour belongs in the Phase 4 example suite, these
 unit tests run in milliseconds because every primitive is mocked.
 """
 
@@ -82,7 +82,7 @@ def test_mention_delegates_to_vector_histogram(mock_primitive):
 
 
 # --------------------------------------------------------------------------- #
-# compute_ngram_histogram — NLTK branch                                       #
+# compute_ngram_histogram, NLTK branch                                       #
 # --------------------------------------------------------------------------- #
 
 class _FakeNltk:

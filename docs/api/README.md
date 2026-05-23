@@ -10,7 +10,7 @@ Modules with a public surface:
 |---|---|
 | `whistlerlib` | `Context` (re-exported from `whistlerlib.context`). |
 | `whistlerlib.context` | `Context` class. |
-| `whistlerlib.dataset` | `TweetDataset` class — all analytic methods. |
+| `whistlerlib.dataset` | `TweetDataset` class, all analytic methods. |
 | `whistlerlib.dask.alt_python_algs` | `compute_*` wrappers for the pure-Python algorithm family. |
 | `whistlerlib.dask.r_algs` | `compute_*` wrappers for the R-bridged algorithm family. |
 | `whistlerlib.dask.coonet_algs` | `to_graph`, `compute_*_weighted_coonet`. |
@@ -20,7 +20,7 @@ Private surface (`whistlerlib.clients`, `whistlerlib.config`, `whistlerlib.logge
 
 ## Generator: `pdoc`
 
-The plan calls for [`pdoc`](https://pdoc.dev/) — single-pass, Markdown-friendly, zero config:
+The plan calls for [`pdoc`](https://pdoc.dev/), single-pass, Markdown-friendly, zero config:
 
 ```bash
 uvx pdoc -o docs/api whistlerlib
@@ -36,9 +36,9 @@ Sphinx is heavier and produces RST/HTML primarily. Whistlerlib's docs are markdo
 
 Until Phase 7 lands, the source is the reference:
 
-- `src/whistlerlib/context.py` — `Context`.
-- `src/whistlerlib/dataset.py` — `TweetDataset`, all analytic methods.
-- `src/whistlerlib/dask/<family>_algs/algs.py` — algorithm dispatch.
-- `src/whistlerlib/dask/base_algs/algs.py` — the four base primitives.
+- `src/whistlerlib/context.py`, `Context`.
+- `src/whistlerlib/dataset.py`, `TweetDataset`, all analytic methods.
+- `src/whistlerlib/dask/<family>_algs/algs.py`, algorithm dispatch.
+- `src/whistlerlib/dask/base_algs/algs.py`, the four base primitives.
 
 Each method has a short docstring; the [Context & datasets](../concepts/context-and-datasets.md) and [Algorithm families](../concepts/algorithm-families.md) pages explain how they fit together.

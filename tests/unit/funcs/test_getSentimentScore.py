@@ -26,7 +26,7 @@ def test_wrapper_applies_clean_then_sentiment(fake_sentiment, spanish_stopwords)
     out = get_sentiment_score_wrapper(df, 'text',
                                       stopwords=spanish_stopwords,
                                       sentiment=fake_sentiment)
-    # The cleaned text — lowercased, hashtag + mention stripped.
+    # The cleaned text, lowercased, hashtag + mention stripped.
     cleaned = out['text'].iloc[0]
     assert '@bob' not in cleaned
     assert '#fun' not in cleaned

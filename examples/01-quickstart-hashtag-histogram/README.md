@@ -1,4 +1,4 @@
-# 01 — Quickstart: top hashtags
+# 01. Quickstart: top hashtags
 
 The minimum-viable Whistlerlib workflow. Connects to a running Dask cluster, loads a CSV of tweets, computes the top-`k` hashtags as a distributed histogram.
 

@@ -2,19 +2,19 @@
 
 Seven runnable examples that **triple as integration tests, learning material, and docs source**. Each example lives in `examples/<slug>/` and contains:
 
-- `README.md` — narrative, copy-paste-ready for the separate Docusaurus docs project.
-- `example.py` — a standalone script you can `python example.py` against a running cluster.
-- `test_example.py` — a pytest wrapper that runs `example.py` against the fixture-managed Docker cluster.
+- `README.md`, narrative, copy-paste-ready for the separate Docusaurus docs project.
+- `example.py`, a standalone script you can `python example.py` against a running cluster.
+- `test_example.py`, a pytest wrapper that runs `example.py` against the fixture-managed Docker cluster.
 
 | # | Example | Demonstrates | Notes |
 |---|---|---|---|
-| 01 | [quickstart-hashtag-histogram](01-quickstart-hashtag-histogram/) | `hashtag_histogram_alt_python` — the canonical Whistlerlib workflow | the minimum-viable usage |
+| 01 | [quickstart-hashtag-histogram](01-quickstart-hashtag-histogram/) | `hashtag_histogram_alt_python`, the canonical Whistlerlib workflow | the minimum-viable usage |
 | 02 | [mention-histogram](02-mention-histogram/) | `mention_histogram_alt_python` | what's different from hashtags |
 | 03 | [ngram-histogram-bilingual](03-ngram-histogram-bilingual/) | `ngram_histogram_alt_python` with `lan='spanish'` and `lan='english'` | stopword handling per language |
-| 04 | [sentiment-spanish](04-sentiment-spanish/) | `sentiment_range_spanish_alt_python` over `[0.9, 1.0]` | **`slow`** — loads the TF model |
-| 05 | [hashtag-coonet](05-hashtag-coonet/) | `hashtag_weighted_coonet` — co-occurrence graph | igraph result inspection |
-| 06 | [mention-coonet](06-mention-coonet/) | `mention_weighted_coonet` — same on mentions | same pattern; clean comparison with #05 |
-| 07 | [r-bridge-mfhashtags](07-r-bridge-mfhashtags/) | `hashtag_histogram_r` — the R-bridge path | **`docker`-only** — needs R, which lives in the worker image |
+| 04 | [sentiment-spanish](04-sentiment-spanish/) | `sentiment_range_spanish_alt_python` over `[0.9, 1.0]` | **`slow`**: loads the TF model |
+| 05 | [hashtag-coonet](05-hashtag-coonet/) | `hashtag_weighted_coonet`, co-occurrence graph | igraph result inspection |
+| 06 | [mention-coonet](06-mention-coonet/) | `mention_weighted_coonet`, same on mentions | same pattern; clean comparison with #05 |
+| 07 | [r-bridge-mfhashtags](07-r-bridge-mfhashtags/) | `hashtag_histogram_r`, the R-bridge path | **`docker`-only**: needs R, which lives in the worker image |
 
 ## How to run them
 
@@ -55,7 +55,7 @@ The `docker` marker is **deselected by default** so a plain `pytest` run stays f
 
 The session fixture in `examples/conftest.py` uses **Docker Compose** (not Swarm) to bring up the local cluster. The reason is purely practical: single-node Docker Swarm doesn't schedule services with `node.role==worker` placement constraints on a manager-only node, which makes the `docker/stack.yml` production stack file fiddly for local testing.
 
-The Compose stack validates exactly the same image and network story that production Swarm uses — same `daskdev/dask` scheduler image, same `whistlerlib/worker` image, same TCP wire protocol. **Production deployment is Swarm via `docker/stack.yml`**; that path is the one operators use with `docker stack deploy` on a real multi-node cluster.
+The Compose stack validates exactly the same image and network story that production Swarm uses, same `daskdev/dask` scheduler image, same `whistlerlib/worker` image, same TCP wire protocol. **Production deployment is Swarm via `docker/stack.yml`**; that path is the one operators use with `docker stack deploy` on a real multi-node cluster.
 
 ## Synthetic data only
 

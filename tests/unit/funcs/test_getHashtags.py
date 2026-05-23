@@ -46,7 +46,7 @@ def test_wrapper_strips_whitespace_in_tag():
 
 
 def test_wrapper_preserves_case():
-    """The function does NOT lowercase hashtags — that's a docs/coonet concern."""
+    """The function does NOT lowercase hashtags, that's a docs/coonet concern."""
     df = pd.DataFrame({'text': ['#Foo #FOO #foo']})
     out = get_hashtags_wrapper(df, 'text')
     tags = set(out['tag'])

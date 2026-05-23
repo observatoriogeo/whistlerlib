@@ -66,7 +66,7 @@ Upon completion, Whistlerlib will be available as a PyPi package, allowing for e
 
 ### Docker Support
 
-Whistlerlib publishes **one custom Docker image** — `whistlerlib/worker` — designed to run in a Dask cluster on Docker Compose (single host) or Docker Swarm (production multi-node). The scheduler/"master" role uses the **upstream `daskdev/dask` image** directly because Whistlerlib's scheduler runs no whistlerlib code (it routes serialized task graphs; the algorithms all execute on workers).
+Whistlerlib publishes **one custom Docker image**: `whistlerlib/worker`, designed to run in a Dask cluster on Docker Compose (single host) or Docker Swarm (production multi-node). The scheduler/"master" role uses the **upstream `daskdev/dask` image** directly because Whistlerlib's scheduler runs no whistlerlib code (it routes serialized task graphs; the algorithms all execute on workers).
 
 | Role | Image | Notes |
 |---|---|---|
@@ -74,9 +74,9 @@ Whistlerlib publishes **one custom Docker image** — `whistlerlib/worker` — d
 | Worker | `whistlerlib/worker:<version>` | The whistlerlib package + R + the full R library set. Where the algorithms actually execute. |
 | Client | Whatever Python env you have | `pip install whistlerlib` and connect with `Context(...)`. |
 
-The worker image bakes in Python 3.11, Dask 2026.x, R, and every R package `whistlerlib.dask.r_algs` calls (`tm`, `slam`, `snowballc`, `rweka`, `syuzhet`, `dplyr`, `tidyr`, `stringr`, `nlp`, `arrow`, `radvertools`, …). **Your host machine never needs to install R, R packages, or set any `WHISTLERLIB_R_*` env vars** — those are worker-image-internal details.
+The worker image bakes in Python 3.11, Dask 2026.x, R, and every R package `whistlerlib.dask.r_algs` calls (`tm`, `slam`, `snowballc`, `rweka`, `syuzhet`, `dplyr`, `tidyr`, `stringr`, `nlp`, `arrow`, `radvertools`, …). **Your host machine never needs to install R, R packages, or set any `WHISTLERLIB_R_*` env vars**, those are worker-image-internal details.
 
-#### Quick start — single host with Docker Compose
+#### Quick start, single host with Docker Compose
 
 ```bash
 docker compose -f docker/docker-compose.yml up -d
@@ -88,14 +88,14 @@ docker compose -f docker/docker-compose.yml \
     run --rm worker python /app/smoke.py master 8786
 ```
 
-#### Production — Docker Swarm
+#### Production, Docker Swarm
 
 ```bash
 docker stack deploy -c docker/stack.yml whistlerlib
 # Manager node hosts the master; worker nodes run N×whistlerlib/worker.
 ```
 
-The Swarm stack file places the master on a `manager` node and spreads workers across `worker` nodes — matching the legacy Linode + Ansible production layout the library was designed for.
+The Swarm stack file places the master on a `manager` node and spreads workers across `worker` nodes, matching the legacy Linode + Ansible production layout the library was designed for.
 
 #### Image tags
 
@@ -113,7 +113,7 @@ Contributors and integrators can install Whistlerlib in editable mode.
 
 ### Recommended: `uv` (Astral)
 
-[uv](https://docs.astral.sh/uv/) is the project's default package / environment manager — ~10× faster than `pip` and provides a reproducible lockfile.
+[uv](https://docs.astral.sh/uv/) is the project's default package / environment manager, ~10× faster than `pip` and provides a reproducible lockfile.
 
 ```bash
 git clone <repo-url>
@@ -138,11 +138,11 @@ pytest
 
 ### R bridge
 
-The R-backed algorithms in `whistlerlib.dask.r_algs` (R-implemented hashtag / mention / n-gram / sentiment) run inside the published Whistlerlib Docker images (**both master and worker** ship with R + the R libraries baked in). **You do not need to install R, or any R packages, or set any `WHISTLERLIB_R_*` env vars** to use whistlerlib — that's the whole point of the Docker images.
+The R-backed algorithms in `whistlerlib.dask.r_algs` (R-implemented hashtag / mention / n-gram / sentiment) run inside the published Whistlerlib Docker images (**both master and worker** ship with R + the R libraries baked in). **You do not need to install R, or any R packages, or set any `WHISTLERLIB_R_*` env vars** to use whistlerlib, that's the whole point of the Docker images.
 
 - **`pip install whistlerlib` on a bare machine** gives you the alt-python algorithm surface (hashtag / mention / n-gram histograms, sentiment-spanish, weighted co-occurrence networks). R-bridge methods aren't available in this mode; that's by design, not a missing dependency.
-- **For the R-bridge methods**, deploy via the published `whistlerlib/worker` image (the scheduler uses upstream `daskdev/dask`) — either with `docker compose` (single-host) or `docker stack deploy` on a Docker Swarm. The worker image sets `WHISTLERLIB_R_PATH` and `WHISTLERLIB_R_SCRIPTS_PATH` internally; you never set them yourself.
-- **R-bridge tests skip locally.** The `r_required` pytest marker gates them on the two env vars — absent on a dev box, so they skip cleanly. They run inside the Docker images.
+- **For the R-bridge methods**, deploy via the published `whistlerlib/worker` image (the scheduler uses upstream `daskdev/dask`), either with `docker compose` (single-host) or `docker stack deploy` on a Docker Swarm. The worker image sets `WHISTLERLIB_R_PATH` and `WHISTLERLIB_R_SCRIPTS_PATH` internally; you never set them yourself.
+- **R-bridge tests skip locally.** The `r_required` pytest marker gates them on the two env vars, absent on a dev box, so they skip cleanly. They run inside the Docker images.
 
 
 ## License

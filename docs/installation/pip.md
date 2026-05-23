@@ -1,13 +1,13 @@
 # Install from PyPI
 
-The client-side install. Use this on any machine that runs the Whistlerlib **client** — your laptop, a Jupyter server, a CI runner that submits jobs to a Dask cluster, etc.
+The client-side install. Use this on any machine that runs the Whistlerlib **client**: your laptop, a Jupyter server, a CI runner that submits jobs to a Dask cluster, etc.
 
 For the cluster itself (scheduler + workers), see [Docker installation](docker.md).
 
 ## Requirements
 
 - **Python ≥ 3.11**.
-- A reachable Dask scheduler (a local one via `LocalCluster`, or a remote one — see [Architecture](../concepts/architecture.md)). The pip install does **not** start a cluster for you.
+- A reachable Dask scheduler (a local one via `LocalCluster`, or a remote one, see [Architecture](../concepts/architecture.md)). The pip install does **not** start a cluster for you.
 
 ## Install
 
@@ -26,7 +26,7 @@ python -c "import whistlerlib; print(whistlerlib.Context)"
 
 ## What you get
 
-A `pip install` on a bare host gives you the **alt-python algorithm surface** — everything in `whistlerlib.dask.alt_python_algs`:
+A `pip install` on a bare host gives you the **alt-python algorithm surface**: everything in `whistlerlib.dask.alt_python_algs`:
 
 - `hashtag_histogram_alt_python`
 - `mention_histogram_alt_python`
@@ -38,7 +38,7 @@ Plus the core types: `Context`, `TweetDataset`.
 
 ## What you don't get (and why that's fine)
 
-The **R-bridge** methods — `hashtag_histogram_r`, `mention_histogram_r`, `ngram_histogram_r`, `sentiment_histogram_and_sum_r` — are **not available from a pip install alone**. They shell out to `Rscript` on the worker, which needs R + a curated set of R libraries (`tm`, `syuzhet`, `RWeka`, `radvertools`, …). Installing all of that on a researcher's laptop is exactly what we don't want you to do.
+The **R-bridge** methods, `hashtag_histogram_r`, `mention_histogram_r`, `ngram_histogram_r`, `sentiment_histogram_and_sum_r`, are **not available from a pip install alone**. They shell out to `Rscript` on the worker, which needs R + a curated set of R libraries (`tm`, `syuzhet`, `RWeka`, `radvertools`, …). Installing all of that on a researcher's laptop is exactly what we don't want you to do.
 
 Instead, the R libraries live **inside the published `whistlerlib/worker` Docker image** ([Docker installation](docker.md)). The pattern is:
 
@@ -53,5 +53,5 @@ So:
 
 ## Next
 
-- [Docker installation](docker.md) — bring up a local cluster (Compose) or production cluster (Swarm).
-- [Tutorial 01](../tutorials/01-quickstart-hashtag-histogram.md) — first end-to-end run.
+- [Docker installation](docker.md), bring up a local cluster (Compose) or production cluster (Swarm).
+- [Tutorial 01](../tutorials/01-quickstart-hashtag-histogram.md), first end-to-end run.

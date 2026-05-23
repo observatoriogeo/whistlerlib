@@ -54,7 +54,7 @@ def test_load_csv_only_reads_requested_columns(tiny_csv):
     }
     out = c.load_csv(tiny_csv, meta)
     pdf = out.compute()
-    # The third column from the source CSV must NOT be present — `usecols`
+    # The third column from the source CSV must NOT be present, `usecols`
     # filters to just date + text.
     assert set(pdf.columns) == {'Date', 'text'}
 

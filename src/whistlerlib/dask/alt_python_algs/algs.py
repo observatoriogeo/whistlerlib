@@ -28,7 +28,7 @@ def compute_hashtag_histogram(df, k, text_column, distributed_sorting, num_parti
 
 def compute_ngram_histogram(df, n, k, lan, w, text_column, distributed_sorting, num_partitions):
 
-    # locally fetch stopwords — only hit the network if not already cached
+    # locally fetch stopwords, only hit the network if not already cached
     import nltk
     try:
         nltk.data.find('corpora/stopwords')
@@ -58,7 +58,7 @@ def compute_sentiment_range_spanish(df, left_end, right_end, text_column, num_pa
     df: A Dask DataFrame that has been already partitioned.
     '''
 
-    # locally fetch stopwords — only hit the network if not already cached
+    # locally fetch stopwords, only hit the network if not already cached
     import nltk
     try:
         nltk.data.find('corpora/stopwords')

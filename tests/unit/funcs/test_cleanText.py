@@ -1,6 +1,6 @@
 """Unit tests for `whistlerlib.dask.alt_python_algs.funcs.cleanText`.
 
-The function is pure (string → string) — unit tests should run in microseconds.
+The function is pure (string → string), unit tests should run in microseconds.
 Covers the cleanup steps individually so a regression points at the exact rule
 that broke.
 """

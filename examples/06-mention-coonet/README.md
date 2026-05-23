@@ -1,4 +1,4 @@
-# 06 — Mention co-occurrence network
+# 06. Mention co-occurrence network
 
 The mirror of example 05 but for `@user` mentions. Same coonet algorithm, same igraph result type. Useful as a clean side-by-side comparison: hashtag networks describe **topics**, mention networks describe **conversation partners**.
 

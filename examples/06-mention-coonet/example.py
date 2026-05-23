@@ -1,4 +1,4 @@
-"""Mention co-occurrence network — the mirror of example 05.
+"""Mention co-occurrence network, the mirror of example 05.
 
 Two mentions per row, cyclic pairing of 10 unique mentions across 10 rows
 to produce a non-trivial graph.

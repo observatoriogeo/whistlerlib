@@ -3,21 +3,21 @@
 # Whistlerlib WORKER image (Dask worker + whistlerlib + R + R libraries).
 #
 # This is the ONLY custom image whistlerlib publishes. The Dask scheduler
-# uses the upstream `daskdev/dask:<version>-py3.11` image — Whistlerlib's
+# uses the upstream `daskdev/dask:<version>-py3.11` image, Whistlerlib's
 # scheduler runs no whistlerlib code (it routes cloudpickle bytes), so
 # building a custom scheduler image would just be a worse copy of upstream.
 #
 # All algorithm closures (alt-python AND R-bridge) execute HERE on workers
 # via `map_partitions`. So R + the R libraries (`tm`, `syuzhet`, `rweka`,
 # `radvertools`, …) live in this image. The Docker host never installs R
-# and never sets the `WHISTLERLIB_R_*` env vars — those are image-internal.
+# and never sets the `WHISTLERLIB_R_*` env vars, those are image-internal.
 # See `.plans/REVIVAL-PLAN.md` Phase 5 + the Docker Swarm memory.
 #
 # Build (from repo root):
 #   docker build -f docker/Dockerfile.worker -t whistlerlib/worker:dev .
 
 # ------------------------------------------------------------------------- #
-# Stage 1 — install Whistlerlib + Dask via uv (same as master).
+# Stage 1, install Whistlerlib + Dask via uv (same as master).
 # ------------------------------------------------------------------------- #
 FROM ghcr.io/astral-sh/uv:python3.11-bookworm-slim AS builder
 
@@ -41,17 +41,17 @@ RUN --mount=type=cache,target=/root/.cache/uv \
 
 
 # ------------------------------------------------------------------------- #
-# Stage 2 — runtime: python + R + the R libraries the bridge scripts call.
+# Stage 2, runtime: python + R + the R libraries the bridge scripts call.
 # Non-slim Debian Bookworm base: has the debian-archive-keyring pre-installed
 # (the slim variant strips it, which makes apt-get fail on older Docker
 # daemons that can't verify Bookworm's signing keys out-of-band).
 # ------------------------------------------------------------------------- #
 FROM python:3.11-bookworm
 
-# R install — three paths:
+# R install, three paths:
 #   1. Debian's `r-cran-*` binary packages for what's pre-built upstream
 #      (fastest).
-#   2. Apache Arrow's official APT repo for `libarrow-dev` — the R arrow
+#   2. Apache Arrow's official APT repo for `libarrow-dev`, the R arrow
 #      package then links against the system C++ libs via pkg-config
 #      instead of source-compiling ~500 .cc files (saves 30+ min).
 #   3. Posit Package Manager binary R wheels for the remaining CRAN
@@ -96,7 +96,7 @@ RUN R -e "install.packages( \
         Ncpus=4)"
 
 # `advertools` Python lib uses an R companion fork (`radvertools`). The legacy
-# image installed from a personal GitHub fork without a SHA pin — replicating
+# image installed from a personal GitHub fork without a SHA pin, replicating
 # that here but with a clear TODO to pin once Phase 7 nears.
 # TODO(Phase 7): pin `ref=<sha>` for reproducible image builds.
 RUN R -e "remotes::install_github('eliasdabbas/radvertools', upgrade='never')"
@@ -112,7 +112,7 @@ COPY --from=builder --chown=whistler:whistler /app/.venv /app/.venv
 #   docker compose run --rm worker python /app/smoke.py master 8786
 COPY --chown=whistler:whistler docker/smoke.py /app/smoke.py
 
-# R-bridge env vars — set inside the image, NEVER expected on the host.
+# R-bridge env vars, set inside the image, NEVER expected on the host.
 # The `r_required` test marker checks these; the algorithm code reads them
 # at call-time. Path matches the uv-installed package layout inside the venv.
 ENV PATH="/app/.venv/bin:${PATH}" \
@@ -123,11 +123,11 @@ ENV PATH="/app/.venv/bin:${PATH}" \
 
 USER whistler
 
-# Workers don't need to expose any port to the host — they connect outbound to
+# Workers don't need to expose any port to the host, they connect outbound to
 # the scheduler. Compose / Swarm handles inter-service routing on the overlay
 # network.
 
-# Default scheduler address — overridable via `CMD` at run time.
+# Default scheduler address, overridable via `CMD` at run time.
 #   docker run whistlerlib/worker tcp://some-other-master:8786
 ENTRYPOINT ["dask-worker"]
 CMD ["tcp://master:8786"]

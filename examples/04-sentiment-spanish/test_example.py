@@ -1,7 +1,7 @@
 """Integration test for example 04 (sentiment-spanish).
 
 Slow: loads the TensorFlow sentiment model. Gated on BOTH `docker` and
-`slow` markers — only runs when explicitly opted in via `-m "docker and slow"`.
+`slow` markers, only runs when explicitly opted in via `-m "docker and slow"`.
 """
 
 import pytest
