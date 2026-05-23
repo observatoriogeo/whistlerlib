@@ -2,8 +2,6 @@
 
 If your code is built against the **abandoned pre-revival Whistlerlib snapshot** (last actively touched 2021–2022, no PyPI release, sourced by cloning the repo and putting it on `PYTHONPATH`), this page covers what changes in the `0.2.0` revival release.
 
-> **Canonical source:** [`MIGRATION.md`](../../MIGRATION.md) at the repo root carries the release-notes-style version of the same information. This page is a docs-context adaptation of it.
-
 If you've never used the pre-revival snapshot, skip this, `pip install whistlerlib` is your starting point, see [Install from PyPI](../installation/pip.md).
 
 ## TL;DR

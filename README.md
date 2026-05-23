@@ -30,7 +30,7 @@
 
 ---
 
-Whistlerlib, developed by the [Observatorio Metropolitano CentroGeo](https://observatoriogeo.mx) at [CentroGeo](https://www.centrogeo.org.mx/), turns a [Dask](https://www.dask.org/) cluster into a distributed analytical engine for large social-media datasets. A single analytical query (top-`k` hashtags, weighted co-occurrence networks, Spanish sentiment ranges, …) fans out across a cluster of workers and comes back as a pandas `DataFrame` or an `igraph.Graph`.
+**Whistlerlib**, developed by the [Observatorio Metropolitano CentroGeo](https://observatoriogeo.mx) at [CentroGeo](https://www.centrogeo.org.mx/), turns a [Dask](https://www.dask.org/) cluster into a distributed analytical engine for large social-media datasets. A single analytical query (top-`k` hashtags, weighted co-occurrence networks, Spanish sentiment ranges, …) fans out across a cluster of workers and comes back as a pandas `DataFrame` or an `igraph.Graph`.
 
 It's aimed at:
 
@@ -51,7 +51,7 @@ The library has been **modernized** from a 2021-2022 codebase to current Python 
 | Docker image | `whistlerlib/worker:<version>` (built locally; Docker Hub publish pending) |
 | PyPI | not yet published; release in progress |
 
-Full release notes in [`CHANGELOG.md`](https://github.com/observatoriogeo/whistlerlib/blob/main/CHANGELOG.md); upgrade path from the pre-revival snapshot in [`MIGRATION.md`](https://github.com/observatoriogeo/whistlerlib/blob/main/MIGRATION.md).
+Full release notes in [`CHANGELOG.md`](https://github.com/observatoriogeo/whistlerlib/blob/main/CHANGELOG.md); upgrade path from the pre-revival snapshot in [`docs/migration/from-pre-revival.md`](https://github.com/observatoriogeo/whistlerlib/blob/main/docs/migration/from-pre-revival.md).
 
 ## What it does
 

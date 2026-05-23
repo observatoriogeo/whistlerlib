@@ -8,8 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 This entry tracks work toward the upcoming `0.2.0` revival release. See also
-[`MIGRATION.md`](MIGRATION.md) for the upgrade story from the abandoned
-pre-revival snapshot.
+[`docs/migration/from-pre-revival.md`](docs/migration/from-pre-revival.md) for
+the upgrade story from the abandoned pre-revival snapshot.
 
 ### Added
 - **Seven runnable examples under `examples/`** (`01-quickstart-hashtag-histogram`, `02-mention-histogram`, `03-ngram-histogram-bilingual`, `04-sentiment-spanish` [`slow`], `05-hashtag-coonet`, `06-mention-coonet`, `07-r-bridge-mfhashtags`). Each example dir contains `example.py` + `README.md`. The matching docker-backed integration test for each example lives under `tests/integration/test_<slug>.py` and shares a session-scoped Docker-cluster fixture.
@@ -27,7 +27,7 @@ pre-revival snapshot.
 - PEP 621 `pyproject.toml` with hatchling build backend.
 - `src/whistlerlib/` package layout.
 - Python 3.11+ requirement declared via `requires-python` and `.python-version`.
-- `CHANGELOG.md` and `MIGRATION.md`.
+- `CHANGELOG.md` and `docs/migration/from-pre-revival.md`.
 - Ported `getWordCloud.py` and `getWordCloud.R` from the unreleased working copy.
 - Test suite (12 files) ported into `tests/`.
 - `pytest-timeout` (30s per-test cap) and `pytest-cov` to the `tests` extra.
@@ -49,4 +49,4 @@ pre-revival snapshot.
 
 ### Removed
 - Pinned `requirements*.txt` files (replaced by `pyproject.toml` dependencies + extras).
-- **`dask_sql` dependency** and the SQL surface it backed (`TweetDataset.run_query()`, `Context.dask_sql_context`, `TweetDataset.dask_sql_context`/`dask_sql_tablename`/`query_result`/`query`). `dask_sql==2024.5.0` is incompatible with `dask>=2025` because Dask folded `dask_expr` into the main namespace, and upstream `dask_sql` is unmaintained. See `MIGRATION.md` for the workaround.
+- **`dask_sql` dependency** and the SQL surface it backed (`TweetDataset.run_query()`, `Context.dask_sql_context`, `TweetDataset.dask_sql_context`/`dask_sql_tablename`/`query_result`/`query`). `dask_sql==2024.5.0` is incompatible with `dask>=2025` because Dask folded `dask_expr` into the main namespace, and upstream `dask_sql` is unmaintained. See `docs/migration/from-pre-revival.md` for the workaround.
