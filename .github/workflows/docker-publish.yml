@@ -1,13 +1,16 @@
 name: Docker images
 
+# Builds and (optionally) publishes the `whistlerlib/worker` image. The
+# scheduler/"master" is the upstream `daskdev/dask` image — Whistlerlib ships
+# no custom scheduler image because the scheduler runs no whistlerlib code.
+#
 # Triggers:
-#   * Pushing a `v*` tag → builds and pushes both images to Docker Hub with the
-#     version + `latest` tags. ONLY happens on tag push; pushing to a branch
-#     does not publish.
+#   * Pushing a `v*` tag → builds and pushes to Docker Hub with the version,
+#     major.minor, and `latest` tags. ONLY happens on tag push.
 #   * Manual `workflow_dispatch` → builds without pushing by default. Operator
 #     can opt in to push with the `push` input set to `true`.
 #
-# Both modes require the `DOCKERHUB_USERNAME` and `DOCKERHUB_TOKEN` repository
+# Both modes require `DOCKERHUB_USERNAME` and `DOCKERHUB_TOKEN` repository
 # secrets to be configured before any push will succeed.
 
 on:
@@ -30,12 +33,8 @@ concurrency:
 
 jobs:
   build:
-    name: build ${{ matrix.image }} (multi-arch)
+    name: build whistlerlib/worker (multi-arch)
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        image: [master, worker]
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -72,25 +71,25 @@ jobs:
             MAJORMINOR="${VERSION%.*}"
             {
               echo "tags<<EOF"
-              echo "whistlerlib/${{ matrix.image }}:${VERSION}"
-              echo "whistlerlib/${{ matrix.image }}:${MAJORMINOR}"
-              echo "whistlerlib/${{ matrix.image }}:latest"
+              echo "whistlerlib/worker:${VERSION}"
+              echo "whistlerlib/worker:${MAJORMINOR}"
+              echo "whistlerlib/worker:latest"
               echo "EOF"
             } >> "$GITHUB_OUTPUT"
           else
             # Manual run: tag with short SHA for traceability.
             SHA="${GITHUB_SHA:0:7}"
-            echo "tags=whistlerlib/${{ matrix.image }}:dev-${SHA}" >> "$GITHUB_OUTPUT"
+            echo "tags=whistlerlib/worker:dev-${SHA}" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Build and (optionally) push
         uses: docker/build-push-action@v5
         with:
           context: .
-          file: docker/Dockerfile.${{ matrix.image }}
+          file: docker/Dockerfile.worker
           platforms: linux/amd64,linux/arm64
           push: ${{ steps.push_flag.outputs.value == 'true' }}
           tags: ${{ steps.tags.outputs.tags }}
-          cache-from: type=gha,scope=${{ matrix.image }}
-          cache-to: type=gha,mode=max,scope=${{ matrix.image }}
+          cache-from: type=gha,scope=worker
+          cache-to: type=gha,mode=max,scope=worker
           provenance: false  # smaller manifests for Docker Hub

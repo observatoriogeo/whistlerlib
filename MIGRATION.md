@@ -61,17 +61,17 @@ land.
 
 ### Deployment changes — Docker images (Phase 5)
 
-The README's long-standing promise of Docker support is now delivered. Two images, both built from `python:3.11-slim-bookworm` via a multi-stage `uv` install, both carrying the same R layer:
+The README's long-standing promise of Docker support is now delivered, but the architecture is simpler than the legacy `../whistlerlib/docker/linode/` two-image setup suggested:
 
-- **`whistlerlib/master`** — Dask scheduler + whistlerlib + R + the R library set.
-- **`whistlerlib/worker`** — Dask worker + whistlerlib + R + the R library set.
+- **`whistlerlib/worker`** — the only custom image. Built from `python:3.11-slim-bookworm` via a multi-stage `uv` install. Carries whistlerlib + Dask + R + the full R library set (`r-cran-tm`, `r-cran-slam`, `r-cran-snowballc`, `r-cran-rweka`, `r-cran-syuzhet`, `r-cran-dplyr`, `r-cran-tidyr`, `r-cran-stringr`, `r-cran-nlp`, `r-cran-arrow`, `r-cran-vctrs`, `r-cran-remotes`, `r-cran-reshape2`) + `radvertools`.
+- **No `whistlerlib/master` image.** The scheduler uses the upstream `daskdev/dask:<version>-py3.11` image directly. Dask's scheduler routes serialized task graphs and runs no whistlerlib code, so wrapping `daskdev/dask` with our own brand would be a lagging copy. The scheduler image tag is pinned in `docker/docker-compose.yml` and `docker/stack.yml` to track the worker's Dask version (currently `2026.3.0-py3.11`).
 
-Replaces the legacy `daskdev/dask` + `conda env update` + `libffi6`-hack stack from `../whistlerlib/docker/linode/`. Modern Dask 2026, Python 3.11, `uv` for ~10× faster builds, multi-arch (`linux/amd64` + `linux/arm64`) via GitHub Actions buildx.
+Replaces the legacy `daskdev/dask` + `conda env update` + `libffi6`-hack stack. Modern Dask 2026, Python 3.11, `uv` for ~10× faster builds, multi-arch (`linux/amd64` + `linux/arm64`) via GitHub Actions buildx.
 
 **Host-machine impact:**
 
 - A host running `pip install whistlerlib` **does not need** R, R packages, or any `WHISTLERLIB_R_*` env vars. The alt-python algorithm surface works out of the box. R-bridge methods are unavailable on a bare host by design.
-- A host running the Docker images **does not need** R either — that's the entire point. `docker compose up` or `docker stack deploy` and you're done.
+- A host running the Docker stack **does not need** R either — that's the entire point. `docker compose up` or `docker stack deploy` and you're done.
 
 **Deployment commands:**
 

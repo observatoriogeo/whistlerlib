@@ -6,11 +6,12 @@
 
 services:
   master:
-    build:
-      context: ..
-      dockerfile: docker/Dockerfile.master
-    image: whistlerlib/master:dev
+    # The Dask scheduler is the upstream maintained image — no whistlerlib
+    # dependencies live here. Pin tracks `dask` in `uv.lock` (currently
+    # 2026.3.0) so scheduler and worker speak the same wire protocol.
+    image: daskdev/dask:2026.3.0-py3.11
     container_name: whistlerlib-master
+    command: ["dask-scheduler", "--dashboard-prefix", "/dask"]
     networks:
       - whistlerlib
     # Scheduler + dashboard, bound to localhost only.

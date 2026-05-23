@@ -2,9 +2,14 @@
 #
 #   docker stack deploy -c docker/stack.yml whistlerlib
 #
-# Versions are pulled from environment: `VERSION=1.0.0 docker stack deploy ...`.
-# Image tags must already exist on Docker Hub (built + pushed by the
-# `.github/workflows/docker-publish.yml` workflow, gated on git tag).
+# Whistlerlib publishes ONE custom image: `whistlerlib/worker`. The scheduler
+# is the upstream Dask image — Whistlerlib's scheduler runs no whistlerlib
+# code, so there's nothing custom to bake in.
+#
+# `VERSION` env var picks the worker image tag (matches Docker Hub releases):
+#   VERSION=1.0.0 docker stack deploy -c docker/stack.yml whistlerlib
+# `DASK_IMAGE` picks the scheduler image; default tracks `dask` in `uv.lock`
+# so master + worker speak the same wire protocol.
 
 version: "3.9"
 
@@ -15,7 +20,8 @@ networks:
 
 services:
   master:
-    image: whistlerlib/master:${VERSION:-latest}
+    image: ${DASK_IMAGE:-daskdev/dask:2026.3.0-py3.11}
+    command: ["dask-scheduler", "--dashboard-prefix", "/dask"]
     networks:
       - whistlerlib
     ports:

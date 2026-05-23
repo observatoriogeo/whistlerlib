@@ -2,12 +2,16 @@
 #
 # Whistlerlib WORKER image (Dask worker + whistlerlib + R + R libraries).
 #
-# R + the R libraries needed by `whistlerlib.dask.r_algs` (tm, syuzhet,
-# rweka, radvertools, …) are baked in HERE AND in the master image. The
-# rule is about the Docker host — it never installs R nor sets the
-# `WHISTLERLIB_R_*` env vars. Both images carry R so any code path —
-# scheduler-side or worker-side — can dispatch to R without configuration
-# drift. See `.plans/REVIVAL-PLAN.md` Phase 5 + the Docker Swarm memory.
+# This is the ONLY custom image whistlerlib publishes. The Dask scheduler
+# uses the upstream `daskdev/dask:<version>-py3.11` image — Whistlerlib's
+# scheduler runs no whistlerlib code (it routes cloudpickle bytes), so
+# building a custom scheduler image would just be a worse copy of upstream.
+#
+# All algorithm closures (alt-python AND R-bridge) execute HERE on workers
+# via `map_partitions`. So R + the R libraries (`tm`, `syuzhet`, `rweka`,
+# `radvertools`, …) live in this image. The Docker host never installs R
+# and never sets the `WHISTLERLIB_R_*` env vars — those are image-internal.
+# See `.plans/REVIVAL-PLAN.md` Phase 5 + the Docker Swarm memory.
 #
 # Build (from repo root):
 #   docker build -f docker/Dockerfile.worker -t whistlerlib/worker:dev .
