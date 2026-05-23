@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="_assets/logo.png" alt="Whistlerlib" width="320">
+  <img src="_assets/logo.png" alt="Whistlerlib" width="300" height="336">
 </p>
 
 # Whistlerlib docs

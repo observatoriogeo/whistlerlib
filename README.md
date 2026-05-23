@@ -6,7 +6,7 @@
   v0.2.0/docs/_assets/logo.png) before the first publish.
 -->
 <p align="center">
-  <img src="docs/_assets/logo.png" width="375" height="300" alt="Whistlerlib" title="Whistlerlib">
+  <img src="docs/_assets/logo.png" width="300" height="336" alt="Whistlerlib" title="Whistlerlib">
 </p>
 
 <p align="center">
