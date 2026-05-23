@@ -1,32 +1,60 @@
 # Keep build contexts small.
+#
+# What MUST stay in the context (used by docker/Dockerfile.worker):
+#   pyproject.toml, uv.lock, README.md, src/, docker/smoke.py, LICENSE
+# Everything else can be ignored.
+
+# git + ci
 .git
 .github
+
+# python venvs
 .venv
 venv
 env
+
+# python build artifacts
 __pycache__
 *.pyc
 *.pyo
+*.egg-info
+dist
+build
+
+# test infra not needed at runtime
+tests
 .pytest_cache
 .coverage
 htmlcov
 coverage.xml
+
+# lint cache
 .ruff_cache
+
+# logs, archives
 *.log
 *.tar.gz
-dist
-build
-*.egg-info
 
-# Test infrastructure not needed at runtime.
-tests
+# docs + examples + dev tooling
 docs
 examples
+scripts
 
-# Plans (untracked anyway, but defensive).
+# workspace items (live alongside the repo but aren't part of it)
+CLAUDE.md
 .plans
+lancedb
 
-# Editor / OS noise.
+# metadata files not consumed by the build (only README.md is COPY'd)
+CHANGELOG.md
+MIGRATION.md
+
+# config files unused in the image
+.python-version
+.gitignore
+.dockerignore
+
+# editor / OS noise
 .vscode
 .idea
 .DS_Store
