@@ -40,7 +40,7 @@ It's aimed at:
 
 ## Status
 
-The library has been **modernized** from a 2021-2022 codebase to current Python (3.11+), Dask (2026.3), and pandas (2.x). The current development version is `0.2.0` (pre-release).
+Current release: **`0.2.0`**. Runs on Python 3.11+, Dask 2026.3.x, pandas 2.x, igraph, nltk, sklearn, and (optionally, via the worker Docker image) R 4.x.
 
 | Surface | State |
 |---|---|
@@ -48,10 +48,10 @@ The library has been **modernized** from a 2021-2022 codebase to current Python 
 | Tests | 119 unit tests (97 % coverage) + 7 docker-backed integration tests, all green |
 | Docs | [`docs/`](https://github.com/observatoriogeo/whistlerlib/blob/main/docs/) tree (renderable on GitHub, portable to Docusaurus) |
 | Examples | 7 runnable end-to-end examples under [`examples/`](https://github.com/observatoriogeo/whistlerlib/blob/main/examples/) |
-| Docker image | `whistlerlib/worker:<version>` (built locally; Docker Hub publish pending) |
-| PyPI | not yet published; release in progress |
+| Docker image | `whistlerlib/worker:<version>` (build locally from `docker/Dockerfile.worker`; Docker Hub publish planned) |
+| PyPI | GitHub release only; PyPI publish planned |
 
-Full release notes in [`CHANGELOG.md`](https://github.com/observatoriogeo/whistlerlib/blob/main/CHANGELOG.md); upgrade path from the pre-revival snapshot in [`docs/migration/from-pre-revival.md`](https://github.com/observatoriogeo/whistlerlib/blob/main/docs/migration/from-pre-revival.md).
+Full release notes in [`CHANGELOG.md`](https://github.com/observatoriogeo/whistlerlib/blob/main/CHANGELOG.md); upgrade path from 0.1.0 in [`docs/migration/from-0.1.0.md`](https://github.com/observatoriogeo/whistlerlib/blob/main/docs/migration/from-0.1.0.md).
 
 ## What it does
 
@@ -153,7 +153,7 @@ See [docs/concepts/architecture.md](https://github.com/observatoriogeo/whistlerl
 | `Context` & datasets | [docs/concepts/context-and-datasets.md](https://github.com/observatoriogeo/whistlerlib/blob/main/docs/concepts/context-and-datasets.md) |
 | Algorithm families | [docs/concepts/algorithm-families.md](https://github.com/observatoriogeo/whistlerlib/blob/main/docs/concepts/algorithm-families.md) |
 | Tutorials (7 examples) | [docs/tutorials/](https://github.com/observatoriogeo/whistlerlib/blob/main/docs/tutorials/) |
-| Migration from pre-revival | [docs/migration/from-pre-revival.md](https://github.com/observatoriogeo/whistlerlib/blob/main/docs/migration/from-pre-revival.md) |
+| Migration from 0.1.0 | [docs/migration/from-0.1.0.md](https://github.com/observatoriogeo/whistlerlib/blob/main/docs/migration/from-0.1.0.md) |
 
 ## Development
 

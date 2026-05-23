@@ -61,7 +61,7 @@ The full quickstart, including how to spin up a local cluster with Docker Compos
 - **Install**: [pip](installation/pip.md) (client) or [Docker](installation/docker.md) (cluster).
 - **Learn the model**: [Architecture](concepts/architecture.md), [Context & datasets](concepts/context-and-datasets.md), [Algorithm families](concepts/algorithm-families.md).
 - **Run something**: [Tutorials](tutorials/), seven runnable end-to-end examples.
-- **Upgrade from a pre-revival snapshot**: [Migration guide](migration/from-pre-revival.md).
+- **Upgrade from 0.1.0**: [Migration guide](migration/from-0.1.0.md).
 
 ## License
 

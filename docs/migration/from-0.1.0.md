@@ -1,8 +1,8 @@
-# Migrating from the pre-revival snapshot
+# Migrating from 0.1.0
 
-If your code is built against the **abandoned pre-revival Whistlerlib snapshot** (last actively touched 2021–2022, no PyPI release, sourced by cloning the repo and putting it on `PYTHONPATH`), this page covers what changes in the `0.2.0` revival release.
+If your code is built against the **0.1.0 codebase** (the [first commit](https://github.com/observatoriogeo/whistlerlib/releases/tag/v0.1.0) of `observatoriogeo/whistlerlib`, dated 2024-05-01, sourced by cloning the repo and putting it on `PYTHONPATH`), this page covers what changes in 0.2.0.
 
-If you've never used the pre-revival snapshot, skip this, `pip install whistlerlib` is your starting point, see [Install from PyPI](../installation/pip.md).
+If you've never used the 0.1.0 codebase, skip this page, `pip install whistlerlib` is your starting point, see [Install from PyPI](../installation/pip.md).
 
 ## TL;DR
 

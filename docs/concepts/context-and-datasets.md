@@ -110,7 +110,7 @@ Bookkeeping:
 
 `range_by_dates` returns a new `TweetDataset` carrying its own metadata (`ranged=True`, `range_start_date`, `range_end_date`). Analytics methods on a ranged dataset behave identically, they just operate on fewer rows.
 
-The library used to use these flags to deduplicate `dask_sql` table names per derived view. That SQL surface was removed in `0.2.0` (see the [Migration guide](../migration/from-pre-revival.md)), but the flags stayed because downstream callers may still inspect them.
+The library used to use these flags to deduplicate `dask_sql` table names per derived view. That SQL surface was removed in `0.2.0` (see the [Migration guide](../migration/from-0.1.0.md)), but the flags stayed because downstream callers may still inspect them.
 
 ## Next
 
