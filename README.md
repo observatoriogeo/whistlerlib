@@ -18,7 +18,7 @@
 
 <p align="center">
   <a href="https://whistlerlib.observatoriogeo.mx"><img src="https://img.shields.io/badge/docs-whistlerlib.observatoriogeo.mx-blue.svg" alt="Documentation"></a>
-  <a href="https://pypi.org/project/whistlerlib/"><img src="https://img.shields.io/badge/pypi-pending-yellow.svg" alt="PyPI"></a>
+  <a href="https://pypi.org/project/whistlerlib/"><img src="https://img.shields.io/pypi/v/whistlerlib" alt="PyPI"></a>
   <a href="https://pypi.org/project/whistlerlib/"><img src="https://img.shields.io/badge/python-3.11+-blue.svg" alt="Python 3.11+"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-GPL--3.0--or--later-green.svg" alt="License: GPL-3.0-or-later"></a>
 </p>
