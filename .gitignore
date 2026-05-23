@@ -19,6 +19,11 @@ __pycache__/
 # venv
 env
 venv
+.venv
+
+# uv
+# uv.lock IS committed (it's the reproducibility anchor)
+.uv-cache/
 
 # other
 .DS_Store

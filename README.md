@@ -71,6 +71,47 @@ For enhanced usability and deployment, Docker images will be provided for both t
 Stay tuned for updates on release dates and additional features!
 
 
+## Development
+
+Contributors and integrators can install Whistlerlib in editable mode.
+
+### Recommended: `uv` (Astral)
+
+[uv](https://docs.astral.sh/uv/) is the project's default package / environment manager — ~10× faster than `pip` and provides a reproducible lockfile.
+
+```bash
+git clone <repo-url>
+cd whistlerlib
+uv sync --extra dev    # creates .venv/, resolves uv.lock, installs deps + dev tools
+uv run pytest           # run the test suite
+uv run python -c "import whistlerlib; print(whistlerlib.Context)"
+```
+
+### Fallback: plain `pip` + `venv`
+
+Plain `pip` is fully supported; `uv` is the project's *internal* preference, not an installation requirement.
+
+```bash
+git clone <repo-url>
+cd whistlerlib
+python3.11 -m venv .venv
+source .venv/bin/activate
+pip install -e ".[dev]"
+pytest
+```
+
+### R bridge (optional)
+
+The R-backed algorithms in `whistlerlib.dask.r_algs` require a system R install and two environment variables:
+
+```bash
+export WHISTLERLIB_R_PATH=/usr/bin
+export WHISTLERLIB_R_SCRIPTS_PATH="$(python -c 'import whistlerlib, os; print(os.path.join(os.path.dirname(whistlerlib.__file__), "dask", "r_algs", "funcs"))')"
+```
+
+Importing Whistlerlib does **not** require these env vars — they're only consumed when an R-backed algorithm is invoked.
+
+
 ## License
 
 Whistlerlib is distributed under the GPL-3 license. See the `LICENSE` file for more details.
